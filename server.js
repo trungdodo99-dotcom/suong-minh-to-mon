@@ -1,139 +1,123 @@
 const express = require('express');
 const http = require('http');
-const { Server } = require('socket.io');
 const path = require('path');
+const fs = require('fs');
+const { Server } = require('socket.io');
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
-  cors: { origin: "*" }
-});
-
-app.use(express.static(path.join(__dirname, 'public')));
-
-const templeState = {
-  meritTotal: 1080,
-  activeIncenseSticks: 9,
-  isMassChanting: false,
-  isGoingHome: false,
-  customNames: {},
-  charPositions: {},
-  chatHistory: []
-};
-
-const onlinePlayers = {};
-
-function getOccupiedMap() {
-  const map = {};
-  for (const [sid, info] of Object.entries(onlinePlayers)) {
-    map[info.charId] = sid;
-  }
-  return map;
-}
-
-io.on('connection', (socket) => {
-  console.log(`[+] Đạo hữu nhập môn: ${socket.id}`);
-
-  socket.emit('init_state', {
-    templeState,
-    occupiedMap: getOccupiedMap(),
-    onlineCount: Object.keys(onlinePlayers).length
-  });
-
-  socket.on('claim_character', ({ charId, customName, deptName }) => {
-    onlinePlayers[socket.id] = { charId };
-    if (customName && customName.trim()) {
-      templeState.customNames[charId] = customName.trim();
-    }
-
-    io.emit('players_updated', {
-      occupiedMap: getOccupiedMap(),
-      customNames: templeState.customNames,
-      onlineCount: Object.keys(onlinePlayers).length
-    });
-
-    const displayName = templeState.customNames[charId] || `Đạo hữu #${charId + 1}`;
-    io.emit('system_notice', {
-      senderName: 'SƯƠNG MINH TỔ MÔN',
-      dept: deptName || 'HR',
-      message: `🟢 ${displayName} vừa bước vào Tổ Môn nhận ghế!`
-    });
-  });
-
-  socket.on('move', ({ charId, destX, destY, afterAction }) => {
-    templeState.charPositions[charId] = { x: destX, y: destY };
-    socket.broadcast.emit('player_moved', {
-      charId,
-      destX,
-      destY,
-      afterAction
-    });
-  });
-
-  socket.on('action', ({ charId, type }) => {
-    if (type === 'wave') templeState.meritTotal += 5;
-    else if (type === 'meditate') templeState.meritTotal += 20;
-    else if (type === 'knock') templeState.meritTotal += 10;
-    else if (type === 'waterfall') templeState.meritTotal += 15;
-    else if (type === 'incense') {
-      templeState.meritTotal += 30;
-      templeState.activeIncenseSticks = Math.min(36, templeState.activeIncenseSticks + 3);
-    }
-
-    io.emit('sync_counters', {
-      meritTotal: templeState.meritTotal,
-      activeIncenseSticks: templeState.activeIncenseSticks
-    });
-
-    socket.broadcast.emit('player_action', { charId, type });
-  });
-
-  socket.on('chat', ({ charId, senderName, dept, text }) => {
-    templeState.meritTotal += 5;
-    const chatItem = { charId, senderName, dept, text, time: Date.now() };
-    templeState.chatHistory.push(chatItem);
-    if (templeState.chatHistory.length > 30) {
-      templeState.chatHistory.shift();
-    }
-
-    io.emit('chat_message', {
-      ...chatItem,
-      meritTotal: templeState.meritTotal
-    });
-  });
-
-  socket.on('mass_chant', () => {
-    templeState.isMassChanting = !templeState.isMassChanting;
-    templeState.isGoingHome = false;
-    io.emit('sync_mass_chant', { isMassChanting: templeState.isMassChanting });
-  });
-
-  socket.on('go_home', () => {
-    templeState.isGoingHome = !templeState.isGoingHome;
-    templeState.isMassChanting = false;
-    io.emit('sync_go_home', { isGoingHome: templeState.isGoingHome });
-  });
-
-  socket.on('update_all_names', ({ customNames }) => {
-    templeState.customNames = { ...templeState.customNames, ...customNames };
-    io.emit('players_updated', {
-      occupiedMap: getOccupiedMap(),
-      customNames: templeState.customNames,
-      onlineCount: Object.keys(onlinePlayers).length
-    });
-  });
-
-  socket.on('disconnect', () => {
-    delete onlinePlayers[socket.id];
-    io.emit('players_updated', {
-      occupiedMap: getOccupiedMap(),
-      customNames: templeState.customNames,
-      onlineCount: Object.keys(onlinePlayers).length
-    });
-  });
+  cors: { origin: '*' }
 });
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-  console.log(`⛩️  SƯƠNG MINH TỔ MÔN đang mở cửa tại: http://localhost:${PORT}`);
+const DB_FILE = path.join(__dirname, 'accounts.json');
+
+// Hỗ trợ phục vụ file tĩnh ở cả thư mục public/ lẫn thư mục gốc
+const publicDir = path.join(__dirname, 'public');
+if (fs.existsSync(publicDir)) {
+  app.use(express.static(publicDir));
+}
+app.use(express.static(__dirname));
+
+app.get('/', (req, res) => {
+  const inPublic = path.join(__dirname, 'public', 'index.html');
+  if (fs.existsSync(inPublic)) {
+    res.sendFile(inPublic);
+  } else {
+    res.sendFile(path.join(__dirname, 'index.html'));
+  }
+});
+
+// Khởi tạo / Đọc dữ liệu tài khoản từ file accounts.json
+const DEFAULT_ACCOUNTS = [
+  {
+    username: 'Trungdq',
+    password: '123456',
+    displayName: 'Trungdq',
+    dept: 'IBD_COST',
+    rank: 'ST3', // Trúc Cơ Kỳ (Áo đỏ)
+    merit: 1080,
+    status: 'APPROVED',
+    isOnlineOnMap: false,
+    isAdmin: true
+  }
+];
+
+function loadAccountsFromDisk() {
+  try {
+    if (fs.existsSync(DB_FILE)) {
+      const raw = fs.readFileSync(DB_FILE, 'utf8');
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch (err) {
+    console.error('Lỗi đọc file accounts.json:', err);
+  }
+  fs.writeFileSync(DB_FILE, JSON.stringify(DEFAULT_ACCOUNTS, null, 2), 'utf8');
+  return JSON.parse(JSON.stringify(DEFAULT_ACCOUNTS));
+}
+
+function saveAccountsToDisk(accounts) {
+  try {
+    fs.writeFileSync(DB_FILE, JSON.stringify(accounts, null, 2), 'utf8');
+  } catch (err) {
+    console.error('Lỗi lưu file accounts.json:', err);
+  }
+}
+
+let accountsDB = loadAccountsFromDisk();
+let activeIncenseSticks = 9;
+let chatHistory = [];
+
+io.on('connection', (socket) => {
+  // Gửi ngay danh sách tài khoản, số nhang và lịch sử chat cho máy mới vào
+  socket.emit('server_init', {
+    accountsDB,
+    activeIncenseSticks,
+    chatHistory
+  });
+
+  // Nhận các sự kiện đồng bộ từ Client
+  socket.on('temple_sync', (payload) => {
+    if (!payload || !payload.type) return;
+
+    if (payload.type === 'SYNC_DB' && Array.isArray(payload.accountsDB)) {
+      accountsDB = payload.accountsDB;
+      // Đảm bảo tài khoản quản lý Trungdq không bao giờ bị mất quyền
+      const adminIdx = accountsDB.findIndex(a => a.username.toLowerCase() === 'trungdq');
+      if (adminIdx !== -1) {
+        accountsDB[adminIdx].isAdmin = true;
+        accountsDB[adminIdx].status = 'APPROVED';
+      }
+      saveAccountsToDisk(accountsDB);
+      io.emit('temple_sync', { type: 'SYNC_DB', accountsDB });
+      return;
+    }
+
+    if (payload.type === 'CHAT_MSG') {
+      chatHistory.push({
+        senderName: payload.senderName,
+        dept: payload.dept,
+        text: payload.text
+      });
+      if (chatHistory.length > 35) chatHistory.shift();
+    }
+
+    if (payload.type === 'ACTION_CHAR' && payload.actionType === 'incense') {
+      activeIncenseSticks = Math.min(36, activeIncenseSticks + 3);
+    }
+
+    // Phát sự kiện (di chuyển, hành lễ, ban phát deadline, chat) sang tất cả các máy khác
+    socket.broadcast.emit('temple_sync', payload);
+  });
+});
+
+server.listen(PORT, '0.0.0.0', () => {
+  console.log(`====================================================`);
+  console.log(`⛩️  SƯƠNG MINH TỔ MÔN ĐÃ KHAI MỞ TẠI PORT ${PORT}`);
+  console.log(`👉 Trên máy này: http://localhost:${PORT}`);
+  console.log(`👉 Điện thoại/Máy cùng mạng LAN: http://<IP-Máy-Bạn>:${PORT}`);
+  console.log(`👑 Acc Quản Lý: Trungdq | MK: 123456 (Tu vi: ST3)`);
+  console.log(`====================================================`);
 });
