@@ -1,0 +1,2378 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SƯƠNG MINH TỔ MÔN - OFFICE TEMPLE ONLINE (2.5D)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      font-family: 'Be Vietnam Pro', 'Segoe UI', Tahoma, sans-serif;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background-color: #120c07;
+      color: #fdf3e7;
+    }
+    canvas {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+      cursor: grab;
+    }
+    canvas:active {
+      cursor: grabbing;
+    }
+
+    .wood-header {
+      background: linear-gradient(180deg, #7f421c 0%, #56280d 100%);
+      border-bottom: 3px solid #2e1305;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.75);
+    }
+    .parchment-plaque {
+      background: linear-gradient(180deg, #f3dcab 0%, #d4af69 100%);
+      border: 3px solid #5a2d0c;
+      box-shadow: inset 0 1px 0 #fff9e6, 0 6px 14px rgba(0,0,0,0.6);
+      color: #3d1803;
+    }
+    .wood-panel {
+      background: rgba(38, 23, 12, 0.9);
+      border: 2px solid #99653a;
+      border-radius: 10px;
+      box-shadow: 0 8px 26px rgba(0,0,0,0.75), inset 0 0 12px rgba(0,0,0,0.45);
+      backdrop-filter: blur(5px);
+    }
+    .wood-panel-header {
+      background: linear-gradient(90deg, #4d2e18, #6e4425, #4d2e18);
+      border-bottom: 1px solid #99653a;
+      color: #ffdf91;
+    }
+    .action-card {
+      background: linear-gradient(180deg, #6e472b 0%, #462a16 100%);
+      border: 2px solid #b07d4f;
+      border-radius: 10px;
+      box-shadow: 0 5px 12px rgba(0,0,0,0.65), inset 0 1px 0 rgba(255,255,255,0.22);
+      transition: all 0.15s ease;
+      position: relative;
+    }
+    .action-card:hover {
+      transform: translateY(-4px);
+      border-color: #ffd166;
+      background: linear-gradient(180deg, #875836 0%, #5c381f 100%);
+      box-shadow: 0 8px 18px rgba(255, 209, 102, 0.3);
+    }
+    .action-card:active {
+      transform: translateY(1px);
+    }
+    .action-card.active-mode {
+      border-color: #ffdf5d;
+      background: linear-gradient(180deg, #a63424 0%, #691b11 100%);
+      animation: pulseGlow 1.5s infinite;
+    }
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 8px rgba(255, 215, 0, 0.45); }
+      50% { box-shadow: 0 0 22px rgba(255, 215, 0, 0.95); }
+    }
+    .hotkey-badge {
+      position: absolute;
+      top: 3px;
+      left: 4px;
+      background: #e0ac58;
+      color: #2d1606;
+      font-weight: 800;
+      font-size: 9px;
+      padding: 0px 4px;
+      border-radius: 4px;
+      border: 1px solid #593212;
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(25, 15, 8, 0.6);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #8c5a32;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #b87b48;
+    }
+  </style>
+</head>
+<body class="relative w-screen h-screen overflow-hidden">
+
+  <!-- ==================== 1. THANH HEADER TRÊN CÙNG ==================== -->
+  <header class="wood-header fixed top-0 left-0 right-0 h-12 z-20 flex items-center justify-between px-3">
+    <div class="flex items-center gap-1.5">
+      <button id="btnToggleView" onclick="toggleCameraProjection()" class="px-2.5 py-1 rounded bg-[#3d1e0a] hover:bg-[#593014] border border-[#b07d4f] text-xs font-bold text-[#ffdf91] flex items-center gap-1 shadow">
+        <span>📐</span> <span id="viewModeLabel">2.5D Chi Tiết</span>
+      </button>
+      <button id="btnNightMode" onclick="toggleNightMode()" class="px-2.5 py-1 rounded bg-[#3d1e0a] hover:bg-[#593014] border border-[#b07d4f] text-xs font-bold text-[#ffd166] flex items-center gap-1 shadow">
+        <span>🏮</span> <span id="nightModeLabel">Đêm Hoa Đăng: TẮT</span>
+      </button>
+      <button onclick="toggleRobeMode()" class="px-2.5 py-1 rounded bg-[#3d1e0a] hover:bg-[#593014] border border-[#b07d4f] text-xs font-semibold text-[#f5d087] hidden xl:flex items-center gap-1">
+        <span>👘</span> <span id="robeModeLabel">Đồ: Công Sở + Cà Sa</span>
+      </button>
+      <button onclick="resetCameraView()" class="px-2 py-1 rounded bg-[#3d1e0a] hover:bg-[#593014] border border-[#b07d4f] text-xs text-[#e5c283]">
+        🎯 Căn Giữa
+      </button>
+      <button id="btnAudio" onclick="toggleAudioMute()" class="px-2 py-1 rounded bg-[#3d1e0a] hover:bg-[#593014] border border-[#b07d4f] text-xs text-[#6fcf97] font-bold">
+        🔊 BẬT
+      </button>
+    </div>
+
+    <!-- Biển hiệu trung tâm SƯƠNG MINH TỔ MÔN -->
+    <div class="parchment-plaque px-6 py-1 rounded-b-xl -mt-1 flex flex-col items-center justify-center">
+      <h1 class="text-sm md:text-base font-extrabold tracking-wider uppercase leading-none">
+        ⛩️ SƯƠNG MINH TỔ MÔN - TỊNH TÂM VIỆN
+      </h1>
+      <span id="eventBannerText" class="text-[10px] font-bold text-[#6e2c04] mt-0.5">
+        Click sàn để qua cửa phòng • Click Đỉnh Hương giữa sân để thắp nhang • Phím 1-8 hành lễ
+      </span>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <div class="bg-[#2c1608] border border-[#8c5a32] px-2.5 py-1 rounded-full text-xs font-bold text-[#ffd166] flex items-center gap-1">
+        <span>🪷 Công Đức:</span>
+        <span id="meritCounter" class="text-[#6fcf97] text-sm">1,080</span>
+      </div>
+      <div class="bg-[#2c1608] border border-[#8c5a32] px-2.5 py-1 rounded-full text-xs font-bold text-[#ffb4a2] hidden md:flex items-center gap-1">
+        <span>🔥 Nhang:</span>
+        <span id="incenseCounter" class="text-[#ffd166]">9</span>
+      </div>
+      <button onclick="openEditModal()" class="px-2.5 py-1 rounded bg-[#a33b20] hover:bg-[#c24727] border border-[#f6d58e] text-xs font-bold text-white shadow">
+        ✏️ Đổi Tên (20)
+      </button>
+    </div>
+  </header>
+
+  <!-- ==================== 2. CANVAS 2.5D ISOMETRIC ==================== -->
+  <canvas id="templeCanvas"></canvas>
+
+  <!-- ==================== 3. BẢNG DANH SÁCH 20 NHÂN SỰ (GÓC PHẢI TRÊN) ==================== -->
+  <aside class="wood-panel fixed top-16 right-4 w-64 z-20 flex flex-col overflow-hidden max-h-[55vh]">
+    <div class="wood-panel-header px-3 py-2 flex items-center justify-between">
+      <span class="text-xs font-extrabold tracking-wide uppercase">🧘 20 Đạo Hữu Tổ Môn</span>
+      <span class="text-[10px] text-[#d4b483]">🟢 = Đang Online</span>
+    </div>
+    <div class="px-2 py-1.5 bg-[#21140b] border-b border-[#5e3b1f] flex flex-wrap gap-1 text-[10px]">
+      <button onclick="filterDept('ALL')" class="px-1.5 py-0.5 rounded bg-[#5e3b1f] hover:bg-[#7d4e29] text-[#ffd166] font-bold">Tất cả</button>
+      <button onclick="filterDept('DIRECTOR')" class="px-1.5 py-0.5 rounded bg-[#4a1c17] hover:bg-[#6e2820] text-[#ffb4a2]">Trụ Trì</button>
+      <button onclick="filterDept('PROC')" class="px-1.5 py-0.5 rounded bg-[#36281b] hover:bg-[#523d29] text-[#e0c097]">PROC</button>
+      <button onclick="filterDept('LOGISTIC')" class="px-1.5 py-0.5 rounded bg-[#36281b] hover:bg-[#523d29] text-[#e0c097]">Logistic</button>
+      <button onclick="filterDept('HR')" class="px-1.5 py-0.5 rounded bg-[#36281b] hover:bg-[#523d29] text-[#e0c097]">HR-GA</button>
+      <button onclick="filterDept('TECH')" class="px-1.5 py-0.5 rounded bg-[#36281b] hover:bg-[#523d29] text-[#e0c097]">Thiết Kế</button>
+      <button onclick="filterDept('COST')" class="px-1.5 py-0.5 rounded bg-[#36281b] hover:bg-[#523d29] text-[#e0c097]">Báo Giá</button>
+      <button onclick="filterDept('SALE')" class="px-1.5 py-0.5 rounded bg-[#36281b] hover:bg-[#523d29] text-[#e0c097]">IBD Sale</button>
+    </div>
+    <div id="userListContainer" class="p-2 overflow-y-auto space-y-1 text-xs flex-1"></div>
+  </aside>
+
+  <!-- ==================== 4. KHUNG CHAT TRỰC TIẾP (GÓC TRÁI DƯỚI) ==================== -->
+  <section class="wood-panel fixed bottom-3 left-3 w-80 md:w-96 h-48 z-20 flex flex-col overflow-hidden">
+    <div class="wood-panel-header px-3 py-1.5 flex items-center justify-between text-xs font-bold">
+      <span>📜 Kinh Văn & Tâm Sự Tổ Môn</span>
+      <span id="activeCharIndicator" class="text-[11px] text-[#6fcf97] truncate max-w-[165px]">Đang chọn: ...</span>
+    </div>
+    <div id="chatLogContainer" class="p-2.5 overflow-y-auto flex-1 space-y-1.5 text-xs leading-relaxed"></div>
+  </section>
+
+  <!-- ==================== 5. THANH CỬ CHỈ & NGHI LỄ (Ở GIỮA DƯỚI) ==================== -->
+  <nav class="fixed bottom-3 left-1/2 -translate-x-1/2 z-20 flex items-end gap-1.5 px-2.5 py-1.5 rounded-xl bg-[#24150b]/95 border-2 border-[#8c5a32] shadow-2xl">
+    <button onclick="performAction('wave')" class="action-card w-16 md:w-18 h-18 flex flex-col items-center justify-center p-1.5">
+      <span class="hotkey-badge">1</span>
+      <span class="text-xl mb-0.5">😄</span>
+      <span class="text-[10px] font-bold text-[#ffebb3] leading-tight">Chào</span>
+      <span class="text-[9px] text-[#d4b483]">(Hoan Hỷ)</span>
+    </button>
+
+    <button onclick="performAction('deadline')" class="action-card w-16 md:w-18 h-18 flex flex-col items-center justify-center p-1.5">
+      <span class="hotkey-badge">2</span>
+      <span class="text-xl mb-0.5">🖕</span>
+      <span class="text-[10px] font-bold text-[#ffebb3] leading-tight">Đừng Dí</span>
+      <span class="text-[9px] text-[#ff9b85]">(Deadline)</span>
+    </button>
+
+    <button onclick="performAction('meditate')" class="action-card w-16 md:w-18 h-18 flex flex-col items-center justify-center p-1.5">
+      <span class="hotkey-badge">3</span>
+      <span class="text-xl mb-0.5">🧘</span>
+      <span class="text-[10px] font-bold text-[#ffebb3] leading-tight">Tọa Thiền</span>
+      <span class="text-[9px] text-[#ffd166]">(Đài Sen)</span>
+    </button>
+
+    <button onclick="performAction('knock')" class="action-card w-16 md:w-18 h-18 flex flex-col items-center justify-center p-1.5">
+      <span class="hotkey-badge">4</span>
+      <span class="text-xl mb-0.5">🥁</span>
+      <span class="text-[10px] font-bold text-[#ffebb3] leading-tight">Gõ Mõ</span>
+      <span class="text-[9px] text-[#6fcf97]">(+Công Đức)</span>
+    </button>
+
+    <button onclick="performAction('incense')" class="action-card w-20 h-18 flex flex-col items-center justify-center p-1.5 border-[#ff9b85]">
+      <span class="hotkey-badge">5</span>
+      <span class="text-xl mb-0.5">🔥</span>
+      <span class="text-[10px] font-extrabold text-[#ffd166] leading-tight">Thắp Hương</span>
+      <span class="text-[9px] text-[#ffb4a2]">(Dâng Nhang)</span>
+    </button>
+
+    <button onclick="performAction('waterfall')" class="action-card w-20 h-18 flex flex-col items-center justify-center p-1.5">
+      <span class="hotkey-badge">6</span>
+      <span class="text-xl mb-0.5">🏞️</span>
+      <span class="text-[10px] font-bold text-[#81ecec] leading-tight">Ngắm Thác</span>
+      <span class="text-[9px] text-[#d4b483]">(Hồ Cá Koi)</span>
+    </button>
+
+    <button id="btnMassChant" onclick="toggleMassChanting()" class="action-card w-20 h-18 flex flex-col items-center justify-center p-1.5 border-[#f5b041]">
+      <span class="hotkey-badge">7</span>
+      <span class="text-xl mb-0.5">🔔</span>
+      <span class="text-[10px] font-extrabold text-[#ffd166] leading-tight">Tụng Kinh</span>
+      <span class="text-[9px] text-[#ffeaa7]">(Họp 20 Acc)</span>
+    </button>
+
+    <button id="btnLeaveWork" onclick="triggerGoHomeEvent()" class="action-card w-16 md:w-18 h-18 flex flex-col items-center justify-center p-1.5">
+      <span class="hotkey-badge">8</span>
+      <span class="text-xl mb-0.5">🏃</span>
+      <span class="text-[10px] font-bold text-[#ffebb3] leading-tight">Hạ Sơn</span>
+      <span class="text-[9px] text-[#81ecec]">(Tan Ca)</span>
+    </button>
+  </nav>
+
+  <!-- ==================== 6. Ô NHẬP TIN NHẮN / LỜI KHẤN (GÓC PHẢI DƯỚI) ==================== -->
+  <div class="wood-panel fixed bottom-3 right-3 w-72 md:w-80 p-2 z-20 flex items-center gap-2">
+    <input
+      id="chatInput"
+      type="text"
+      placeholder="Nhập lời khấn / tâm sự phòng ban..."
+      class="flex-1 bg-[#fdf6e9] text-[#2c1608] placeholder-[#8c6d53] text-xs font-semibold px-3 py-2 rounded border-2 border-[#7c4d28] focus:outline-none focus:border-[#d48a29]"
+    />
+    <button
+      onclick="sendCustomChat()"
+      class="px-3.5 py-2 rounded bg-[#3b7a57] hover:bg-[#4b966d] text-white font-bold text-xs border border-[#88d4ab] shadow"
+    >
+      [Gửi]
+    </button>
+  </div>
+
+  <!-- ==================== 7. MODAL ĐỔI TÊN 20 NHÂN SỰ ==================== -->
+  <div id="editModal" class="fixed inset-0 bg-black/75 z-50 hidden items-center justify-center p-4">
+    <div class="wood-panel w-full max-w-2xl max-h-[85vh] flex flex-col overflow-hidden">
+      <div class="wood-panel-header px-4 py-3 flex items-center justify-between">
+        <div>
+          <h2 class="text-sm font-extrabold uppercase text-[#ffd166]">✏️ Tùy Chỉnh Danh Sách 20 Pháp Danh Sương Minh Tổ Môn</h2>
+          <p class="text-[11px] text-[#e0c097]">Đổi tên nhân vật thành tên đồng nghiệp thật và đồng bộ cho toàn bộ mọi người!</p>
+        </div>
+        <button onclick="closeEditModal()" class="text-lg text-[#ff9b85] hover:text-white font-bold px-2">✕</button>
+      </div>
+      <div id="editModalList" class="p-4 overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-2.5 text-xs"></div>
+      <div class="p-3 bg-[#1f1209] border-t border-[#6e472b] flex justify-between items-center">
+        <button onclick="resetDefaultNames()" class="px-3 py-1.5 rounded bg-[#4a2c18] hover:bg-[#633b20] text-xs text-[#e0c097]">
+          🔄 Khôi phục mặc định
+        </button>
+        <div class="flex gap-2">
+          <button onclick="closeEditModal()" class="px-4 py-1.5 rounded bg-[#593a22] text-xs text-white">Đóng</button>
+          <button onclick="saveEditedNames()" class="px-5 py-1.5 rounded bg-[#c97a1c] hover:bg-[#e08b24] text-xs font-extrabold text-white shadow">
+            💾 Lưu & Đồng Bộ Toàn Chùa
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 8. POPUP ĐĂNG NHẬP CHỌN GHẾ ONLINE ==================== -->
+  <div id="loginModal" class="fixed inset-0 bg-black/85 z-50 flex items-center justify-center p-4">
+    <div class="wood-panel w-full max-w-2xl max-h-[88vh] flex flex-col overflow-hidden border-2 border-[#ffd166]">
+      <div class="wood-panel-header px-5 py-3.5 flex items-center justify-between">
+        <div>
+          <h2 class="text-base font-extrabold uppercase text-[#ffd166]">⛩️ SƯƠNG MINH TỔ MÔN - NHẬP MÔN CHỌN GHẾ</h2>
+          <p class="text-xs text-[#e0c097]">Chọn vị trí phòng ban của bạn để tương tác trực tiếp với đồng nghiệp!</p>
+        </div>
+        <span id="loginOnlineBadge" class="px-3 py-1 rounded-full bg-[#2c1608] border border-[#6fcf97] text-xs font-bold text-[#6fcf97]">
+          🟢 Đang online: 1
+        </span>
+      </div>
+
+      <div class="p-4 bg-[#1c1008] border-b border-[#6e472b] flex flex-col md:flex-row gap-3 items-center">
+        <label class="text-xs font-bold text-[#ffd166] shrink-0">✍️ Pháp danh / Tên của bạn:</label>
+        <input
+          id="customLoginName"
+          type="text"
+          placeholder="Nhập tên thật hoặc biệt danh (để trống nếu giữ nguyên)..."
+          class="flex-1 w-full bg-[#fdf6e9] text-[#2c1608] text-xs font-bold px-3 py-2 rounded border-2 border-[#b07d4f] focus:outline-none"
+        />
+      </div>
+
+      <div id="loginCharGrid" class="p-4 overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-2 text-xs flex-1"></div>
+    </div>
+  </div>
+
+  <!-- ==================== 9. THƯ VIỆN SOCKET.IO & LOGIC CHÍNH ==================== -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    // 1. ÂM THANH WEB AUDIO API
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    let audioCtx = null;
+    let soundMuted = false;
+
+    function ensureAudio() {
+      if (!audioCtx) audioCtx = new AudioContextClass();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+    }
+
+    function toggleAudioMute() {
+      soundMuted = !soundMuted;
+      const btn = document.getElementById('btnAudio');
+      btn.textContent = soundMuted ? '🔇 TẮT' : '🔊 BẬT';
+      btn.style.color = soundMuted ? '#ff9b85' : '#6fcf97';
+    }
+
+    function playMokugyoSound(pitchFactor = 1.0) {
+      if (soundMuted) return;
+      try {
+        ensureAudio();
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(760 * pitchFactor, now);
+        osc.frequency.exponentialRampToValueAtTime(310 * pitchFactor, now + 0.065);
+        gain.gain.setValueAtTime(0.32, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.075);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now);
+        osc.stop(now + 0.08);
+      } catch (e) {}
+    }
+
+    function playTempleBellSound() {
+      if (soundMuted) return;
+      try {
+        ensureAudio();
+        const now = audioCtx.currentTime;
+        [216, 432, 648].forEach((freq, idx) => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, now);
+          gain.gain.setValueAtTime(0.32 / (idx + 1), now);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 2.8 - idx * 0.5);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now);
+          osc.stop(now + 2.9);
+        });
+      } catch (e) {}
+    }
+
+    // 2. BẢN ĐỒ KIẾN TRÚC 9 PHÒNG RIÊNG BIỆT & CỬA RA VÀO CÓ BIỂN TÊN
+    const MAP_W = 26;
+    const MAP_H = 18;
+
+    const INCENSE_ALTAR = {
+      x: 9.2,
+      y: 9.6,
+      standX: 9.2,
+      standY: 10.45
+    };
+
+    const WATERFALL_ZONE = {
+      x: 0.6,
+      y: 0.5,
+      w: 5.8,
+      h: 3.6,
+      viewX: 3.8,
+      viewY: 4.1
+    };
+
+    const ZONES = {
+      DIRECTOR: {
+        id: 'DIRECTOR',
+        shortName: 'Phòng Trụ Trì',
+        doorTitle: '⛩️ ĐẠI HÙNG BẢO ĐIỆN - TỔ SƯ ĐƯỜNG',
+        subLabel: '(Tượng Phật Vàng & Bàn Trụ Trì)',
+        rx: 7.0, ry: 0.5, rw: 9.6, rh: 3.4,
+        doorX: 11.8, doorY: 3.9, doorSide: 'south',
+        approachX: 11.8, approachY: 4.25,
+        floorColor: '#691b16',
+        wallColor: '#b5835a',
+        badgeColor: '#dc2626'
+      },
+      PROC: {
+        id: 'PROC',
+        shortName: 'Phòng PROC',
+        doorTitle: '🚪 PHÒNG PROC - TÀNG KINH CÁC',
+        subLabel: '(Đàn Ép Giá Vật Tư)',
+        rx: 0.8, ry: 4.5, rw: 5.0, rh: 4.2,
+        deskX: 2.4, deskY: 5.0, deskW: 1.8, deskH: 3.1,
+        doorX: 3.3, doorY: 8.7, doorSide: 'south',
+        approachX: 3.3, approachY: 9.3,
+        floorColor: '#7a4e2d',
+        wallColor: '#c99b68',
+        badgeColor: '#d97706'
+      },
+      LOGISTIC: {
+        id: 'LOGISTIC',
+        shortName: 'Phòng Logistic',
+        doorTitle: '🚪 PHÒNG IBD LOGISTIC - THỈNH KINH VIỆN',
+        subLabel: '(Thông Quan & Tàu Biển)',
+        rx: 6.7, ry: 4.5, rw: 5.0, rh: 4.2,
+        deskX: 8.3, deskY: 5.0, deskW: 1.8, deskH: 3.1,
+        doorX: 9.2, doorY: 8.7, doorSide: 'south',
+        approachX: 9.2, approachY: 9.3,
+        floorColor: '#70482a',
+        wallColor: '#c99b68',
+        badgeColor: '#2563eb'
+      },
+      HR: {
+        id: 'HR',
+        shortName: 'Phòng HR-GA',
+        doorTitle: '🚪 PHÒNG HR-GA - PHÁP ĐƯỜNG GIÁM LUẬT',
+        subLabel: '(Sổ Sinh Tử & Chấm Công)',
+        rx: 12.6, ry: 4.5, rw: 5.0, rh: 4.2,
+        deskX: 14.2, deskY: 5.0, deskW: 1.8, deskH: 3.1,
+        doorX: 15.1, doorY: 8.7, doorSide: 'south',
+        approachX: 15.1, approachY: 9.3,
+        floorColor: '#7a4e2d',
+        wallColor: '#c99b68',
+        badgeColor: '#db2777'
+      },
+      TECH: {
+        id: 'TECH',
+        shortName: 'Phòng Thiết Kế',
+        doorTitle: '🚪 PHÒNG KỸ THUẬT - LÒ LUYỆN ĐƠN',
+        subLabel: '(Tu Luyện Bản Vẽ & Spec)',
+        rx: 0.8, ry: 11.3, rw: 5.0, rh: 4.5,
+        deskX: 2.4, deskY: 11.9, deskW: 1.8, deskH: 3.3,
+        doorX: 3.3, doorY: 11.3, doorSide: 'north',
+        approachX: 3.3, approachY: 10.6,
+        floorColor: '#70482a',
+        wallColor: '#c99b68',
+        badgeColor: '#059669'
+      },
+      COST: {
+        id: 'COST',
+        shortName: 'Phòng Báo Giá',
+        doorTitle: '🚪 PHÒNG IBD BÁO GIÁ - ĐÀN CẦU SIÊU',
+        subLabel: '(Cost Team Tịnh Tâm Tính Giá)',
+        rx: 6.7, ry: 11.3, rw: 5.0, rh: 4.5,
+        deskX: 8.3, deskY: 11.9, deskW: 1.8, deskH: 3.3,
+        doorX: 9.2, doorY: 11.3, doorSide: 'north',
+        approachX: 9.2, approachY: 10.6,
+        floorColor: '#78472a',
+        wallColor: '#c99b68',
+        badgeColor: '#7c3aed'
+      },
+      SALE: {
+        id: 'SALE',
+        shortName: 'Phòng IBD Sale',
+        doorTitle: '🚪 PHÒNG IBD SALE - HỘ PHÁP ĐƯỜNG',
+        subLabel: '(Ban Khất Thực Đơn Hàng & PO)',
+        rx: 12.6, ry: 11.3, rw: 5.0, rh: 4.5,
+        deskX: 14.2, deskY: 11.9, deskW: 1.8, deskH: 3.3,
+        doorX: 15.1, doorY: 11.3, doorSide: 'north',
+        approachX: 15.1, approachY: 10.6,
+        floorColor: '#70482a',
+        wallColor: '#c99b68',
+        badgeColor: '#dc2626'
+      },
+      PANTRY: {
+        id: 'PANTRY',
+        shortName: 'Phòng Pantry',
+        doorTitle: '🍵 PHÒNG PANTRY - TRAI ĐƯỜNG THỤ LỘC',
+        subLabel: '(Trà Đạo, Cà Phê & Hoa Quả)',
+        rx: 19.2, ry: 1.2, rw: 5.8, rh: 6.8,
+        doorX: 22.1, doorY: 8.0, doorSide: 'south',
+        approachX: 22.1, approachY: 9.2,
+        floorColor: '#5c4433',
+        wallColor: '#d4a373',
+        badgeColor: '#ca8a04'
+      },
+      STAIRS: {
+        id: 'STAIRS',
+        shortName: 'Cầu Thang Hạ Sơn',
+        doorTitle: '🪜 CỬA CẦU THANG - CỔNG HẠ SƠN 17:00',
+        subLabel: '(Lối Thoát Luân Hồi Tan Ca)',
+        rx: 19.4, ry: 11.2, rw: 5.4, rh: 5.4,
+        doorX: 22.1, doorY: 11.2, doorSide: 'north',
+        approachX: 22.1, approachY: 10.2,
+        floorColor: '#292524',
+        wallColor: '#a8a29e',
+        badgeColor: '#0891b2'
+      }
+    };
+
+    const DEPT_QUOTES = {
+      DIRECTOR: [
+        "[Đang Thiền] Sương Minh Tổ Môn tâm bất biến giữa dòng đời doanh số 🙏",
+        "Các đại đức hôm nay chốt được mấy đơn Motor rồi?",
+        "Ta ngồi dưới chân Tượng Phật nhìn thấu mọi bản báo giá!",
+        "Nam mô KPI viên mãn, lợi nhuận tăng trưởng đều!"
+      ],
+      PROC: [
+        "Nam mô Nhà Cung Cấp giảm giá 20%, giao hàng đúng hẹn!",
+        "Đừng tăng giá nguyên vật liệu nữa thí chủ NCC ơi!",
+        "Phòng PROC vừa ra sân thắp nhang cầu giá thép hạ nhiệt!",
+        "Xin chữ ký duyệt PO nhanh như chớp giật!"
+      ],
+      LOGISTIC: [
+        "Đường Tăng đi lấy kinh còn dễ hơn xin Booking tàu tuần này!",
+        "Nam mô Hải Quan luồng xanh, tờ khai thông quan 1 nốt nhạc!",
+        "Cầu cho container không bị delay ở cảng 🙏",
+        "Thỉnh Kinh Viện Logistic quyết tâm đưa hàng về kịp tiến độ!"
+      ],
+      HR: [
+        "Chúng sinh Sương Minh Tổ Môn nhớ chấm vân tay kẻo phạm giới luật!",
+        "Pháp Đường HR-GA đang soạn Sổ Sinh Tử (Bảng Lương) tháng này!",
+        "Phòng Pantry mới có lộc hoa quả, mời chư vị thụ lộc!",
+        "Ai đi muộn 5 phút tự giác ra Đỉnh Hương gõ mõ 108 lần!"
+      ],
+      TECH: [
+        "Đừng dí deadline bản vẽ nữa! Sắp tẩu hỏa nhập ma rồi 🖕",
+        "Khách hàng đổi Spec lần thứ 9... Bần tăng xin quy y cửa Phật!",
+        "Bản vẽ CAD này hội tụ linh khí đất trời, cấm sửa!",
+        "Ra ngắm Thác Nước Cá Koi cho hạ hỏa rồi vào vẽ tiếp..."
+      ],
+      COST: [
+        "Phòng IBD Báo Giá đang gõ mõ cầu siêu cho file Excel không lỗi!",
+        "Margin mỏng như lá lúa, xin khách đừng ép giá nữa 🙏",
+        "Cốc! Cốc! Tính giá chuẩn từng đồng, bách phát bách trúng!",
+        "Sale giục báo giá gấp quá, toàn phòng Cost nhập định đây!"
+      ],
+      SALE: [
+        "Phòng IBD Sale đi hóa duyên chốt PO triệu đô về cho Tổ Môn!",
+        "Vừa cắm 3 nén nhang ở Đỉnh Đồng, chiều nay khách chắc chắn ký!",
+        "Anh em Báo Giá + Kỹ Thuật độ cho ca này chốt đơn nhanh nhé!",
+        "Chào cả nhà! Hôm nay Sale quyết tâm săn khách lớn 🙏"
+      ]
+    };
+
+    const DEFAULT_CHARACTERS = [
+      { id: 0, name: "Sếp_Tổng (Trụ Trì)", dept: "DIRECTOR", role: "ABBOT", homeX: 11.8, homeY: 2.85, seatSide: "down", gender: "M", hairColor: "#1f2937", robeColor: "#d97706" },
+      { id: 1, name: "Trưởng_PROC", dept: "PROC", role: "LEADER", homeX: 1.65, homeY: 5.5, seatSide: "right", gender: "F", hairColor: "#4a2c18", robeColor: "#b45309" },
+      { id: 2, name: "VậtTư_Minh", dept: "PROC", role: "STAFF", homeX: 1.65, homeY: 7.0, seatSide: "right", gender: "M", hairColor: "#1e293b", robeColor: "#3b82f6" },
+      { id: 3, name: "MuaHàng_Lan", dept: "PROC", role: "STAFF", homeX: 4.95, homeY: 6.2, seatSide: "left", gender: "F", hairColor: "#3f2314", robeColor: "#ec4899" },
+      { id: 4, name: "Lead_Logistic", dept: "LOGISTIC", role: "LEADER", homeX: 7.55, homeY: 5.5, seatSide: "right", gender: "F", hairColor: "#2d1a10", robeColor: "#2563eb" },
+      { id: 5, name: "XNK_Tuấn", dept: "LOGISTIC", role: "STAFF", homeX: 7.55, homeY: 7.0, seatSide: "right", gender: "M", hairColor: "#111827", robeColor: "#0284c7" },
+      { id: 6, name: "CảngVụ_Hà", dept: "LOGISTIC", role: "STAFF", homeX: 10.85, homeY: 6.2, seatSide: "left", gender: "F", hairColor: "#451a03", robeColor: "#6366f1" },
+      { id: 7, name: "Hương_HR", dept: "HR", role: "LEADER", homeX: 13.45, homeY: 5.5, seatSide: "right", gender: "F", hairColor: "#5c3317", robeColor: "#f43f5e" },
+      { id: 8, name: "GA_HànhChính", dept: "HR", role: "STAFF", homeX: 13.45, homeY: 7.0, seatSide: "right", gender: "F", hairColor: "#27272a", robeColor: "#e11d48" },
+      { id: 9, name: "TuyểnDụng_Vy", dept: "HR", role: "STAFF", homeX: 16.75, homeY: 6.2, seatSide: "left", gender: "F", hairColor: "#422006", robeColor: "#f97316" },
+      { id: 10, name: "Lead_ThiếtKế", dept: "TECH", role: "LEADER", homeX: 1.65, homeY: 12.5, seatSide: "right", gender: "M", hairColor: "#18181b", robeColor: "#059669" },
+      { id: 11, name: "KỹThuật_Tú", dept: "TECH", role: "STAFF", homeX: 1.65, homeY: 14.1, seatSide: "right", gender: "M", hairColor: "#0f172a", robeColor: "#10b981" },
+      { id: 12, name: "BảnVẽ_Khánh", dept: "TECH", role: "STAFF", homeX: 4.95, homeY: 12.5, seatSide: "left", gender: "M", hairColor: "#292524", robeColor: "#0d9488" },
+      { id: 13, name: "CAD_Đức", dept: "TECH", role: "STAFF", homeX: 4.95, homeY: 14.1, seatSide: "left", gender: "M", hairColor: "#1c1917", robeColor: "#14b8a6" },
+      { id: 14, name: "Trưởng_BáoGiá", dept: "COST", role: "LEADER", homeX: 7.55, homeY: 12.5, seatSide: "right", gender: "M", hairColor: "#1e1b4b", robeColor: "#7c3aed" },
+      { id: 15, name: "Cost_Team (Bạn)", dept: "COST", role: "STAFF", homeX: 7.55, homeY: 14.1, seatSide: "right", gender: "M", hairColor: "#111827", robeColor: "#8b5cf6" },
+      { id: 16, name: "BáoGiá_Đào", dept: "COST", role: "STAFF", homeX: 10.85, homeY: 13.3, seatSide: "left", gender: "F", hairColor: "#431407", robeColor: "#a855f7" },
+      { id: 17, name: "Sếp_Nam (Sale)", dept: "SALE", role: "LEADER", homeX: 13.45, homeY: 12.5, seatSide: "right", gender: "M", hairColor: "#0f172a", robeColor: "#dc2626" },
+      { id: 18, name: "Sale_Hùng", dept: "SALE", role: "STAFF", homeX: 13.45, homeY: 14.1, seatSide: "right", gender: "M", hairColor: "#1f2937", robeColor: "#ef4444" },
+      { id: 19, name: "Sale_Trang", dept: "SALE", role: "STAFF", homeX: 16.75, homeY: 13.3, seatSide: "left", gender: "F", hairColor: "#4a1d1f", robeColor: "#f43f5e" }
+    ];
+
+    const canvas = document.getElementById('templeCanvas');
+    const ctx = canvas.getContext('2d');
+
+    let isTopDown2D = false;
+    let isNightMode = false;
+    let fullMonkRobeMode = false;
+    let meritTotal = 1080;
+    let activeIncenseSticks = 9;
+    let selectedCharId = 15;
+    let activeDeptFilter = 'ALL';
+    let isMassChanting = false;
+    let isGoingHome = false;
+
+    let camZoom = 1.0;
+    let camOffsetX = 0;
+    let camOffsetY = 0;
+    let isDraggingCam = false;
+    let dragStartX = 0;
+    let dragStartY = 0;
+    let pointerMovedDist = 0;
+
+    const ISO_TILE_W = 60;
+    const ISO_TILE_H = 30;
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      if (camOffsetX === 0 && camOffsetY === 0) {
+        resetCameraView();
+      }
+    }
+    window.addEventListener('resize', resizeCanvas);
+
+    function resetCameraView() {
+      if (!isTopDown2D) {
+        camZoom = Math.min(window.innerWidth / 1580, window.innerHeight / 920);
+        camZoom = Math.max(0.66, Math.min(1.15, camZoom));
+        camOffsetX = window.innerWidth * 0.42;
+        camOffsetY = window.innerHeight * 0.09;
+      } else {
+        camZoom = Math.min((window.innerWidth - 360) / (MAP_W * 40), (window.innerHeight - 190) / (MAP_H * 40));
+        camOffsetX = (window.innerWidth - MAP_W * 40 * camZoom) * 0.4;
+        camOffsetY = 66;
+      }
+    }
+
+    function worldToScreen(gx, gy, gz = 0) {
+      if (isTopDown2D) {
+        const cell = 40 * camZoom;
+        return {
+          x: camOffsetX + gx * cell,
+          y: camOffsetY + gy * cell
+        };
+      }
+      const tw = ISO_TILE_W * camZoom;
+      const th = ISO_TILE_H * camZoom;
+      return {
+        x: camOffsetX + (gx - gy) * (tw / 2),
+        y: camOffsetY + (gx + gy) * (th / 2) - gz * camZoom
+      };
+    }
+
+    function screenToWorld(sx, sy) {
+      if (isTopDown2D) {
+        const cell = 40 * camZoom;
+        return {
+          x: (sx - camOffsetX) / cell,
+          y: (sy - camOffsetY) / cell
+        };
+      }
+      const tw = ISO_TILE_W * camZoom;
+      const th = ISO_TILE_H * camZoom;
+      const dx = sx - camOffsetX;
+      const dy = sy - camOffsetY;
+      const gx = (dx / (tw / 2) + dy / (th / 2)) / 2;
+      const gy = (dy / (th / 2) - dx / (tw / 2)) / 2;
+      return { x: gx, y: gy };
+    }
+
+    let savedNames = null;
+    try {
+      const raw = localStorage.getItem('suong_minh_to_mon_names');
+      if (raw) savedNames = JSON.parse(raw);
+    } catch (e) {}
+
+    const characters = DEFAULT_CHARACTERS.map((item, idx) => ({
+      ...item,
+      name: (savedNames && savedNames[idx]) ? savedNames[idx] : item.name,
+      x: item.homeX,
+      y: item.homeY,
+      targetX: item.homeX,
+      targetY: item.homeY,
+      waypoints: [],
+      afterWalkAction: null,
+      state: idx === 0 ? 'meditate' : 'work',
+      actionTimer: idx === 0 ? 999999 : 0,
+      facing: item.seatSide,
+      bobPhase: Math.random() * Math.PI * 2,
+      bubbleText: idx === 0 ? '[Đang Thiền] 🙏' : '',
+      bubbleTimer: idx === 0 ? 999999 : 0
+    }));
+
+    let smokeParticles = [];
+    let waterfallParticles = [];
+    let waterRipples = [];
+    let floatingLabels = [];
+    let bellShockwaves = [];
+    let goldenMotes = [];
+    let simTick = 0;
+
+    for (let i = 0; i < 90; i++) {
+      waterfallParticles.push({
+        streamIdx: i % 3,
+        progress: Math.random(),
+        speed: 0.018 + Math.random() * 0.012,
+        offsetX: (Math.random() - 0.5) * 0.28,
+        size: 2 + Math.random() * 2.5
+      });
+    }
+
+    const koiFishList = [
+      { angle: 0.2, speed: 0.022, rx: 1.2, ry: 0.65, cx: 3.6, cy: 2.55, color: '#ff4d4d', spot: '#ffffff' },
+      { angle: 1.8, speed: 0.019, rx: 1.45, ry: 0.7, cx: 3.5, cy: 2.6, color: '#fbbf24', spot: '#dc2626' },
+      { angle: 3.4, speed: 0.025, rx: 0.95, ry: 0.5, cx: 3.8, cy: 2.7, color: '#f97316', spot: '#ffffff' },
+      { angle: 4.7, speed: 0.017, rx: 1.3, ry: 0.6, cx: 3.4, cy: 2.5, color: '#ffffff', spot: '#ef4444' },
+      { angle: 2.5, speed: 0.021, rx: 1.1, ry: 0.55, cx: 3.9, cy: 2.45, color: '#f59e0b', spot: '#111827' }
+    ];
+
+    for (let i = 0; i < 35; i++) {
+      goldenMotes.push({
+        gx: Math.random() * MAP_W,
+        gy: Math.random() * MAP_H,
+        gz: 8 + Math.random() * 55,
+        phase: Math.random() * Math.PI * 2,
+        size: 1.5 + Math.random() * 2
+      });
+    }
+
+    function spawnFloatingText(gx, gy, text, color = '#ffd166') {
+      floatingLabels.push({ gx, gy, gz: 52, text, color, life: 70 });
+    }
+
+    function addMerit(points, gx, gy, label) {
+      meritTotal += points;
+      document.getElementById('meritCounter').textContent = meritTotal.toLocaleString();
+      if (gx !== undefined) {
+        spawnFloatingText(gx, gy, label || `+${points} Công Đức`, '#6fcf97');
+      }
+    }
+
+    // 3. TÌM ĐƯỜNG THÔNG MINH QUA CỬA PHÒNG
+    function getContainingZone(gx, gy) {
+      for (const key of Object.keys(ZONES)) {
+        const z = ZONES[key];
+        if (gx >= z.rx && gx <= z.rx + z.rw && gy >= z.ry && gy <= z.ry + z.rh) {
+          return z;
+        }
+      }
+      return null;
+    }
+
+    // Kết nối Socket.io (Nếu chạy qua node server.js)
+    const socket = typeof io !== 'undefined' ? io() : null;
+    let isApplyingRemote = false;
+    let occupiedSeats = {};
+    let onlineUserCount = 1;
+
+    function moveCharacterSmart(char, destX, destY, afterAction = null) {
+      const clampedX = Math.max(0.8, Math.min(MAP_W - 0.8, destX));
+      const clampedY = Math.max(1.0, Math.min(MAP_H - 0.8, destY));
+      const wp = [];
+
+      const startZone = getContainingZone(char.x, char.y);
+      const endZone = getContainingZone(clampedX, clampedY);
+
+      if (startZone && (!endZone || startZone.id !== endZone.id)) {
+        wp.push({ x: startZone.doorX, y: startZone.doorY });
+        wp.push({ x: startZone.approachX, y: startZone.approachY });
+      }
+
+      const currentlyRightWing = char.x > 18.2;
+      const targetRightWing = clampedX > 18.2;
+      if (currentlyRightWing !== targetRightWing) {
+        const gateLeft = { x: 17.6, y: 9.7 };
+        const gateRight = { x: 18.8, y: 9.7 };
+        if (!currentlyRightWing) {
+          wp.push(gateLeft, gateRight);
+        } else {
+          wp.push(gateRight, gateLeft);
+        }
+      }
+
+      if (endZone && (!startZone || startZone.id !== endZone.id)) {
+        wp.push({ x: endZone.approachX, y: endZone.approachY });
+        wp.push({ x: endZone.doorX, y: endZone.doorY });
+      }
+
+      wp.push({ x: clampedX, y: clampedY });
+      char.waypoints = wp;
+      char.targetX = wp[0].x;
+      char.targetY = wp[0].y;
+      char.afterWalkAction = afterAction;
+      char.state = 'walk';
+
+      if (socket && !isApplyingRemote && char.id === selectedCharId) {
+        socket.emit('move', { charId: char.id, destX, destY, afterAction });
+      }
+    }
+
+    function appendChatLog(senderName, deptKey, message, isHighlight = false) {
+      const box = document.getElementById('chatLogContainer');
+      const div = document.createElement('div');
+      div.className = isHighlight
+        ? 'p-1.5 rounded bg-[#4f2812]/90 border border-[#f5b041] text-[#fff3cd]'
+        : 'text-[#e6ccb2]';
+      div.innerHTML = `<span class="font-extrabold" style="color:${isHighlight ? '#ffd166' : '#7bed9f'}">${senderName}:</span> <span>${message}</span>`;
+      box.appendChild(div);
+      while (box.children.length > 35) {
+        box.removeChild(box.firstChild);
+      }
+      box.scrollTop = box.scrollHeight;
+    }
+
+    function performAction(type, customChar = null) {
+      const c = customChar || characters.find(ch => ch.id === selectedCharId) || characters[0];
+
+      if (socket && !isApplyingRemote && c.id === selectedCharId) {
+        socket.emit('action', { charId: c.id, type });
+      }
+
+      if (type === 'incense') {
+        const offset = (c.id % 5 - 2) * 0.35;
+        isApplyingRemote = true;
+        moveCharacterSmart(c, INCENSE_ALTAR.standX + offset, INCENSE_ALTAR.standY, 'do_incense_ritual');
+        isApplyingRemote = false;
+        c.bubbleText = 'Ra Đỉnh Hương dâng nhang cầu KPI! 🔥';
+        c.bubbleTimer = 160;
+        playMokugyoSound(1.1);
+        return;
+      }
+
+      if (type === 'waterfall') {
+        const offset = (c.id % 4) * 0.45;
+        isApplyingRemote = true;
+        moveCharacterSmart(c, WATERFALL_ZONE.viewX + offset, WATERFALL_ZONE.viewY, 'admire_waterfall');
+        isApplyingRemote = false;
+        c.bubbleText = 'Ra Thác Nước ngắm cá Koi tịnh tâm! 🏞️';
+        c.bubbleTimer = 160;
+        playMokugyoSound(1.25);
+        return;
+      }
+
+      c.waypoints = [];
+      c.targetX = c.x;
+      c.targetY = c.y;
+
+      if (type === 'wave') {
+        c.state = 'wave';
+        c.actionTimer = 150;
+        c.bubbleText = 'Chào cả nhà! 🙏';
+        c.bubbleTimer = 150;
+        playMokugyoSound(1.2);
+        appendChatLog(c.name, c.dept, 'Chào đạo hữu các phòng, chúc một ngày làm việc tịnh tâm! 🙏');
+        addMerit(5, c.x, c.y, '👋 +5 Hoan Hỷ');
+      } else if (type === 'deadline') {
+        c.state = 'deadline';
+        c.actionTimer = 165;
+        c.bubbleText = 'Đừng dí deadline nữa! 🖕';
+        c.bubbleTimer = 165;
+        playMokugyoSound(0.75);
+        appendChatLog(c.name, c.dept, 'Đừng dí deadline nữa! Bần tăng sắp tẩu hỏa nhập ma rồi! 🖕');
+        spawnFloatingText(c.x, c.y, '🔥 Sân Si -0, Tịnh Tâm +10', '#ff9b85');
+      } else if (type === 'meditate') {
+        c.state = 'meditate';
+        c.actionTimer = 320;
+        c.bubbleText = '[Đang Thiền] 🙏';
+        c.bubbleTimer = 320;
+        playTempleBellSound();
+        appendChatLog(c.name, c.dept, 'Đã tọa thiền trên đài sen trong phòng, tạm ngưng nhận việc gấp... 🧘');
+        addMerit(20, c.x, c.y, '🪷 +20 Định Lực');
+      } else if (type === 'knock') {
+        c.state = 'knock';
+        c.actionTimer = 140;
+        const deptLines = DEPT_QUOTES[c.dept] || DEPT_QUOTES.COST;
+        const msg = deptLines[Math.floor(Math.random() * deptLines.length)];
+        c.bubbleText = 'Cốc! Cốc! +10 Công Đức 🥁';
+        c.bubbleTimer = 130;
+        playMokugyoSound(1.0);
+        appendChatLog(c.name, c.dept, msg);
+        addMerit(10, c.x, c.y, '🥁 +10 Công Đức');
+      }
+    }
+
+    function executeIncenseRitual(c) {
+      c.state = 'bow';
+      c.actionTimer = 180;
+      activeIncenseSticks = Math.min(36, activeIncenseSticks + 3);
+      document.getElementById('incenseCounter').textContent = activeIncenseSticks;
+      c.bubbleText = 'Thành tâm dâng 3 nén nhang trầm! 🔥🙏';
+      c.bubbleTimer = 190;
+      playTempleBellSound();
+      bellShockwaves.push({ gx: INCENSE_ALTAR.x, gy: INCENSE_ALTAR.y, radius: 4, maxRadius: 220 });
+
+      for (let i = 0; i < 18; i++) {
+        smokeParticles.push({
+          gx: INCENSE_ALTAR.x + (Math.random() - 0.5) * 0.45,
+          gy: INCENSE_ALTAR.y + (Math.random() - 0.5) * 0.3,
+          gz: 28 + Math.random() * 12,
+          alpha: 0.85,
+          size: 4 + Math.random() * 4,
+          goldTint: true
+        });
+      }
+
+      appendChatLog(c.name, c.dept, '🔥 Vừa thành tâm dâng 3 nén hương tại Đỉnh Đồng Sương Minh Tổ Môn!', true);
+      addMerit(30, INCENSE_ALTAR.x, INCENSE_ALTAR.y, '🔥 Dâng Hương +30 Công Đức');
+    }
+
+    function applyMassChantLocal() {
+      isMassChanting = !isMassChanting;
+      isGoingHome = false;
+      const btn = document.getElementById('btnMassChant');
+      const banner = document.getElementById('eventBannerText');
+
+      if (isMassChanting) {
+        btn.classList.add('active-mode');
+        banner.textContent = '🔔 ĐẠI LỄ TỤNG KINH: 20 Nhân sự từ 6 phòng bước qua cửa tập trung quanh Đỉnh Hương!';
+        playTempleBellSound();
+        bellShockwaves.push({ gx: 11.8, gy: 2.0, radius: 5, maxRadius: 520 });
+        appendChatLog('ĐẠI HỒNG CHUNG', 'DIRECTOR', '🔔 CHUÔNG TỔ MÔN ĐÃ ĐIỂM! Triệu tập toàn bộ 6 phòng ban bước ra sân xếp hàng tụng kinh!', true);
+
+        characters.forEach((c, idx) => {
+          isApplyingRemote = true;
+          if (idx === 0) {
+            moveCharacterSmart(c, 11.8, 3.1);
+            c.bubbleText = 'Chư vị các phòng bắt đầu tụng kinh! 🙏';
+            c.bubbleTimer = 260;
+          } else {
+            const i = idx - 1;
+            const row = Math.floor(i / 7);
+            const col = i % 7;
+            const targetX = 4.6 + col * 1.9;
+            const targetY = 9.0 + (row - 1) * 0.78;
+            moveCharacterSmart(c, targetX, targetY);
+            c.bubbleText = 'Ra sân tụng kinh thôi!';
+            c.bubbleTimer = 110;
+          }
+          isApplyingRemote = false;
+        });
+      } else {
+        btn.classList.remove('active-mode');
+        banner.textContent = 'Click sàn để qua cửa phòng • Click Đỉnh Hương giữa sân để thắp nhang • Phím 1-8 hành lễ';
+        appendChatLog('ĐẠI HỒNG CHUNG', 'DIRECTOR', 'Buổi lễ hoàn mãn! Các đạo hữu đi qua cửa phòng trở về bàn làm việc.', true);
+        characters.forEach((c, idx) => {
+          isApplyingRemote = true;
+          moveCharacterSmart(c, c.homeX, c.homeY);
+          isApplyingRemote = false;
+          c.bubbleText = idx === 0 ? '[Đang Thiền] 🙏' : 'Về phòng mình làm việc tiếp!';
+          c.bubbleTimer = 110;
+        });
+      }
+    }
+
+    function toggleMassChanting() {
+      if (socket && !isApplyingRemote) {
+        socket.emit('mass_chant');
+      } else {
+        applyMassChantLocal();
+      }
+    }
+
+    function applyGoHomeLocal() {
+      isGoingHome = !isGoingHome;
+      isMassChanting = false;
+      document.getElementById('btnMassChant').classList.remove('active-mode');
+      const btnLeave = document.getElementById('btnLeaveWork');
+
+      if (isGoingHome) {
+        btnLeave.classList.add('active-mode');
+        playTempleBellSound();
+        appendChatLog('CHUÔNG TAN CA', 'HR', '🏃 17:00 GIỜ HẠ SƠN! Các phòng đồng loạt mở cửa tiến về Phòng Pantry & Cầu Thang Hạ Sơn!', true);
+        characters.forEach((c, idx) => {
+          isApplyingRemote = true;
+          if (idx === 0) {
+            c.bubbleText = 'Chúc các đạo hữu hạ sơn bình an!';
+            c.bubbleTimer = 200;
+          } else if (idx % 3 === 0) {
+            moveCharacterSmart(c, 20.4 + (idx % 3) * 1.2, 3.2 + (idx % 2) * 1.8);
+            c.bubbleText = 'Qua cửa Pantry thụ lộc trà bánh đã! 🍵';
+            c.bubbleTimer = 180;
+          } else {
+            moveCharacterSmart(c, 20.5 + (idx % 3) * 1.1, 12.6 + (idx % 3) * 1.1);
+            c.bubbleText = '17h00! Ra Cầu Thang hạ sơn thôi! 🏃';
+            c.bubbleTimer = 180;
+          }
+          isApplyingRemote = false;
+        });
+      } else {
+        btnLeave.classList.remove('active-mode');
+        appendChatLog('CHUÔNG VÀO CA', 'HR', 'Toàn bộ 20 nhân sự đã đi qua cửa từng phòng quay lại bàn làm việc.', false);
+        characters.forEach((c) => {
+          isApplyingRemote = true;
+          moveCharacterSmart(c, c.homeX, c.homeY);
+          isApplyingRemote = false;
+        });
+      }
+    }
+
+    function triggerGoHomeEvent() {
+      if (socket && !isApplyingRemote) {
+        socket.emit('go_home');
+      } else {
+        applyGoHomeLocal();
+      }
+    }
+
+    function toggleNightMode() {
+      isNightMode = !isNightMode;
+      document.getElementById('nightModeLabel').textContent = isNightMode ? 'Đêm Hoa Đăng: BẬT' : 'Đêm Hoa Đăng: TẮT';
+    }
+
+    function toggleCameraProjection() {
+      isTopDown2D = !isTopDown2D;
+      document.getElementById('viewModeLabel').textContent = isTopDown2D ? 'Sơ Đồ Phòng 2D' : '2.5D Chi Tiết';
+      resetCameraView();
+    }
+
+    function toggleRobeMode() {
+      fullMonkRobeMode = !fullMonkRobeMode;
+      document.getElementById('robeModeLabel').textContent = fullMonkRobeMode ? 'Đồ: 100% Áo Cà Sa' : 'Đồ: Công Sở + Cà Sa';
+    }
+
+    function renderUserList() {
+      const container = document.getElementById('userListContainer');
+      container.innerHTML = '';
+
+      const filtered = characters.filter(c => activeDeptFilter === 'ALL' || c.dept === activeDeptFilter);
+      filtered.forEach(c => {
+        const isSel = c.id === selectedCharId;
+        const isOnline = Boolean(occupiedSeats[c.id]);
+        const row = document.createElement('div');
+        row.className = `flex items-center justify-between px-2 py-1.5 rounded cursor-pointer transition ${
+          isSel ? 'bg-[#6e421f] border border-[#ffd166]' : 'hover:bg-[#3d2514]'
+        }`;
+        const badgeColor = ZONES[c.dept]?.badgeColor || '#b45309';
+        row.innerHTML = `
+          <div class="flex items-center gap-1.5 truncate">
+            <span>${isOnline ? '🟢' : '⚪'}</span>
+            <span class="font-bold ${isSel ? 'text-[#ffd166]' : (isOnline ? 'text-[#6fcf97]' : 'text-[#f3e5ab]')} truncate">${c.name}</span>
+          </div>
+          <span class="text-[9px] font-bold px-1.5 py-0.5 rounded text-white shrink-0" style="background:${badgeColor}">
+            ${ZONES[c.dept].shortName.replace('Phòng ', '')}
+          </span>
+        `;
+        row.onclick = () => selectCharacter(c.id);
+        container.appendChild(row);
+      });
+
+      const activeChar = characters.find(ch => ch.id === selectedCharId);
+      if (activeChar) {
+        document.getElementById('activeCharIndicator').textContent = `Bạn: ${activeChar.name} (${onlineUserCount} Online)`;
+      }
+    }
+
+    function filterDept(deptKey) {
+      activeDeptFilter = deptKey;
+      renderUserList();
+    }
+
+    function selectCharacter(id) {
+      selectedCharId = id;
+      const c = characters.find(ch => ch.id === id);
+      if (c) {
+        c.bubbleText = 'Bần tăng nghe lệnh! 🙏';
+        c.bubbleTimer = 95;
+        playMokugyoSound(1.15);
+      }
+      renderUserList();
+    }
+
+    function sendCustomChat() {
+      const input = document.getElementById('chatInput');
+      const text = input.value.trim();
+      if (!text) return;
+      const c = characters.find(ch => ch.id === selectedCharId) || characters[0];
+
+      if (socket) {
+        socket.emit('chat', {
+          charId: c.id,
+          senderName: c.name,
+          dept: c.dept,
+          text
+        });
+      } else {
+        c.bubbleText = text;
+        c.bubbleTimer = 220;
+        playMokugyoSound(1.05);
+        appendChatLog(c.name, c.dept, text, true);
+      }
+      input.value = '';
+    }
+
+    document.getElementById('chatInput').addEventListener('keydown', (e) => {
+      e.stopPropagation();
+      if (e.key === 'Enter') sendCustomChat();
+    });
+
+    function openEditModal() {
+      const modal = document.getElementById('editModal');
+      const list = document.getElementById('editModalList');
+      list.innerHTML = '';
+      characters.forEach((c, idx) => {
+        const item = document.createElement('div');
+        item.className = 'flex items-center gap-2 bg-[#2b1a0e] p-2 rounded border border-[#6e472b]';
+        item.innerHTML = `
+          <span class="w-6 text-center font-bold text-[#ffd166]">#${idx + 1}</span>
+          <span class="text-[10px] font-bold px-1.5 py-0.5 rounded text-white w-28 text-center shrink-0" style="background:${ZONES[c.dept].badgeColor}">
+            ${ZONES[c.dept].shortName}
+          </span>
+          <input
+            type="text"
+            data-char-idx="${idx}"
+            value="${c.name}"
+            class="char-name-input flex-1 bg-[#160c06] text-[#fff3cd] px-2 py-1 rounded border border-[#8c5a32] text-xs font-bold"
+          />
+        `;
+        list.appendChild(item);
+      });
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeEditModal() {
+      const modal = document.getElementById('editModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function saveEditedNames() {
+      const inputs = document.querySelectorAll('.char-name-input');
+      const updated = [];
+      const customNames = {};
+      inputs.forEach(inp => {
+        const idx = parseInt(inp.getAttribute('data-char-idx'), 10);
+        const val = inp.value.trim() || DEFAULT_CHARACTERS[idx].name;
+        characters[idx].name = val;
+        updated[idx] = val;
+        customNames[idx] = val;
+      });
+      try {
+        localStorage.setItem('suong_minh_to_mon_names', JSON.stringify(updated));
+      } catch (e) {}
+      if (socket) {
+        socket.emit('update_all_names', { customNames });
+      }
+      renderUserList();
+      closeEditModal();
+    }
+
+    function resetDefaultNames() {
+      const customNames = {};
+      DEFAULT_CHARACTERS.forEach((def, idx) => {
+        characters[idx].name = def.name;
+        customNames[idx] = def.name;
+      });
+      try {
+        localStorage.removeItem('suong_minh_to_mon_names');
+      } catch (e) {}
+      if (socket) {
+        socket.emit('update_all_names', { customNames });
+      }
+      openEditModal();
+      renderUserList();
+    }
+
+    function renderLoginModal() {
+      const grid = document.getElementById('loginCharGrid');
+      if (!grid) return;
+      grid.innerHTML = '';
+      document.getElementById('loginOnlineBadge').textContent = `🟢 Đang online: ${onlineUserCount}/20`;
+
+      characters.forEach(c => {
+        const occupiedBySocket = occupiedSeats[c.id];
+        const isTakenByOther = occupiedBySocket && socket && occupiedBySocket !== socket.id;
+        const card = document.createElement('div');
+        card.className = `flex items-center justify-between p-2.5 rounded border transition ${
+          isTakenByOther
+            ? 'bg-[#2a1a12]/60 border-[#593a22] opacity-75'
+            : 'bg-[#362010] hover:bg-[#523018] border-[#b07d4f] cursor-pointer'
+        }`;
+
+        card.innerHTML = `
+          <div class="flex flex-col truncate pr-2">
+            <span class="font-extrabold text-[#ffd166] truncate">${c.name}</span>
+            <span class="text-[10px] text-[#e0c097]">${ZONES[c.dept].shortName}</span>
+          </div>
+          <button class="px-2.5 py-1 rounded text-[10px] font-extrabold shrink-0 ${
+            isTakenByOther ? 'bg-[#5c2b23] text-[#ffb4a2]' : 'bg-[#2e7d32] hover:bg-[#388e3c] text-white shadow'
+          }">
+            ${isTakenByOther ? '🟢 Đã có người' : 'Chọn Ghế Này'}
+          </button>
+        `;
+
+        card.onclick = () => {
+          const customInput = document.getElementById('customLoginName').value.trim();
+          selectedCharId = c.id;
+          if (customInput) c.name = customInput;
+
+          if (socket) {
+            socket.emit('claim_character', {
+              charId: c.id,
+              customName: customInput || c.name,
+              deptName: c.dept
+            });
+          }
+
+          document.getElementById('loginModal').classList.add('hidden');
+          ensureAudio();
+          playTempleBellSound();
+          renderUserList();
+        };
+
+        grid.appendChild(card);
+      });
+    }
+
+    // Lắng nghe các sự kiện đồng bộ từ Server
+    if (socket) {
+      socket.on('init_state', ({ templeState, occupiedMap, onlineCount }) => {
+        meritTotal = templeState.meritTotal;
+        activeIncenseSticks = templeState.activeIncenseSticks;
+        document.getElementById('meritCounter').textContent = meritTotal.toLocaleString();
+        document.getElementById('incenseCounter').textContent = activeIncenseSticks;
+
+        occupiedSeats = occupiedMap || {};
+        onlineUserCount = onlineCount || 1;
+
+        if (templeState.customNames) {
+          Object.entries(templeState.customNames).forEach(([id, name]) => {
+            if (characters[id]) characters[id].name = name;
+          });
+        }
+
+        if (templeState.charPositions) {
+          Object.entries(templeState.charPositions).forEach(([id, pos]) => {
+            if (characters[id]) {
+              characters[id].x = pos.x;
+              characters[id].y = pos.y;
+              characters[id].targetX = pos.x;
+              characters[id].targetY = pos.y;
+            }
+          });
+        }
+
+        if (templeState.chatHistory && templeState.chatHistory.length > 0) {
+          document.getElementById('chatLogContainer').innerHTML = '';
+          templeState.chatHistory.forEach(item => {
+            appendChatLog(item.senderName, item.dept, item.text, false);
+          });
+        }
+
+        renderUserList();
+        renderLoginModal();
+      });
+
+      socket.on('players_updated', ({ occupiedMap, customNames, onlineCount }) => {
+        occupiedSeats = occupiedMap || {};
+        onlineUserCount = onlineCount || 1;
+        if (customNames) {
+          Object.entries(customNames).forEach(([id, name]) => {
+            if (characters[id]) characters[id].name = name;
+          });
+        }
+        renderUserList();
+        renderLoginModal();
+      });
+
+      socket.on('player_moved', ({ charId, destX, destY, afterAction }) => {
+        const c = characters.find(ch => ch.id === charId);
+        if (!c) return;
+        isApplyingRemote = true;
+        moveCharacterSmart(c, destX, destY, afterAction);
+        isApplyingRemote = false;
+      });
+
+      socket.on('player_action', ({ charId, type }) => {
+        const c = characters.find(ch => ch.id === charId);
+        if (!c) return;
+        isApplyingRemote = true;
+        performAction(type, c);
+        isApplyingRemote = false;
+      });
+
+      socket.on('sync_counters', ({ meritTotal: sMerit, activeIncenseSticks: sIncense }) => {
+        meritTotal = sMerit;
+        activeIncenseSticks = sIncense;
+        document.getElementById('meritCounter').textContent = meritTotal.toLocaleString();
+        document.getElementById('incenseCounter').textContent = activeIncenseSticks;
+      });
+
+      socket.on('chat_message', ({ charId, senderName, dept, text, meritTotal: sMerit }) => {
+        meritTotal = sMerit;
+        document.getElementById('meritCounter').textContent = meritTotal.toLocaleString();
+        const c = characters.find(ch => ch.id === charId);
+        if (c) {
+          c.bubbleText = text;
+          c.bubbleTimer = 220;
+        }
+        playMokugyoSound(1.05);
+        appendChatLog(senderName, dept, text, true);
+      });
+
+      socket.on('system_notice', ({ senderName, dept, message }) => {
+        appendChatLog(senderName, dept, message, true);
+      });
+
+      socket.on('sync_mass_chant', ({ isMassChanting: sChant }) => {
+        if (isMassChanting !== sChant) applyMassChantLocal();
+      });
+
+      socket.on('sync_go_home', ({ isGoingHome: sHome }) => {
+        if (isGoingHome !== sHome) applyGoHomeLocal();
+      });
+    }
+
+    // 4. SỰ KIỆN CHUỘT & PHÍM TẮT
+    canvas.addEventListener('mousedown', (e) => {
+      if (e.button !== 0) return;
+      isDraggingCam = true;
+      dragStartX = e.clientX;
+      dragStartY = e.clientY;
+      pointerMovedDist = 0;
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!isDraggingCam) return;
+      const dx = e.clientX - dragStartX;
+      const dy = e.clientY - dragStartY;
+      pointerMovedDist += Math.hypot(dx, dy);
+      camOffsetX += dx;
+      camOffsetY += dy;
+      dragStartX = e.clientX;
+      dragStartY = e.clientY;
+    });
+
+    window.addEventListener('mouseup', (e) => {
+      if (!isDraggingCam) return;
+      isDraggingCam = false;
+
+      if (pointerMovedDist < 7) {
+        const rect = canvas.getBoundingClientRect();
+        const sx = e.clientX - rect.left;
+        const sy = e.clientY - rect.top;
+
+        for (let i = characters.length - 1; i >= 0; i--) {
+          const ch = characters[i];
+          const p = worldToScreen(ch.x, ch.y, 18);
+          if (Math.hypot(sx - p.x, sy - p.y) < 23 * camZoom) {
+            selectCharacter(ch.id);
+            return;
+          }
+        }
+
+        const worldPos = screenToWorld(sx, sy);
+
+        if (Math.hypot(worldPos.x - INCENSE_ALTAR.x, worldPos.y - INCENSE_ALTAR.y) < 1.35) {
+          performAction('incense');
+          return;
+        }
+
+        if (worldPos.x >= 0.5 && worldPos.x <= 6.4 && worldPos.y >= 0.5 && worldPos.y <= 4.1) {
+          performAction('waterfall');
+          return;
+        }
+
+        if (worldPos.x >= 0.6 && worldPos.x <= MAP_W - 0.6 && worldPos.y >= 0.8 && worldPos.y <= MAP_H - 0.6) {
+          const activeChar = characters.find(ch => ch.id === selectedCharId);
+          if (activeChar) {
+            moveCharacterSmart(activeChar, worldPos.x, worldPos.y);
+            spawnFloatingText(worldPos.x, worldPos.y, '📍 Đi tới đây', '#ffeaa7');
+          }
+        }
+      }
+    });
+
+    canvas.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const factor = e.deltaY < 0 ? 1.08 : 0.92;
+      camZoom = Math.max(0.5, Math.min(1.65, camZoom * factor));
+    }, { passive: false });
+
+    window.addEventListener('keydown', (e) => {
+      if (document.activeElement && document.activeElement.tagName === 'INPUT') return;
+      if (e.key === '1') performAction('wave');
+      else if (e.key === '2') performAction('deadline');
+      else if (e.key === '3') performAction('meditate');
+      else if (e.key === '4') performAction('knock');
+      else if (e.key === '5') performAction('incense');
+      else if (e.key === '6') performAction('waterfall');
+      else if (e.key === '7') toggleMassChanting();
+      else if (e.key === '8') triggerGoHomeEvent();
+    });
+
+    // 5. VÒNG LẶP VẬT LÝ & HẠT MÔI TRƯỜNG
+    function updateSimulation() {
+      simTick++;
+
+      waterfallParticles.forEach(wp => {
+        wp.progress += wp.speed;
+        if (wp.progress >= 1.0) {
+          wp.progress = 0;
+          if (Math.random() < 0.28) {
+            const streamX = 1.6 + wp.streamIdx * 1.1 + wp.offsetX;
+            waterRipples.push({
+              gx: streamX + (Math.random() - 0.5) * 0.4,
+              gy: 2.15 + Math.random() * 0.35,
+              r: 2,
+              maxR: 16 + Math.random() * 10
+            });
+          }
+        }
+      });
+
+      waterRipples.forEach(wr => { wr.r += 0.38; });
+      waterRipples = waterRipples.filter(wr => wr.r < wr.maxR);
+      koiFishList.forEach(koi => { koi.angle += koi.speed; });
+
+      if (simTick % 5 === 0) {
+        [
+          { x: INCENSE_ALTAR.x, y: INCENSE_ALTAR.y, z: 26, gold: true },
+          { x: 9.6, y: 2.0, z: 24, gold: false },
+          { x: 14.0, y: 2.0, z: 24, gold: false }
+        ].forEach(burner => {
+          smokeParticles.push({
+            gx: burner.x + (Math.random() * 0.22 - 0.11),
+            gy: burner.y + (Math.random() * 0.22 - 0.11),
+            gz: burner.z,
+            alpha: 0.7,
+            size: 3 + Math.random() * 3.2,
+            goldTint: burner.gold
+          });
+        });
+      }
+
+      smokeParticles.forEach(sp => {
+        sp.gz += 0.38;
+        sp.gx += Math.sin(simTick * 0.06 + sp.gz * 0.15) * 0.008;
+        sp.alpha -= 0.0075;
+        sp.size += 0.065;
+      });
+      smokeParticles = smokeParticles.filter(sp => sp.alpha > 0.02);
+
+      goldenMotes.forEach(m => {
+        m.gz += Math.sin(simTick * 0.03 + m.phase) * 0.15;
+        m.gx += Math.cos(simTick * 0.02 + m.phase) * 0.004;
+      });
+
+      characters.forEach((c) => {
+        const dx = c.targetX - c.x;
+        const dy = c.targetY - c.y;
+        const dist = Math.hypot(dx, dy);
+
+        if (dist > 0.06) {
+          const speed = isGoingHome ? 0.08 : 0.052;
+          c.x += (dx / dist) * speed;
+          c.y += (dy / dist) * speed;
+          c.state = 'walk';
+          c.facing = dx >= 0 ? 'right' : 'left';
+        } else {
+          if (c.waypoints && c.waypoints.length > 0) {
+            c.waypoints.shift();
+            if (c.waypoints.length > 0) {
+              c.targetX = c.waypoints[0].x;
+              c.targetY = c.waypoints[0].y;
+              return;
+            }
+          }
+
+          if (c.afterWalkAction === 'do_incense_ritual') {
+            c.afterWalkAction = null;
+            executeIncenseRitual(c);
+            return;
+          } else if (c.afterWalkAction === 'admire_waterfall') {
+            c.afterWalkAction = null;
+            c.state = 'wave';
+            c.actionTimer = 180;
+            c.bubbleText = 'Thác chảy mát quá, cá Koi bơi đẹp tuyệt! 🐟✨';
+            c.bubbleTimer = 180;
+            return;
+          }
+
+          if (c.state === 'walk') {
+            c.state = isMassChanting ? (c.id === 0 ? 'meditate' : 'knock') : (c.id === 0 ? 'meditate' : 'work');
+            c.facing = c.seatSide;
+          }
+        }
+
+        if (c.actionTimer > 0 && !isMassChanting && c.id !== 0) {
+          c.actionTimer--;
+          if (c.actionTimer === 0) c.state = 'work';
+        }
+        if (c.bubbleTimer > 0 && c.id !== 0) {
+          c.bubbleTimer--;
+          if (c.bubbleTimer === 0) c.bubbleText = '';
+        }
+      });
+
+      floatingLabels.forEach(fl => { fl.gz += 0.55; fl.life--; });
+      floatingLabels = floatingLabels.filter(fl => fl.life > 0);
+      bellShockwaves.forEach(bw => { bw.radius += 9; });
+      bellShockwaves = bellShockwaves.filter(bw => bw.radius < bw.maxRadius);
+    }
+
+    // 6. CÁC HÀM VẼ ĐỒ HỌA 2.5D
+    function drawIsoBlock(gx, gy, w, d, h, topCol, leftCol, rightCol, strokeCol = null) {
+      if (isTopDown2D) {
+        const p1 = worldToScreen(gx, gy);
+        const p2 = worldToScreen(gx + w, gy + d);
+        ctx.fillStyle = topCol;
+        ctx.fillRect(p1.x, p1.y, p2.x - p1.x, p2.y - p1.y);
+        if (strokeCol) {
+          ctx.strokeStyle = strokeCol;
+          ctx.lineWidth = 1;
+          ctx.strokeRect(p1.x, p1.y, p2.x - p1.x, p2.y - p1.y);
+        }
+        return;
+      }
+
+      const p1 = worldToScreen(gx, gy, h);
+      const p2 = worldToScreen(gx + w, gy, h);
+      const p3 = worldToScreen(gx + w, gy + d, h);
+      const p4 = worldToScreen(gx, gy + d, h);
+
+      const b2 = worldToScreen(gx + w, gy, 0);
+      const b3 = worldToScreen(gx + w, gy + d, 0);
+      const b4 = worldToScreen(gx, gy + d, 0);
+
+      ctx.fillStyle = leftCol;
+      ctx.beginPath();
+      ctx.moveTo(p4.x, p4.y);
+      ctx.lineTo(p3.x, p3.y);
+      ctx.lineTo(b3.x, b3.y);
+      ctx.lineTo(b4.x, b4.y);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = rightCol;
+      ctx.beginPath();
+      ctx.moveTo(p2.x, p2.y);
+      ctx.lineTo(p3.x, p3.y);
+      ctx.lineTo(b3.x, b3.y);
+      ctx.lineTo(b2.x, b2.y);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = topCol;
+      ctx.beginPath();
+      ctx.moveTo(p1.x, p1.y);
+      ctx.lineTo(p2.x, p2.y);
+      ctx.lineTo(p3.x, p3.y);
+      ctx.lineTo(p4.x, p4.y);
+      ctx.closePath();
+      ctx.fill();
+
+      if (strokeCol) {
+        ctx.strokeStyle = strokeCol;
+        ctx.lineWidth = 0.9 * camZoom;
+        ctx.stroke();
+      }
+    }
+
+    function drawOrnateFloor(gx, gy, w, d, fillCol, borderCol) {
+      const p1 = worldToScreen(gx, gy, 0.5);
+      const p2 = worldToScreen(gx + w, gy, 0.5);
+      const p3 = worldToScreen(gx + w, gy + d, 0.5);
+      const p4 = worldToScreen(gx, gy + d, 0.5);
+
+      ctx.fillStyle = fillCol;
+      ctx.beginPath();
+      ctx.moveTo(p1.x, p1.y);
+      ctx.lineTo(p2.x, p2.y);
+      ctx.lineTo(p3.x, p3.y);
+      ctx.lineTo(p4.x, p4.y);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.strokeStyle = borderCol;
+      ctx.lineWidth = 2 * camZoom;
+      ctx.stroke();
+    }
+
+    function drawHangingLantern(gx, gy, gz) {
+      if (isTopDown2D) return;
+      const p = worldToScreen(gx, gy, gz);
+      const swing = Math.sin(simTick * 0.05 + gx) * 2 * camZoom;
+      const lx = p.x + swing;
+      const ly = p.y;
+
+      const glowRadius = (isNightMode ? 28 : 14) * camZoom;
+      const grad = ctx.createRadialGradient(lx, ly, 2 * camZoom, lx, ly, glowRadius);
+      grad.addColorStop(0, isNightMode ? 'rgba(255, 200, 70, 0.85)' : 'rgba(255, 180, 50, 0.45)');
+      grad.addColorStop(1, 'rgba(255, 120, 20, 0)');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(lx, ly, glowRadius, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.strokeStyle = '#fbbf24';
+      ctx.lineWidth = 1.2 * camZoom;
+      ctx.beginPath();
+      ctx.moveTo(p.x, p.y - 8 * camZoom);
+      ctx.lineTo(lx, ly - 3 * camZoom);
+      ctx.stroke();
+
+      ctx.fillStyle = '#dc2626';
+      ctx.beginPath();
+      ctx.ellipse(lx, ly, 5.5 * camZoom, 7 * camZoom, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#fbbf24';
+      ctx.lineWidth = 1 * camZoom;
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(lx, ly + 7 * camZoom);
+      ctx.lineTo(lx, ly + 12 * camZoom);
+      ctx.stroke();
+    }
+
+    function drawDoorwayArchWithPlaque(doorX, doorY, doorTitle, subLabel, badgeColor, isGrandAltar = false) {
+      const pillarH = isGrandAltar ? 48 : 38;
+      const span = isGrandAltar ? 1.25 : 0.95;
+
+      drawIsoBlock(doorX - span, doorY - 0.25, span * 2, 0.5, 2.5, '#fcd34d', '#d97706', '#92400e');
+
+      if (!isTopDown2D) {
+        drawIsoBlock(doorX - span, doorY - 0.14, 0.24, 0.28, pillarH, '#dc2626', '#991b1b', '#7f1d1d', '#fbbf24');
+        drawIsoBlock(doorX + span - 0.24, doorY - 0.14, 0.24, 0.28, pillarH, '#dc2626', '#991b1b', '#7f1d1d', '#fbbf24');
+
+        const leftTop = worldToScreen(doorX - span - 0.2, doorY, pillarH);
+        const rightTop = worldToScreen(doorX + span + 0.2, doorY, pillarH);
+        const midTop = worldToScreen(doorX, doorY, pillarH + 8);
+
+        ctx.fillStyle = '#451a03';
+        ctx.strokeStyle = '#fbbf24';
+        ctx.lineWidth = 2 * camZoom;
+        ctx.beginPath();
+        ctx.moveTo(leftTop.x - 10 * camZoom, leftTop.y + 2 * camZoom);
+        ctx.quadraticCurveTo(midTop.x, midTop.y - 10 * camZoom, rightTop.x + 10 * camZoom, rightTop.y + 2 * camZoom);
+        ctx.lineTo(rightTop.x + 4 * camZoom, rightTop.y + 8 * camZoom);
+        ctx.quadraticCurveTo(midTop.x, midTop.y - 2 * camZoom, leftTop.x - 4 * camZoom, leftTop.y + 8 * camZoom);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        drawHangingLantern(doorX - span + 0.1, doorY + 0.1, pillarH - 8);
+        drawHangingLantern(doorX + span - 0.1, doorY + 0.1, pillarH - 8);
+      }
+
+      const plaquePos = worldToScreen(doorX, doorY, isTopDown2D ? 0 : pillarH + 11);
+      ctx.save();
+      ctx.font = `800 ${Math.max(9, Math.round((isGrandAltar ? 12 : 10.5) * camZoom))}px 'Be Vietnam Pro', sans-serif`;
+      ctx.textAlign = 'center';
+      const titleW = ctx.measureText(doorTitle).width;
+      const subW = ctx.measureText(subLabel).width;
+      const boxW = Math.max(titleW, subW) + 18 * camZoom;
+      const boxH = 29 * camZoom;
+
+      ctx.fillStyle = isGrandAltar ? '#5c110b' : 'rgba(28, 15, 7, 0.94)';
+      ctx.beginPath();
+      ctx.roundRect(plaquePos.x - boxW / 2, plaquePos.y - boxH / 2, boxW, boxH, 6 * camZoom);
+      ctx.fill();
+
+      ctx.strokeStyle = badgeColor || '#ffd166';
+      ctx.lineWidth = 2.2 * camZoom;
+      ctx.stroke();
+
+      ctx.fillStyle = '#ffd166';
+      ctx.fillText(doorTitle, plaquePos.x, plaquePos.y - 2 * camZoom);
+      ctx.font = `600 ${Math.max(8, Math.round(9 * camZoom))}px 'Be Vietnam Pro', sans-serif`;
+      ctx.fillStyle = '#f3e5ab';
+      ctx.fillText(subLabel, plaquePos.x, plaquePos.y + 10 * camZoom);
+      ctx.restore();
+    }
+
+    function drawEnclosedRoom(zone) {
+      const { rx, ry, rw, rh, doorX, doorY, doorSide, floorColor, wallColor, badgeColor, doorTitle, subLabel } = zone;
+      const wallThick = 0.24;
+      const backWallH = 26;
+      const frontWallH = 13;
+      const doorGap = 1.05;
+
+      drawOrnateFloor(rx + 0.1, ry + 0.1, rw - 0.2, rh - 0.2, floorColor, badgeColor);
+
+      if (doorSide === 'north') {
+        const leftLen = (doorX - doorGap) - rx;
+        const rightStart = doorX + doorGap;
+        const rightLen = (rx + rw) - rightStart;
+        if (leftLen > 0) drawIsoBlock(rx, ry, leftLen, wallThick, backWallH, wallColor, '#8c5a32', '#6b4223', '#422006');
+        if (rightLen > 0) drawIsoBlock(rightStart, ry, rightLen, wallThick, backWallH, wallColor, '#8c5a32', '#6b4223', '#422006');
+      } else {
+        drawIsoBlock(rx, ry, rw, wallThick, backWallH, wallColor, '#8c5a32', '#6b4223', '#422006');
+      }
+
+      drawIsoBlock(rx, ry, wallThick, rh, backWallH, wallColor, '#8c5a32', '#6b4223', '#422006');
+      drawIsoBlock(rx + rw - wallThick, ry, wallThick, rh, frontWallH, wallColor, '#8c5a32', '#6b4223', '#422006');
+
+      if (doorSide === 'south') {
+        const leftLen = (doorX - doorGap) - rx;
+        const rightStart = doorX + doorGap;
+        const rightLen = (rx + rw) - rightStart;
+        if (leftLen > 0) drawIsoBlock(rx, ry + rh - wallThick, leftLen, wallThick, frontWallH, wallColor, '#8c5a32', '#6b4223', '#422006');
+        if (rightLen > 0) drawIsoBlock(rightStart, ry + rh - wallThick, rightLen, wallThick, frontWallH, wallColor, '#8c5a32', '#6b4223', '#422006');
+      } else {
+        drawIsoBlock(rx, ry + rh - wallThick, rw, wallThick, frontWallH, wallColor, '#8c5a32', '#6b4223', '#422006');
+      }
+
+      [
+        [rx, ry],
+        [rx + rw - 0.28, ry],
+        [rx, ry + rh - 0.28],
+        [rx + rw - 0.28, ry + rh - 0.28]
+      ].forEach(([px, py]) => {
+        drawIsoBlock(px, py, 0.28, 0.28, backWallH + 4, '#7f1d1d', '#450a0a', '#2b0606', '#fbbf24');
+      });
+
+      if (zone.deskX !== undefined) {
+        const { deskX, deskY, deskW, deskH } = zone;
+        const halfW = deskW / 2;
+
+        for (let r = 0; r < 2; r++) {
+          const sy = deskY + 0.35 + r * 1.45;
+          drawIsoBlock(deskX - 0.75, sy, 0.5, 0.75, 8, '#5c4033', '#3e2723', '#271714', '#8d6e63');
+          drawIsoBlock(deskX + deskW + 0.25, sy, 0.5, 0.75, 8, '#5c4033', '#3e2723', '#271714', '#8d6e63');
+        }
+
+        drawIsoBlock(deskX, deskY, halfW, deskH, 15, '#c89666', '#9c6b3f', '#7a502c', '#4a2c11');
+        drawIsoBlock(deskX + halfW, deskY, halfW, deskH, 15, '#c28e5c', '#9c6b3f', '#7a502c', '#4a2c11');
+
+        if (!isTopDown2D) {
+          for (let r = 0; r < 2; r++) {
+            const py = deskY + 0.7 + r * 1.45;
+            const mLeft = worldToScreen(deskX + 0.35, py, 19);
+            const mRight = worldToScreen(deskX + deskW - 0.35, py, 19);
+
+            [mLeft, mRight].forEach((mp, sideIdx) => {
+              ctx.fillStyle = '#1e293b';
+              ctx.fillRect(mp.x - 8 * camZoom, mp.y - 11 * camZoom, 16 * camZoom, 11 * camZoom);
+              ctx.fillStyle = '#38bdf8';
+              ctx.fillRect(mp.x - 6.5 * camZoom, mp.y - 9.5 * camZoom, 13 * camZoom, 8 * camZoom);
+
+              ctx.fillStyle = '#ea580c';
+              ctx.beginPath();
+              ctx.arc(mp.x + (sideIdx === 0 ? -11 : 11) * camZoom, mp.y + 1 * camZoom, 3.8 * camZoom, 0, Math.PI * 2);
+              ctx.fill();
+            });
+          }
+        }
+      }
+
+      drawDoorwayArchWithPlaque(doorX, doorY, doorTitle, subLabel, badgeColor, zone.id === 'DIRECTOR');
+    }
+
+    function drawWaterfallAndKoiPond() {
+      const wz = WATERFALL_ZONE;
+
+      drawIsoBlock(wz.x, wz.y, wz.w, wz.h, 3, '#0d9488', '#0f766e', '#115e59', '#5eead4');
+      drawOrnateFloor(wz.x + 0.25, wz.y + 0.25, wz.w - 0.5, wz.h - 0.5, '#0284c7', '#38bdf8');
+
+      koiFishList.forEach(koi => {
+        const fx = koi.cx + Math.cos(koi.angle) * koi.rx;
+        const fy = koi.cy + Math.sin(koi.angle) * koi.ry;
+        const fp = worldToScreen(fx, fy, 2);
+        const dirAngle = Math.atan2(Math.cos(koi.angle) * koi.ry, -Math.sin(koi.angle) * koi.rx);
+
+        ctx.save();
+        ctx.translate(fp.x, fp.y);
+        ctx.rotate(dirAngle);
+        ctx.fillStyle = koi.color;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 6.5 * camZoom, 3 * camZoom, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = koi.spot;
+        ctx.beginPath();
+        ctx.arc(1.5 * camZoom, 0, 2 * camZoom, 0, Math.PI * 2);
+        ctx.fill();
+        const tailWag = Math.sin(simTick * 0.3 + koi.angle) * 2 * camZoom;
+        ctx.fillStyle = koi.color;
+        ctx.beginPath();
+        ctx.moveTo(-6 * camZoom, 0);
+        ctx.lineTo(-10 * camZoom, -3 * camZoom + tailWag);
+        ctx.lineTo(-10 * camZoom, 3 * camZoom + tailWag);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+      });
+
+      [
+        { x: 2.3, y: 3.1, hasFlower: true },
+        { x: 4.8, y: 2.9, hasFlower: true },
+        { x: 5.3, y: 1.9, hasFlower: false },
+        { x: 2.8, y: 3.5, hasFlower: false }
+      ].forEach(lotus => {
+        const lp = worldToScreen(lotus.x, lotus.y, 2.5);
+        ctx.fillStyle = '#15803d';
+        ctx.beginPath();
+        ctx.ellipse(lp.x, lp.y, 8 * camZoom, 4.5 * camZoom, 0, 0, Math.PI * 1.85);
+        ctx.fill();
+
+        if (lotus.hasFlower) {
+          ctx.fillStyle = '#f472b6';
+          ctx.beginPath();
+          ctx.arc(lp.x, lp.y - 3 * camZoom, 4.5 * camZoom, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = '#fef08a';
+          ctx.beginPath();
+          ctx.arc(lp.x, lp.y - 3 * camZoom, 1.8 * camZoom, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      });
+
+      waterRipples.forEach(wr => {
+        const rp = worldToScreen(wr.gx, wr.gy, 2.5);
+        const alpha = Math.max(0, 1 - wr.r / wr.maxR);
+        ctx.strokeStyle = `rgba(224, 242, 254, ${alpha * 0.8})`;
+        ctx.lineWidth = 1.4 * camZoom;
+        ctx.beginPath();
+        ctx.ellipse(rp.x, rp.y, wr.r * camZoom, wr.r * 0.5 * camZoom, 0, 0, Math.PI * 2);
+        ctx.stroke();
+      });
+
+      drawIsoBlock(0.7, 0.6, 5.2, 1.3, 44, '#64748b', '#475569', '#334155', '#94a3b8');
+      drawIsoBlock(1.0, 0.8, 4.4, 1.1, 30, '#475569', '#334155', '#1e293b', '#64748b');
+      drawIsoBlock(1.3, 1.1, 3.6, 0.9, 16, '#334155', '#1e293b', '#0f172a', '#475569');
+
+      if (!isTopDown2D) {
+        [1.7, 2.8, 3.9].forEach((sx) => {
+          const topP = worldToScreen(sx, 1.2, 42);
+          const botP = worldToScreen(sx, 2.1, 3);
+          const wGrad = ctx.createLinearGradient(topP.x, topP.y, botP.x, botP.y);
+          wGrad.addColorStop(0, 'rgba(186, 230, 253, 0.92)');
+          wGrad.addColorStop(0.5, 'rgba(56, 189, 248, 0.85)');
+          wGrad.addColorStop(1, 'rgba(255, 255, 255, 0.95)');
+
+          ctx.strokeStyle = wGrad;
+          ctx.lineWidth = 12 * camZoom;
+          ctx.lineCap = 'round';
+          ctx.beginPath();
+          ctx.moveTo(topP.x, topP.y);
+          ctx.lineTo(botP.x, botP.y);
+          ctx.stroke();
+        });
+
+        waterfallParticles.forEach(wp => {
+          const sx = 1.7 + wp.streamIdx * 1.1 + wp.offsetX;
+          const sy = 1.2 + wp.progress * 0.95;
+          const sz = 42 * (1 - wp.progress) + 3;
+          const p = worldToScreen(sx, sy, sz);
+
+          ctx.fillStyle = wp.progress > 0.82 ? '#ffffff' : '#e0f2fe';
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, wp.size * camZoom, 0, Math.PI * 2);
+          ctx.fill();
+        });
+
+        const pinePos = worldToScreen(1.2, 0.9, 46);
+        ctx.fillStyle = '#451a03';
+        ctx.fillRect(pinePos.x - 3 * camZoom, pinePos.y - 12 * camZoom, 6 * camZoom, 14 * camZoom);
+        ctx.fillStyle = '#15803d';
+        ctx.beginPath();
+        ctx.arc(pinePos.x, pinePos.y - 16 * camZoom, 14 * camZoom, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#22c55e';
+        ctx.beginPath();
+        ctx.arc(pinePos.x + 6 * camZoom, pinePos.y - 20 * camZoom, 10 * camZoom, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      const wfLabel = worldToScreen(3.3, 0.8, isTopDown2D ? 0 : 54);
+      ctx.save();
+      ctx.font = `800 ${Math.max(9, Math.round(10.5 * camZoom))}px 'Be Vietnam Pro', sans-serif`;
+      ctx.textAlign = 'center';
+      const wText = '🏞️ THÁC NƯỚC SƯƠNG MINH & HỒ CÁ KOI';
+      const tw = ctx.measureText(wText).width + 16 * camZoom;
+      ctx.fillStyle = 'rgba(12, 45, 72, 0.92)';
+      ctx.beginPath();
+      ctx.roundRect(wfLabel.x - tw / 2, wfLabel.y - 12 * camZoom, tw, 22 * camZoom, 6 * camZoom);
+      ctx.fill();
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 1.8 * camZoom;
+      ctx.stroke();
+      ctx.fillStyle = '#e0f2fe';
+      ctx.fillText(wText, wfLabel.x, wfLabel.y + 3 * camZoom);
+      ctx.restore();
+    }
+
+    function drawDetailedBuddhaAndChanhDien() {
+      const z = ZONES.DIRECTOR;
+      drawEnclosedRoom(z);
+
+      drawIsoBlock(9.8, 1.5, 4.0, 0.95, 20, '#9a3412', '#7c2d12', '#431407', '#fbbf24');
+
+      const bx = 11.8;
+      const by = 1.05;
+      const statuePos = worldToScreen(bx, by, 26);
+
+      if (!isTopDown2D) {
+        const haloCenterY = statuePos.y - 26 * camZoom;
+        const haloR = (38 + Math.sin(simTick * 0.05) * 3) * camZoom;
+        const grad = ctx.createRadialGradient(statuePos.x, haloCenterY, 5 * camZoom, statuePos.x, haloCenterY, haloR);
+        grad.addColorStop(0, 'rgba(255, 250, 190, 0.95)');
+        grad.addColorStop(0.55, 'rgba(251, 191, 36, 0.65)');
+        grad.addColorStop(1, 'rgba(245, 158, 11, 0)');
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(statuePos.x, haloCenterY, haloR, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.save();
+        ctx.translate(statuePos.x, haloCenterY);
+        ctx.rotate(simTick * 0.008);
+        ctx.strokeStyle = 'rgba(254, 240, 138, 0.55)';
+        ctx.lineWidth = 1.5 * camZoom;
+        for (let r = 0; r < 12; r++) {
+          const ang = (r * Math.PI) / 6;
+          ctx.beginPath();
+          ctx.moveTo(Math.cos(ang) * 14 * camZoom, Math.sin(ang) * 14 * camZoom);
+          ctx.lineTo(Math.cos(ang) * 33 * camZoom, Math.sin(ang) * 33 * camZoom);
+          ctx.stroke();
+        }
+        ctx.restore();
+
+        ctx.fillStyle = '#b45309';
+        ctx.beginPath();
+        ctx.ellipse(statuePos.x, statuePos.y + 4 * camZoom, 24 * camZoom, 10 * camZoom, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#f59e0b';
+        ctx.strokeStyle = '#78350f';
+        ctx.lineWidth = 1.5 * camZoom;
+        ctx.beginPath();
+        ctx.ellipse(statuePos.x, statuePos.y, 20 * camZoom, 8 * camZoom, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        for (let p = -3; p <= 3; p++) {
+          const px = statuePos.x + p * 5 * camZoom;
+          ctx.fillStyle = '#fcd34d';
+          ctx.beginPath();
+          ctx.ellipse(px, statuePos.y, 3.5 * camZoom, 6 * camZoom, 0, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        ctx.fillStyle = '#fbbf24';
+        ctx.beginPath();
+        ctx.ellipse(statuePos.x, statuePos.y - 5 * camZoom, 17 * camZoom, 6.5 * camZoom, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#f59e0b';
+        ctx.beginPath();
+        ctx.roundRect(statuePos.x - 13 * camZoom, statuePos.y - 26 * camZoom, 26 * camZoom, 22 * camZoom, 9 * camZoom);
+        ctx.fill();
+        ctx.strokeStyle = '#fef08a';
+        ctx.lineWidth = 1.5 * camZoom;
+        ctx.stroke();
+
+        ctx.fillStyle = '#fde047';
+        ctx.beginPath();
+        ctx.arc(statuePos.x, statuePos.y - 11 * camZoom, 4.5 * camZoom, 0, Math.PI * 2);
+        ctx.fill();
+
+        const bHeadY = statuePos.y - 34 * camZoom;
+        ctx.fillStyle = '#fbbf24';
+        ctx.beginPath();
+        ctx.arc(statuePos.x, bHeadY, 10.5 * camZoom, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#d97706';
+        ctx.beginPath();
+        ctx.arc(statuePos.x, bHeadY - 10 * camZoom, 5 * camZoom, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#ef4444';
+        ctx.beginPath();
+        ctx.arc(statuePos.x, bHeadY - 3.5 * camZoom, 1.3 * camZoom, 0, Math.PI * 2);
+        ctx.fill();
+
+        [9.6, 14.0].forEach(lx => {
+          const lp = worldToScreen(lx, 2.0, 14);
+          ctx.fillStyle = '#d97706';
+          ctx.beginPath();
+          ctx.arc(lp.x, lp.y, 7 * camZoom, 0, Math.PI * 2);
+          ctx.fill();
+        });
+      }
+    }
+
+    function drawCentralIncenseSanctuary() {
+      const ix = INCENSE_ALTAR.x;
+      const iy = INCENSE_ALTAR.y;
+
+      drawOrnateFloor(ix - 1.55, iy - 1.05, 3.1, 2.2, '#7f1d1d', '#fbbf24');
+      drawIsoBlock(ix - 1.1, iy - 0.65, 2.2, 1.3, 6, '#991b1b', '#7f1d1d', '#450a0a', '#fcd34d');
+      drawIsoBlock(ix - 0.75, iy - 0.4, 1.5, 0.75, 14, '#b45309', '#78350f', '#451a03', '#fde047');
+
+      const urnPos = worldToScreen(ix, iy, 18);
+      if (!isTopDown2D) {
+        ctx.fillStyle = '#b45309';
+        ctx.fillRect(urnPos.x - 9 * camZoom, urnPos.y, 3 * camZoom, 8 * camZoom);
+        ctx.fillRect(urnPos.x + 6 * camZoom, urnPos.y, 3 * camZoom, 8 * camZoom);
+        ctx.fillRect(urnPos.x - 1.5 * camZoom, urnPos.y + 1 * camZoom, 3 * camZoom, 8 * camZoom);
+
+        const urnGrad = ctx.createRadialGradient(urnPos.x - 3 * camZoom, urnPos.y - 6 * camZoom, 2 * camZoom, urnPos.x, urnPos.y - 4 * camZoom, 16 * camZoom);
+        urnGrad.addColorStop(0, '#fef08a');
+        urnGrad.addColorStop(0.6, '#d97706');
+        urnGrad.addColorStop(1, '#78350f');
+        ctx.fillStyle = urnGrad;
+        ctx.beginPath();
+        ctx.ellipse(urnPos.x, urnPos.y - 4 * camZoom, 15 * camZoom, 10 * camZoom, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#fef08a';
+        ctx.lineWidth = 1.5 * camZoom;
+        ctx.stroke();
+
+        const visibleSticks = Math.min(15, activeIncenseSticks);
+        for (let s = 0; s < visibleSticks; s++) {
+          const spread = (s - (visibleSticks - 1) / 2) * 1.9 * camZoom;
+          const tilt = (s - (visibleSticks - 1) / 2) * 0.6 * camZoom;
+          const sx1 = urnPos.x + spread * 0.5;
+          const sy1 = urnPos.y - 11 * camZoom;
+          const sx2 = urnPos.x + spread + tilt;
+          const sy2 = urnPos.y - 25 * camZoom - (s % 3) * 2 * camZoom;
+
+          ctx.strokeStyle = '#b91c1c';
+          ctx.lineWidth = 1.4 * camZoom;
+          ctx.beginPath();
+          ctx.moveTo(sx1, sy1);
+          ctx.lineTo(sx2, sy2);
+          ctx.stroke();
+
+          const emberAlpha = 0.75 + Math.sin(simTick * 0.2 + s) * 0.25;
+          ctx.fillStyle = `rgba(255, 69, 0, ${emberAlpha})`;
+          ctx.beginPath();
+          ctx.arc(sx2, sy2, 2.2 * camZoom, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        const matPos = worldToScreen(INCENSE_ALTAR.standX, INCENSE_ALTAR.standY, 1.5);
+        ctx.fillStyle = '#dc2626';
+        ctx.strokeStyle = '#fbbf24';
+        ctx.lineWidth = 1.5 * camZoom;
+        ctx.beginPath();
+        ctx.ellipse(matPos.x, matPos.y, 16 * camZoom, 8 * camZoom, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+      }
+
+      const lbl = worldToScreen(ix, iy + 1.05, isTopDown2D ? 0 : 2);
+      ctx.save();
+      ctx.font = `800 ${Math.max(9, Math.round(10 * camZoom))}px 'Be Vietnam Pro', sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#fde047';
+      ctx.strokeStyle = '#000';
+      ctx.lineWidth = 3 * camZoom;
+      ctx.strokeText('🔥 ĐÀI THẮP HƯƠNG TỔ MÔN (Click để dâng hương)', lbl.x, lbl.y);
+      ctx.fillText('🔥 ĐÀI THẮP HƯƠNG TỔ MÔN (Click để dâng hương)', lbl.x, lbl.y);
+      ctx.restore();
+    }
+
+    function drawRightWingRooms() {
+      drawIsoBlock(18.1, 0.5, 0.3, 8.1, 34, '#d4b483', '#8c6239', '#5e3f22', '#3d2610');
+      drawIsoBlock(18.1, 10.9, 0.3, 6.2, 34, '#d4b483', '#8c6239', '#5e3f22', '#3d2610');
+      drawDoorwayArchWithPlaque(18.25, 9.7, '🌙 NGUYỆT MÔN HẬU VIỆN', '(Lối Sang Pantry & Cầu Thang)', '#f59e0b', false);
+
+      drawEnclosedRoom(ZONES.PANTRY);
+      const pt = ZONES.PANTRY;
+      drawIsoBlock(pt.rx + 0.6, pt.ry + 0.6, 3.4, 0.9, 17, '#a16207', '#713f12', '#422006', '#fde047');
+      drawIsoBlock(pt.rx + 4.3, pt.ry + 0.6, 0.7, 0.7, 25, '#e0f2fe', '#38bdf8', '#0284c7');
+      drawIsoBlock(pt.rx + 1.6, pt.ry + 2.8, 2.4, 1.5, 13, '#78350f', '#451a03', '#271202', '#f59e0b');
+
+      drawEnclosedRoom(ZONES.STAIRS);
+      const st = ZONES.STAIRS;
+      const stepCount = 7;
+      const stepH = (st.rh - 1.2) / stepCount;
+      for (let s = 0; s < stepCount; s++) {
+        const sy = st.ry + 0.7 + s * stepH;
+        const shade = Math.max(25, 155 - s * 18);
+        const col = `rgb(${shade}, ${Math.round(shade * 0.78)}, ${Math.round(shade * 0.55)})`;
+        drawIsoBlock(st.rx + 0.6, sy, st.rw - 1.2, stepH - 0.06, Math.max(1, (stepCount - s) * 2.2), col, '#271c15', '#1a120d');
+      }
+    }
+
+    function drawCharacterSprite(c) {
+      const isSelected = c.id === selectedCharId;
+      const bounce = c.state === 'walk' ? Math.abs(Math.sin(simTick * 0.26 + c.bobPhase)) * 6 : 0;
+      const bowDip = c.state === 'bow' ? Math.abs(Math.sin(simTick * 0.18)) * 7.5 : 0;
+      const isMeditating = c.state === 'meditate';
+
+      const pos = worldToScreen(c.x, c.y, bounce);
+      const scale = camZoom;
+
+      ctx.save();
+
+      if (isSelected) {
+        ctx.strokeStyle = '#00f5d4';
+        ctx.lineWidth = 2.5 * scale;
+        ctx.beginPath();
+        ctx.ellipse(pos.x, pos.y, 17 * scale, 9 * scale, 0, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
+      if (c.role === 'ABBOT' || isMeditating) {
+        ctx.fillStyle = '#f59e0b';
+        ctx.strokeStyle = '#b45309';
+        ctx.lineWidth = 2 * scale;
+        ctx.beginPath();
+        ctx.ellipse(pos.x, pos.y + 2 * scale, 18 * scale, 9.5 * scale, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        const haloY = pos.y - 22 * scale;
+        const grad = ctx.createRadialGradient(pos.x, haloY, 6 * scale, pos.x, haloY, 25 * scale);
+        grad.addColorStop(0, 'rgba(255, 235, 130, 0.5)');
+        grad.addColorStop(0.7, 'rgba(255, 210, 60, 0.75)');
+        grad.addColorStop(1, 'rgba(255, 215, 0, 0)');
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(pos.x, haloY, 25 * scale, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      ctx.fillStyle = 'rgba(0,0,0,0.42)';
+      ctx.beginPath();
+      ctx.ellipse(pos.x, pos.y, 11 * scale, 5.5 * scale, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      const wearMonkRobe = fullMonkRobeMode || c.role === 'ABBOT' || isMeditating;
+      const bodyH = (isMeditating ? 16 : 21 - bowDip * 0.4) * scale;
+      const bodyW = 15.5 * scale;
+
+      if (!isMeditating) {
+        ctx.fillStyle = '#1e293b';
+        ctx.fillRect(pos.x - 5 * scale, pos.y - 6 * scale, 4 * scale, 6 * scale);
+        ctx.fillRect(pos.x + 1 * scale, pos.y - 6 * scale, 4 * scale, 6 * scale);
+      }
+
+      if (wearMonkRobe) {
+        ctx.fillStyle = c.role === 'ABBOT' ? '#ea580c' : '#f59e0b';
+        ctx.beginPath();
+        ctx.roundRect(pos.x - bodyW / 2, pos.y - bodyH - 3 * scale, bodyW, bodyH, 6 * scale);
+        ctx.fill();
+        ctx.strokeStyle = '#fef08a';
+        ctx.lineWidth = 2.2 * scale;
+        ctx.beginPath();
+        ctx.moveTo(pos.x - 6 * scale, pos.y - bodyH - 1 * scale);
+        ctx.lineTo(pos.x + 6 * scale, pos.y - 6 * scale);
+        ctx.stroke();
+      } else {
+        ctx.fillStyle = c.gender === 'F' ? c.robeColor : '#f8fafc';
+        ctx.beginPath();
+        ctx.roundRect(pos.x - bodyW / 2, pos.y - bodyH - 4 * scale, bodyW, bodyH - 2 * scale, 4 * scale);
+        ctx.fill();
+        ctx.fillStyle = c.robeColor;
+        ctx.fillRect(pos.x - 1.8 * scale, pos.y - bodyH, 3.6 * scale, 9 * scale);
+      }
+
+      const headY = pos.y - bodyH - 12 * scale + bowDip * scale;
+      const headR = 10 * scale;
+
+      ctx.fillStyle = '#fed7aa';
+      ctx.beginPath();
+      ctx.arc(pos.x, headY, headR, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#431407';
+      ctx.lineWidth = 1.2 * scale;
+      ctx.stroke();
+
+      if (c.role === 'ABBOT' || fullMonkRobeMode) {
+        ctx.fillStyle = '#9a3412';
+        ctx.fillRect(pos.x - 3 * scale, headY - 6 * scale, 1.6 * scale, 1.6 * scale);
+        ctx.fillRect(pos.x + 1.4 * scale, headY - 6 * scale, 1.6 * scale, 1.6 * scale);
+      } else {
+        ctx.fillStyle = c.hairColor;
+        ctx.beginPath();
+        ctx.arc(pos.x, headY - 2 * scale, headR + 0.8 * scale, Math.PI, Math.PI * 2);
+        ctx.fill();
+        if (c.gender === 'F') {
+          ctx.fillRect(pos.x - headR - 1 * scale, headY - 3 * scale, 3.2 * scale, 10 * scale);
+          ctx.fillRect(pos.x + headR - 2.2 * scale, headY - 3 * scale, 3.2 * scale, 10 * scale);
+        }
+      }
+
+      ctx.fillStyle = '#1c1917';
+      if (isMeditating) {
+        ctx.lineWidth = 1.5 * scale;
+        ctx.beginPath();
+        ctx.moveTo(pos.x - 5 * scale, headY);
+        ctx.lineTo(pos.x - 2 * scale, headY);
+        ctx.moveTo(pos.x + 2 * scale, headY);
+        ctx.lineTo(pos.x + 5 * scale, headY);
+        ctx.stroke();
+      } else {
+        ctx.beginPath();
+        ctx.arc(pos.x - 3.5 * scale, headY - 0.5 * scale, 1.5 * scale, 0, Math.PI * 2);
+        ctx.arc(pos.x + 3.5 * scale, headY - 0.5 * scale, 1.5 * scale, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      ctx.beginPath();
+      if (c.state === 'deadline') {
+        ctx.arc(pos.x, headY + 5 * scale, 2.5 * scale, Math.PI, 0);
+      } else {
+        ctx.arc(pos.x, headY + 2.5 * scale, 2.5 * scale, 0, Math.PI);
+      }
+      ctx.stroke();
+
+      if (c.state === 'bow') {
+        ctx.strokeStyle = '#dc2626';
+        ctx.lineWidth = 2 * scale;
+        ctx.beginPath();
+        ctx.moveTo(pos.x, pos.y - 12 * scale);
+        ctx.lineTo(pos.x, pos.y - 24 * scale);
+        ctx.stroke();
+        ctx.fillStyle = '#ff4500';
+        ctx.beginPath();
+        ctx.arc(pos.x, pos.y - 25 * scale, 2.2 * scale, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      if (c.state === 'knock') {
+        const beat = Math.sin(simTick * 0.45) > 0 ? 3 * scale : 0;
+        ctx.fillStyle = '#d97706';
+        ctx.beginPath();
+        ctx.arc(pos.x + 13 * scale, pos.y - 12 * scale - beat, 5 * scale, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      const nameY = headY - 14 * scale;
+      ctx.font = `700 ${Math.max(9, Math.round(10 * scale))}px 'Be Vietnam Pro', sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.strokeStyle = 'rgba(0,0,0,0.88)';
+      ctx.lineWidth = 3 * scale;
+      ctx.strokeText(c.name, pos.x, nameY);
+      ctx.fillStyle = isSelected ? '#00f5d4' : '#ffffff';
+      ctx.fillText(c.name, pos.x, nameY);
+
+      if (c.bubbleText) {
+        ctx.font = `700 ${Math.max(9, Math.round(10.5 * scale))}px 'Be Vietnam Pro', sans-serif`;
+        const padX = 9 * scale;
+        const textW = ctx.measureText(c.bubbleText).width + padX * 2;
+        const boxH = 21 * scale;
+        const bx = pos.x - textW / 2;
+        const by = nameY - 30 * scale;
+
+        ctx.fillStyle = '#fffbeb';
+        ctx.beginPath();
+        ctx.roundRect(bx, by, textW, boxH, 6 * scale);
+        ctx.fill();
+        ctx.strokeStyle = '#5c3418';
+        ctx.lineWidth = 1.6 * scale;
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(pos.x - 4 * scale, by + boxH);
+        ctx.lineTo(pos.x + 4 * scale, by + boxH);
+        ctx.lineTo(pos.x, by + boxH + 5 * scale);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = '#29170a';
+        ctx.fillText(c.bubbleText, pos.x, by + 14 * scale);
+      }
+
+      ctx.restore();
+    }
+
+    function renderScene() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      for (let gx = 0; gx < MAP_W; gx++) {
+        for (let gy = 0; gy < MAP_H; gy++) {
+          const p1 = worldToScreen(gx, gy);
+          const p2 = worldToScreen(gx + 1, gy);
+          const p3 = worldToScreen(gx + 1, gy + 1);
+          const p4 = worldToScreen(gx, gy + 1);
+
+          const isEven = (gx + gy) % 2 === 0;
+          const isCentralAvenue = gy >= 9 && gy <= 10 && gx < 18;
+          let tileCol = isEven ? '#8c562f' : '#804d28';
+
+          if (isCentralAvenue) {
+            tileCol = isEven ? '#57534e' : '#44403c';
+          } else if (gx >= 18) {
+            tileCol = isEven ? '#784725' : '#6e3f20';
+          }
+
+          ctx.fillStyle = tileCol;
+          ctx.beginPath();
+          ctx.moveTo(p1.x, p1.y);
+          ctx.lineTo(p2.x, p2.y);
+          ctx.lineTo(p3.x, p3.y);
+          ctx.lineTo(p4.x, p4.y);
+          ctx.closePath();
+          ctx.fill();
+
+          ctx.strokeStyle = 'rgba(40, 20, 8, 0.35)';
+          ctx.lineWidth = 0.8;
+          ctx.stroke();
+        }
+      }
+
+      if (!isTopDown2D) {
+        drawIsoBlock(0, 0, MAP_W, 0.3, 48, '#e6ccb2', '#b08968', '#7f5539', '#4a2c11');
+        drawIsoBlock(0, 0, 0.3, MAP_H, 48, '#e6ccb2', '#b08968', '#7f5539', '#4a2c11');
+      }
+
+      drawWaterfallAndKoiPond();
+      drawDetailedBuddhaAndChanhDien();
+
+      drawEnclosedRoom(ZONES.PROC);
+      drawEnclosedRoom(ZONES.LOGISTIC);
+      drawEnclosedRoom(ZONES.HR);
+
+      drawCentralIncenseSanctuary();
+
+      drawEnclosedRoom(ZONES.TECH);
+      drawEnclosedRoom(ZONES.COST);
+      drawEnclosedRoom(ZONES.SALE);
+
+      drawRightWingRooms();
+
+      bellShockwaves.forEach(bw => {
+        const center = worldToScreen(bw.gx, bw.gy, 15);
+        ctx.strokeStyle = `rgba(255, 215, 0, ${1 - bw.radius / bw.maxRadius})`;
+        ctx.lineWidth = 3.5;
+        ctx.beginPath();
+        ctx.arc(center.x, center.y, bw.radius, 0, Math.PI * 2);
+        ctx.stroke();
+      });
+
+      const sortedChars = [...characters].sort((a, b) => (a.x + a.y) - (b.x + b.y));
+      sortedChars.forEach(ch => drawCharacterSprite(ch));
+
+      if (!isTopDown2D) {
+        smokeParticles.forEach(sp => {
+          const p = worldToScreen(sp.gx, sp.gy, sp.gz);
+          ctx.fillStyle = sp.goldTint
+            ? `rgba(254, 240, 138, ${sp.alpha})`
+            : `rgba(235, 235, 245, ${sp.alpha})`;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, sp.size * camZoom, 0, Math.PI * 2);
+          ctx.fill();
+        });
+
+        goldenMotes.forEach(m => {
+          const p = worldToScreen(m.gx, m.gy, m.gz);
+          const alpha = 0.35 + Math.sin(simTick * 0.05 + m.phase) * 0.25;
+          ctx.fillStyle = `rgba(253, 224, 71, ${alpha})`;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, m.size * camZoom, 0, Math.PI * 2);
+          ctx.fill();
+        });
+      }
+
+      if (isNightMode) {
+        ctx.fillStyle = 'rgba(8, 10, 26, 0.36)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      }
+
+      floatingLabels.forEach(fl => {
+        const p = worldToScreen(fl.gx, fl.gy, fl.gz);
+        ctx.font = `800 ${Math.round(12 * camZoom)}px 'Be Vietnam Pro', sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 3;
+        ctx.strokeText(fl.text, p.x, p.y);
+        ctx.fillStyle = fl.color;
+        ctx.fillText(fl.text, p.x, p.y);
+      });
+    }
+
+    function initApp() {
+      resizeCanvas();
+      renderUserList();
+      renderLoginModal();
+
+      appendChatLog('SƯƠNG MINH TỔ MÔN', 'DIRECTOR', 'Chào mừng chư vị đạo hữu nhập môn! Hãy chọn ghế và bước ra Đỉnh Hương dâng nhang cầu KPI! 🔥');
+
+      function animateLoop() {
+        updateSimulation();
+        renderScene();
+        requestAnimationFrame(animateLoop);
+      }
+      animateLoop();
+    }
+
+    window.onload = initApp;
+  </script>
+</body>
+</html>
