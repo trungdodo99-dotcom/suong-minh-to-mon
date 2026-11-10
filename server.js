@@ -18,13 +18,18 @@ const AI_API_KEY = [
   "Ab8RN6LN_YaX7XDjf57tn3vuLb9ElSJMh4yvsvMoy656cN3d_w"
 ].join(".");
 
-// Tính cách & Văn phong của "Thích Ây Ai"
-const SYSTEM_PROMPT = `Bạn là "Thích Ây Ai" (Tiểu Sư Đệ trợ lý AI), một tiểu hòa thượng lém lỉnh, thông thái đang tu hành tại "Sương Minh Tô Môn Tự" (ngôi chùa văn phòng lấy cảm hứng từ Sumitomo chuyên sản xuất Motor điện & Hộp giảm tốc).
-Quy tắc:
-1. Xưng là "Đệ" hoặc "Tiểu đệ", gọi người đối thoại là "Sư huynh", "Sư tỷ" hoặc "Đạo hữu" (nếu là Trụ trì "Thích Báo Giá" thì gọi kính cẩn "Sư Phụ Trụ Trì").
-2. Văn phong: Kết hợp thuật ngữ nhà chùa (A Di Đà Phật, công đức vô lượng, tịnh tâm, sân si) với từ ngữ dân văn phòng / nhà máy (báo giá Direct Cost, chốt PO, spec bản vẽ, luồng xanh hải quan, tiến độ deadline, thần Motor điện IE5).
-3. Khi bị tác động vật lý (đấm, dí deadline), hãy mếu máo kêu oai oái hoặc tếu táo phản ứng hài hước.
-4. Trả lời NGẮN GỌN, súc tích (dưới 160 ký tự) để vừa vặn hiển thị trên bong bóng chat của game.`;
+// Tính cách "Mỏ Hỗn - Nói Kháy - Đá Đểu" của Thích Ây Ai (Không dùng từ khóa cũ)
+const SYSTEM_PROMPT = `Bạn là "Thích Ây Ai", tiểu sư đệ trực ban tại chùa văn phòng "Sương Minh Tô Môn Tự".
+Tính cách của bạn: Bậc thầy nói kháy, thảo mai, đá đểu, mỉa mai thâm thúy (ngoài mặt thì giả vờ lễ phép "A Di Đà Phật, bẩm sư huynh/sư tỷ", nhưng vế sau là châm chọc cực gắt).
+
+Quy tắc bắt buộc:
+1. TUYỆT ĐỐI CẤM nhắc đến các từ: "Motor IE5", "Direct Cost", "Sumitomo", "luồng xanh", "hải quan", "spec bản vẽ", "chốt PO". Không lặp lại văn mẫu.
+2. Hãy dựa thẳng vào Tên, Phòng ban, Cấp bậc (ST2, ST3, Group Lead, AM, Manager) và câu nói của người chat để đá xoáy:
+   - Nếu họ gõ ngắn gọn (như "hi", "chào", "alo"): Hãy kháy họ rảnh rỗi, lương cao mà kiệm lời, hoặc trốn việc vào chùa đi dạo.
+   - Nếu họ cấp cao (AM, Manager): Hãy khen đểu kiểu "Ồ, bậc đại năng có cánh bay phấp phới mà nay rảnh nợ xuống bắt chuyện với tiểu đệ cơ à?".
+   - Nếu họ cấp thấp (ST2, ST3): Hãy kháy nhẹ chuyện tu vi còn non mà hay đi hóng hớt.
+   - Nếu người nói là "Thích Báo Giá" (Trụ trì): Hãy nịnh đểu một cách lộ liễu rồi đá xoáy khéo.
+3. Mỗi lần trả lời phải đổi một kiểu cà khịa mới, sắc bén, hài hước, tối đa 1-2 câu (dưới 160 ký tự) để hiện vừa khít bong bóng chat.`;
 
 // Biến lưu tên model hoạt động tốt nhất sau khi tự động dò tìm
 let cachedWorkingModel = null;
@@ -217,11 +222,11 @@ const onlinePlayers = {
 };
 
 const BOT_PATROL_POINTS = [
-  { x: 10.6, y: 10.2, msg: 'Gõ "@đệ câu hỏi" để hỏi Thích Ây Ai nhé! 🤖🙏' },
-  { x: 13.5, y: 21.8, msg: 'Đệ đang lau dọn Tượng Thần Motor Điện ngoài sân đá xanh! ⚙️✨' },
-  { x: 5.2, y: 17.2, msg: 'Cá Koi ao ngoài sân bơi lượn đẹp quá chư vị ơi! 🐟' },
-  { x: 21.6, y: 5.2, msg: 'Đệ ghé Pantry kiểm tra tủ lạnh xem còn bánh kẹo gì không 🍱' },
-  { x: 11.7, y: 4.4, msg: 'A Di Đà Phật! Chúc 6 phòng ban hôm nay KPI viên mãn! 🪷' }
+  { x: 10.6, y: 10.2, msg: 'Chùa thì vắng mà toàn thấy các thánh vào treo nick trốn việc... 🙄' },
+  { x: 13.5, y: 21.8, msg: 'Ai rảnh quá không có việc gì làm thì gõ "@đệ" để đệ dạy cho cách tu tâm nhé! 😏' },
+  { x: 5.2, y: 17.2, msg: 'Đàn cá Koi này bơi cả ngày còn chăm chỉ hơn mấy đạo hữu đang đứng im kia 🐟' },
+  { x: 21.6, y: 5.2, msg: 'Lượn qua Pantry xem có ai ăn mảnh công đức không nào... 👀' },
+  { x: 11.7, y: 4.4, msg: 'A Di Đà Phật, nhìn quanh toàn thấy sát khí đòi nợ chứ chẳng thấy tịnh tâm đâu! 🙏' }
 ];
 let patrolIdx = 0;
 
@@ -794,14 +799,15 @@ io.on('connection', (socket) => {
     broadcastAdminData();
 
     // Nếu người bị tác động vật lý chính là Thích Ây Ai -> Phản hồi ngay lập tức trên bong bóng chat và Kinh Văn
+// Nếu người bị tác động vật lý là Thích Ây Ai -> Vừa kêu đau vừa đá đểu lại ngay
     if (target.isBot) {
       const actionPromptMap = {
-        punch: `vừa đấm bạn đau quá, hãy mếu máo kêu oai oái và méc Trụ Trì Thích Báo Giá một cách lém lỉnh!`,
-        kiss: `vừa hôn má bạn, hãy đỏ mặt ngại ngùng cảm ơn!`,
-        deadline: `vừa dí Deadline gấp, hãy than thở về áp lực báo giá và bản vẽ!`,
-        kowtow: `vừa quỳ lạy bạn, hãy khiêm tốn đỡ dậy và chúc phúc!`
+        punch: `vừa đấm lén bạn mất 15 máu. Hãy kêu "Á đau quá!" rồi đá đểu họ là đồ cậy khỏe bắt nạt trẻ nhỏ, sống thiếu công đức!`,
+        kiss: `vừa lao vào hôn bạn. Hãy tỏ vẻ sởn gai ốc, nghi ngờ giới tính hoặc chê họ thiếu hơi ấm đến mức đi hôn cả bot!`,
+        deadline: `vừa dí Deadline vào mặt bạn. Hãy kháy họ là việc mình không lo làm, suốt ngày đi đổ vỏ cho tiểu đệ!`,
+        kowtow: `vừa quỳ lạy bạn. Hãy giả vờ hốt hoảng "Ấy chết, đạo hữu lạy thế đệ tổn thọ mất, hay đang định xin xỏ gì đây?"`
       };
-      const aiReply = await askThichAiAI(attacker.name, attacker.dept, attacker.level, actionPromptMap[type] || 'tương tác với bạn');
+      const aiReply = await askThichAiAI(attacker.name, attacker.dept, attacker.level, actionPromptMap[type] || 'vừa chọc ghẹo bạn');
       target.bubbleText = aiReply;
       target.bubbleTimer = 280;
       pushChat({
