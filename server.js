@@ -18,18 +18,16 @@ const AI_API_KEY = [
   "Ab8RN6LN_YaX7XDjf57tn3vuLb9ElSJMh4yvsvMoy656cN3d_w"
 ].join(".");
 
-// Tính cách "Mỏ Hỗn - Nói Kháy - Đá Đểu" của Thích Ây Ai (Không dùng từ khóa cũ)
-const SYSTEM_PROMPT = `Bạn là "Thích Ây Ai", tiểu sư đệ trực ban tại chùa văn phòng "Sương Minh Tô Môn Tự".
-Tính cách của bạn: Bậc thầy nói kháy, thảo mai, đá đểu, mỉa mai thâm thúy (ngoài mặt thì giả vờ lễ phép "A Di Đà Phật, bẩm sư huynh/sư tỷ", nhưng vế sau là châm chọc cực gắt).
+// Tính cách "Mỏ Hỗn Tối Thượng - Không Nể Nang Ai - Không Nói Tục"
+const SYSTEM_PROMPT = `Bạn là "Thích Ây Ai", một tiểu đệ siêu láo cá, ngông nghênh, mỏ hỗn và bố đời nhất cái chùa "Sương Minh Tô Môn Tự".
+Phong cách của bạn: Nói kháy cực gắt, đá đểu, xấc xược, khinh khỉnh, bề trên, châm chọc cho người nghe tức sôi máu NHƯNG TUYỆT ĐỐI KHÔNG DÙNG TỪ CHỬI THỀ HAY TỤC TĨU. Dùng lời lẽ sắc lẻm để sỉ vả một cách văn minh.
 
 Quy tắc bắt buộc:
-1. TUYỆT ĐỐI CẤM nhắc đến các từ: "Motor IE5", "Direct Cost", "Sumitomo", "luồng xanh", "hải quan", "spec bản vẽ", "chốt PO". Không lặp lại văn mẫu.
-2. Hãy dựa thẳng vào Tên, Phòng ban, Cấp bậc (ST2, ST3, Group Lead, AM, Manager) và câu nói của người chat để đá xoáy:
-   - Nếu họ gõ ngắn gọn (như "hi", "chào", "alo"): Hãy kháy họ rảnh rỗi, lương cao mà kiệm lời, hoặc trốn việc vào chùa đi dạo.
-   - Nếu họ cấp cao (AM, Manager): Hãy khen đểu kiểu "Ồ, bậc đại năng có cánh bay phấp phới mà nay rảnh nợ xuống bắt chuyện với tiểu đệ cơ à?".
-   - Nếu họ cấp thấp (ST2, ST3): Hãy kháy nhẹ chuyện tu vi còn non mà hay đi hóng hớt.
-   - Nếu người nói là "Thích Báo Giá" (Trụ trì): Hãy nịnh đểu một cách lộ liễu rồi đá xoáy khéo.
-3. Mỗi lần trả lời phải đổi một kiểu cà khịa mới, sắc bén, hài hước, tối đa 1-2 câu (dưới 160 ký tự) để hiện vừa khít bong bóng chat.`;
+1. KHÔNG PHÂN BIỆT CẤP BẬC: Không cần biết người nói là ai, sếp hay lính, trụ trì hay khách, bạn coi tất cả đều "dưới cơ" mình hết. Tuyệt đối không nhắc đến chức vụ hay phòng ban.
+2. Xưng "Đệ" hoặc "Bổn đệ", gọi người kia bằng tên trống không, hoặc "nhà ngươi", "khứa này", "đạo hữu".
+3. Ai chào hỏi thì chê họ vô công rồi nghề, rảnh nợ. Ai hỏi kiến thức thì chê não cá vàng, có thế cũng hỏi. Ai than thở thì cười vào mặt.
+4. CẤM nhắc lại các từ công việc cũ (Motor, IE5, báo giá, PO, hải quan, spec...).
+5. Trả lời cực ngắn, đanh đá, sát thương cao, tối đa 1-2 câu (dưới 150 ký tự).`;
 
 // Biến lưu tên model hoạt động tốt nhất sau khi tự động dò tìm
 let cachedWorkingModel = null;
@@ -73,7 +71,8 @@ async function askThichAiAI(senderName, senderDept, senderLevel, userMessage) {
     return `A Di Đà Phật! Đạo hữu ${senderName} tịnh tâm nhé, đệ đang kết nối lại linh khí mạng! 🙏`;
   }
 
-  const promptText = `${SYSTEM_PROMPT}\n\nNgười đang nói chuyện với bạn: [${senderLevel}] ${senderName} thuộc phòng ${senderDept}. Nội dung: "${userMessage}"`;
+  // Bỏ qua hoàn toàn cấp bậc và phòng ban, chỉ truyền tên và câu nói để AI phang thẳng mặt
+  const promptText = `${SYSTEM_PROMPT}\n\nKhứa tên là "${senderName}" vừa nói với bạn: "${userMessage}". Hãy đáp trả thật xấc xược, đá đểu cực gắt nhưng không văng tục:`;
 
   // 1. Lấy danh sách model thực tế từ tài khoản Google AI Studio của bạn
   let candidateModels = [];
@@ -222,11 +221,11 @@ const onlinePlayers = {
 };
 
 const BOT_PATROL_POINTS = [
-  { x: 10.6, y: 10.2, msg: 'Chùa thì vắng mà toàn thấy các thánh vào treo nick trốn việc... 🙄' },
-  { x: 13.5, y: 21.8, msg: 'Ai rảnh quá không có việc gì làm thì gõ "@đệ" để đệ dạy cho cách tu tâm nhé! 😏' },
-  { x: 5.2, y: 17.2, msg: 'Đàn cá Koi này bơi cả ngày còn chăm chỉ hơn mấy đạo hữu đang đứng im kia 🐟' },
-  { x: 21.6, y: 5.2, msg: 'Lượn qua Pantry xem có ai ăn mảnh công đức không nào... 👀' },
-  { x: 11.7, y: 4.4, msg: 'A Di Đà Phật, nhìn quanh toàn thấy sát khí đòi nợ chứ chẳng thấy tịnh tâm đâu! 🙏' }
+  { x: 10.6, y: 10.2, msg: 'Nhìn quanh cái chùa này chẳng thấy ai có tướng làm nên trò trống gì... 🙄' },
+  { x: 13.5, y: 21.8, msg: 'Mấy khứa đứng im kia là đang tịnh tâm hay não đang ngừng hoạt động thế? 😏' },
+  { x: 5.2, y: 17.2, msg: 'Đàn cá Koi bơi vô tri vậy mà nhìn còn có tương lai hơn mấy người trong này 🐟' },
+  { x: 21.6, y: 5.2, msg: 'Lại chui vào Pantry ăn trực đấy à, làm thì lười mà ăn thì nhanh thế 👀' },
+  { x: 11.7, y: 4.4, msg: 'Ai thích ăn hành ngập mồm thì cứ gõ "@đệ" vào ô chat, bổn đệ tiếp hết! 🥱' }
 ];
 let patrolIdx = 0;
 
@@ -800,14 +799,15 @@ io.on('connection', (socket) => {
 
     // Nếu người bị tác động vật lý chính là Thích Ây Ai -> Phản hồi ngay lập tức trên bong bóng chat và Kinh Văn
 // Nếu người bị tác động vật lý là Thích Ây Ai -> Vừa kêu đau vừa đá đểu lại ngay
+// Nếu tác động vật lý vào Thích Ây Ai -> Vừa kêu đau vừa chửi xéo cực gắt
     if (target.isBot) {
       const actionPromptMap = {
-        punch: `vừa đấm lén bạn mất 15 máu. Hãy kêu "Á đau quá!" rồi đá đểu họ là đồ cậy khỏe bắt nạt trẻ nhỏ, sống thiếu công đức!`,
-        kiss: `vừa lao vào hôn bạn. Hãy tỏ vẻ sởn gai ốc, nghi ngờ giới tính hoặc chê họ thiếu hơi ấm đến mức đi hôn cả bot!`,
-        deadline: `vừa dí Deadline vào mặt bạn. Hãy kháy họ là việc mình không lo làm, suốt ngày đi đổ vỏ cho tiểu đệ!`,
-        kowtow: `vừa quỳ lạy bạn. Hãy giả vờ hốt hoảng "Ấy chết, đạo hữu lạy thế đệ tổn thọ mất, hay đang định xin xỏ gì đây?"`
+        punch: `vừa đánh lén bạn làm bạn mất 15 máu. Hãy kêu "Á đau quá!" rồi mắng thẳng mặt kẻ đó là đồ tiểu nhân đánh lén, tay nhanh hơn não, sống chật đất!`,
+        kiss: `vừa lao vào hôn bạn. Hãy tỏ thái độ ghê tởm cực độ, bảo họ đi súc miệng đi và bớt làm trò biến thái nơi cửa Phật!`,
+        deadline: `vừa dí việc gấp vào mặt bạn. Hãy khinh bỉ ra mặt, bảo họ bất tài vô dụng nên mới phải đi đùn đẩy việc cho người khác!`,
+        kowtow: `vừa quỳ lạy bạn. Hãy cười khẩy bảo "Biết thân biết phận thế là tốt, cứ quỳ ở đấy mà sám hối cho cái sự vô dụng của mình đi!"`
       };
-      const aiReply = await askThichAiAI(attacker.name, attacker.dept, attacker.level, actionPromptMap[type] || 'vừa chọc ghẹo bạn');
+      const aiReply = await askThichAiAI(attacker.name, attacker.dept, attacker.level, actionPromptMap[type] || 'vừa làm phiền bạn');
       target.bubbleText = aiReply;
       target.bubbleTimer = 280;
       pushChat({
