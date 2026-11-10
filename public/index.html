@@ -5,15 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="mobile-web-app-capable" content="yes" />
-  <title>SƯƠNG MINH TỔ MÔN - OFFICE TEMPLE</title>
+  <title>SƯƠNG MINH TỔ MÔN - OFFICE TEMPLE ONLINE (2.5D)</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700;800&display=swap" rel="stylesheet">
   <style>
     * {
       box-sizing: border-box;
       user-select: none;
       -webkit-user-select: none;
-      font-family: 'Be Vietnam Pro', sans-serif;
+      font-family: 'Be Vietnam Pro', 'Segoe UI', Tahoma, sans-serif;
       touch-action: manipulation;
     }
     html, body {
@@ -22,231 +22,352 @@
       width: 100%;
       height: 100dvh;
       overflow: hidden;
-      background-color: #120a05;
+      background-color: #120c07;
       color: #fdf3e7;
     }
     canvas {
       display: block;
       width: 100vw;
       height: 100dvh;
+      cursor: grab;
       touch-action: none;
     }
-    .wood-bar {
-      background: linear-gradient(180deg, rgba(88, 43, 17, 0.95) 0%, rgba(48, 22, 8, 0.95) 100%);
-      border-bottom: 2px solid #b07d4f;
-      box-shadow: 0 4px 14px rgba(0,0,0,0.75);
+    canvas:active {
+      cursor: grabbing;
     }
-    .wood-card {
-      background: rgba(34, 18, 9, 0.94);
-      border: 2px solid #a47143;
-      border-radius: 12px;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.85);
+
+    /* Giao diện Gỗ Sơn Mài & Bảng Vàng Cổ Kính */
+    .wood-header {
+      background: linear-gradient(180deg, #7f421c 0%, #4e240b 100%);
+      border-bottom: 3px solid #2b1104;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.8);
+    }
+    .parchment-plaque {
+      background: linear-gradient(180deg, #f6e3b4 0%, #d4a959 100%);
+      border: 3px solid #5a2d0c;
+      box-shadow: inset 0 1px 0 #fff9e6, 0 6px 14px rgba(0,0,0,0.65);
+      color: #3d1803;
+    }
+    .wood-panel {
+      background: rgba(38, 22, 11, 0.93);
+      border: 2px solid #a66f3f;
+      border-radius: 10px;
+      box-shadow: 0 8px 26px rgba(0,0,0,0.82), inset 0 0 12px rgba(0,0,0,0.45);
       backdrop-filter: blur(6px);
     }
-    .plaque-badge {
-      background: linear-gradient(180deg, #fae2aa 0%, #d4a44c 100%);
-      border: 2px solid #5a2e0c;
-      color: #381803;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.6);
+    .wood-panel-header {
+      background: linear-gradient(90deg, #4d2a14, #734222, #4d2a14);
+      border-bottom: 1.5px solid #a66f3f;
+      color: #ffdf91;
     }
-    .dock-btn {
-      background: linear-gradient(180deg, #694124 0%, #3d2210 100%);
-      border: 1.5px solid #b88454;
+    .action-card {
+      background: linear-gradient(180deg, #70472a 0%, #432714 100%);
+      border: 2px solid #b88454;
       border-radius: 10px;
-      transition: transform 0.12s ease, border-color 0.12s ease;
+      box-shadow: 0 5px 12px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.22);
+      transition: all 0.14s ease;
+      position: relative;
       flex-shrink: 0;
     }
-    .dock-btn:active {
-      transform: scale(0.93);
+    .action-card:hover {
+      transform: translateY(-3px);
       border-color: #ffd166;
+      background: linear-gradient(180deg, #8a5936 0%, #59351c 100%);
+      box-shadow: 0 8px 18px rgba(255, 209, 102, 0.35);
+    }
+    .action-card:active {
+      transform: scale(0.94);
+    }
+    .hotkey-badge {
+      position: absolute;
+      top: 2px;
+      left: 3px;
+      background: #e5b35c;
+      color: #2d1606;
+      font-weight: 800;
+      font-size: 9px;
+      padding: 0px 4px;
+      border-radius: 4px;
+      border: 1px solid #593212;
+      line-height: 1.2;
     }
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: rgba(25, 15, 8, 0.6); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb { background: #99653a; border-radius: 4px; }
   </style>
 </head>
 <body class="relative w-full h-full overflow-hidden">
 
-  <!-- ==================== 1. THANH HEADER SIÊU GỌN (TỐI ƯU MOBILE) ==================== -->
-  <header class="wood-bar fixed top-0 left-0 right-0 h-10 md:h-12 z-30 flex items-center justify-between px-2 md:px-4">
-    <!-- Cụm nút bên trái -->
+  <!-- ==================== 1. THANH HEADER CỔ KÍNH ==================== -->
+  <header class="wood-header fixed top-0 left-0 right-0 h-11 md:h-12 z-30 flex items-center justify-between px-2 md:px-3">
+    <!-- Cụm nút điều khiển bên trái -->
     <div class="flex items-center gap-1 md:gap-1.5">
-      <button onclick="toggleFullScreen()" class="px-2 py-1 rounded bg-[#2e1508] border border-[#a47143] text-[11px] font-bold text-[#ffd166] flex items-center gap-1" title="Toàn màn hình">
-        <span>⛶</span> <span class="hidden sm:inline">Full</span>
+      <button onclick="toggleCameraProjection()" class="px-2 py-1 rounded bg-[#3d1e0a] hover:bg-[#593014] border border-[#b07d4f] text-[10px] md:text-xs font-bold text-[#ffdf91] flex items-center gap-1 shadow">
+        <span>📐</span> <span id="viewModeLabel" class="hidden sm:inline">2.5D Chi Tiết</span>
       </button>
-      <button onclick="toggleProjection()" class="px-2 py-1 rounded bg-[#2e1508] border border-[#a47143] text-[11px] font-bold text-[#ffdf91]">
-        <span id="projLabel">2.5D</span>
+      <button onclick="toggleNightMode()" class="px-2 py-1 rounded bg-[#3d1e0a] hover:bg-[#593014] border border-[#b07d4f] text-[10px] md:text-xs font-bold text-[#ffd166] shadow" title="Đêm Hoa Đăng">
+        🏮 <span id="nightModeLabel" class="hidden xl:inline">Hoa Đăng</span>
       </button>
-      <button onclick="toggleNight()" class="px-2 py-1 rounded bg-[#2e1508] border border-[#a47143] text-[11px] font-bold text-[#ffd166]">
-        🏮
-      </button>
-      <button onclick="resetCameraView()" class="px-2 py-1 rounded bg-[#2e1508] border border-[#a47143] text-[11px] text-[#e5c283]">
+      <button onclick="resetCameraView()" class="px-2 py-1 rounded bg-[#3d1e0a] hover:bg-[#593014] border border-[#b07d4f] text-[10px] md:text-xs text-[#e5c283]" title="Căn Giữa">
         🎯
       </button>
-      <button id="btnSound" onclick="toggleSound()" class="px-2 py-1 rounded bg-[#2e1508] border border-[#a47143] text-[11px] font-bold text-[#6fcf97]">
+      <button id="btnAudio" onclick="toggleAudioMute()" class="px-2 py-1 rounded bg-[#3d1e0a] hover:bg-[#593014] border border-[#b07d4f] text-[10px] md:text-xs text-[#6fcf97] font-bold" title="Âm thanh">
         🔊
+      </button>
+      <button onclick="toggleFullScreen()" class="px-2 py-1 rounded bg-[#3d1e0a] hover:bg-[#593014] border border-[#b07d4f] text-[10px] md:text-xs font-bold text-[#ffd166]" title="Toàn màn hình khi xoay ngang">
+        ⛶ <span class="hidden md:inline">Full</span>
+      </button>
+      <button onclick="toggleAllPanelsUI()" class="px-2 py-1 rounded bg-[#3d1e0a] hover:bg-[#593014] border border-[#b07d4f] text-[10px] md:text-xs font-bold text-[#f3e5ab]" title="Ẩn/Hiện bảng UI">
+        👁️ <span class="hidden sm:inline">UI</span>
       </button>
     </div>
 
-    <!-- Biển hiệu trung tâm -->
-    <div class="plaque-badge px-3 md:px-5 py-0.5 md:py-1 rounded-b-xl flex items-center gap-1.5">
-      <span class="text-xs md:text-sm font-extrabold tracking-wider uppercase whitespace-nowrap">
-        ⛩️ SƯƠNG MINH TỔ MÔN
+    <!-- Biển hiệu trung tâm SƯƠNG MINH TỔ MÔN -->
+    <div class="parchment-plaque px-3 md:px-6 py-0.5 md:py-1 rounded-b-xl -mt-1 flex flex-col items-center justify-center shrink-0">
+      <h1 class="text-[11px] sm:text-sm md:text-base font-extrabold tracking-wider uppercase leading-none">
+        ⛩️ SƯƠNG MINH TỔ MÔN - TỊNH TÂM VIỆN
+      </h1>
+      <span class="hidden md:inline text-[10px] font-bold text-[#6e2c04] mt-0.5">
+        Thiền đúng phòng +25 🪷 (Khác phòng trộm linh khí) • Click người khác để Đấm / Hôn
       </span>
     </div>
 
-    <!-- Cụm chỉ số & Ngăn kéo bên phải -->
-    <div class="flex items-center gap-1.5 md:gap-2">
-      <!-- Thanh máu cá nhân -->
-      <div class="bg-[#241107] border border-[#a47143] px-2 py-0.5 rounded-full text-[11px] font-extrabold text-[#ff6b6b] flex items-center gap-1">
+    <!-- Cụm Thông tin, Công Đức, Quản Lý Acc bên phải -->
+    <div class="flex items-center gap-1 md:gap-2">
+      <!-- Máu 100 HP -->
+      <div class="bg-[#2c1608] border border-[#8c5a32] px-2 py-0.5 md:py-1 rounded-full text-[10px] md:text-xs font-extrabold text-[#ff7675] flex items-center gap-1">
         <span>❤️</span>
-        <span id="myHpHeader">100</span>
+        <span id="headerHpText">100</span>
       </div>
-      <!-- Điểm Công Đức -->
-      <div class="bg-[#241107] border border-[#a47143] px-2 py-0.5 rounded-full text-[11px] font-extrabold text-[#6fcf97] flex items-center gap-1">
-        <span>🪷</span>
-        <span id="myMeritHeader">1,000</span>
+      <!-- Công Đức -->
+      <div class="bg-[#2c1608] border border-[#8c5a32] px-2.5 py-0.5 md:py-1 rounded-full text-[10px] md:text-xs font-extrabold text-[#ffd166] flex items-center gap-1">
+        <span>🪷 <span class="hidden sm:inline">Công Đức:</span></span>
+        <span id="headerMeritText" class="text-[#6fcf97]">1,080</span>
       </div>
-      <!-- Nút mở Danh Sách Đạo Hữu -->
-      <button onclick="toggleDrawer('onlineDrawer')" class="px-2 py-1 rounded bg-[#3b2010] border border-[#c9935b] text-[11px] font-extrabold text-[#ffd166] flex items-center gap-1">
-        <span>👥</span>
-        <span id="onlineBadgeCount">0</span>
+      <!-- Nút Quản Lý Acc (Luôn hiện, báo số đơn chờ duyệt) -->
+      <button onclick="openAdminModal()" class="relative px-2.5 py-1 rounded bg-[#a33b20] hover:bg-[#c24727] border border-[#f6d58e] text-[10px] md:text-xs font-extrabold text-white shadow flex items-center gap-1">
+        <span>👑</span>
+        <span>Quản Lý Acc</span>
+        <span id="pendingCountBadge" class="hidden px-1.5 py-0.2 rounded-full bg-yellow-400 text-black font-black text-[9px]">0</span>
       </button>
-      <!-- Nút mở Khung Chat & Nhập tin nhắn -->
-      <button onclick="toggleChatModal()" class="relative px-2.5 py-1 rounded bg-[#2f6f4e] border border-[#7be0ad] text-[11px] font-extrabold text-white flex items-center gap-1">
-        <span>💬</span>
-        <span class="hidden sm:inline">Chat</span>
-        <span id="unreadDot" class="hidden w-2 h-2 rounded-full bg-red-500 absolute -top-1 -right-1"></span>
-      </button>
+      <!-- Badge Pháp Danh hiện tại -->
+      <div class="hidden sm:flex items-center gap-1 bg-[#2b1508] border border-[#a66f3f] px-2.5 py-1 rounded text-[11px] font-bold text-[#6fcf97]">
+        <span>👤</span>
+        <span id="headerMyName">Chưa Nhập Tự</span>
+      </div>
     </div>
   </header>
 
-  <!-- ==================== 2. KHUNG MINI-CHAT TRONG SUỐT (KHÔNG CHE MÀN HÌNH) ==================== -->
-  <div onclick="toggleChatModal()" class="fixed top-11 md:top-14 left-2 z-20 w-64 sm:w-80 bg-black/55 border border-[#8c5a32]/70 rounded-lg px-2.5 py-1.5 pointer-events-auto cursor-pointer backdrop-blur-sm">
-    <div class="flex items-center justify-between text-[10px] text-[#ffd166] font-bold mb-0.5">
-      <span>📜 Kinh Văn Mới Nhất (Chạm để gõ chat)</span>
-      <span id="myIdentityTag" class="text-[#6fcf97]">...</span>
+  <!-- ==================== 2. THANH TƯƠNG TÁC CẬN CHIẾN (HIỆN KHI CLICK VÀO ĐẠO HỮU KHÁC) ==================== -->
+  <div id="combatPopup" class="hidden fixed top-14 left-1/2 -translate-x-1/2 z-30 wood-panel px-3 py-2 flex items-center gap-2 border-2 border-[#ffd166]">
+    <div class="text-xs font-extrabold text-[#ffdf91]">
+      🎯 <span id="combatTargetName">Thích Đạo Hữu</span>
+      <span id="combatTargetHp" class="text-[#ff7675] ml-1">(100 HP)</span>
     </div>
-    <div id="miniChatPreview" class="text-[11px] space-y-0.5 max-h-11 overflow-hidden leading-tight text-[#f5e6d3]">
-      <div class="text-[#d4b483] italic">Chào mừng đạo hữu nhập môn...</div>
-    </div>
-  </div>
-
-  <!-- ==================== 3. MENU TƯƠNG TÁC CẬN CHIẾN (HIỆN KHI CHẠM VÀO NGƯỜI KHÁC) ==================== -->
-  <div id="targetActionMenu" class="hidden fixed top-12 left-1/2 -translate-x-1/2 z-30 wood-card px-3 py-2 flex items-center gap-2 border-2 border-[#ffd166]">
-    <div class="text-xs font-bold text-[#ffdf91] pr-1">
-      🎯 <span id="targetPlayerName">Đạo hữu</span>
-      <span id="targetPlayerHp" class="text-[#ff7675] ml-1">(100 HP)</span>
-    </div>
-    <button onclick="triggerProximityInteraction('punch')" class="px-2.5 py-1 rounded bg-red-700 hover:bg-red-600 border border-red-300 text-xs font-extrabold text-white shadow">
+    <button onclick="triggerCombatAction('punch')" class="px-2.5 py-1 rounded bg-gradient-to-b from-red-600 to-red-800 hover:from-red-500 hover:to-red-700 border border-red-300 text-xs font-extrabold text-white shadow">
       👊 Đấm (-15 HP)
     </button>
-    <button onclick="triggerProximityInteraction('kiss')" class="px-2.5 py-1 rounded bg-pink-600 hover:bg-pink-500 border border-pink-300 text-xs font-extrabold text-white shadow">
+    <button onclick="triggerCombatAction('kiss')" class="px-2.5 py-1 rounded bg-gradient-to-b from-pink-500 to-pink-700 hover:from-pink-400 hover:to-pink-600 border border-pink-200 text-xs font-extrabold text-white shadow">
       😘 Hôn (+10 HP)
     </button>
-    <button onclick="closeTargetMenu()" class="text-xs text-gray-300 px-1.5 font-bold">✕</button>
+    <button onclick="closeCombatPopup()" class="text-xs font-bold text-[#ff9b85] px-1.5">✕</button>
   </div>
 
-  <!-- ==================== 4. CANVAS 2.5D CHÙA CHIỀN ==================== -->
+  <!-- ==================== 3. CANVAS 2.5D ISOMETRIC ==================== -->
   <canvas id="templeCanvas"></canvas>
 
-  <!-- ==================== 5. NGĂN KÉO DANH SÁCH ĐẠO HỮU (ĐÓNG/MỞ GỌN GÀNG) ==================== -->
-  <aside id="onlineDrawer" class="hidden wood-card fixed top-12 right-2 w-64 max-h-[68dvh] z-40 flex flex-col overflow-hidden">
-    <div class="bg-[#422310] px-3 py-2 border-b border-[#8c5a32] flex items-center justify-between">
-      <span class="text-xs font-extrabold text-[#ffd166]">🧘 Đạo Hữu Hiện Diện</span>
-      <button onclick="toggleDrawer('onlineDrawer')" class="text-xs font-bold text-[#ff9b85] px-1">✕</button>
+  <!-- ==================== 4. BẢNG ĐẠO HỮU HIỆN DIỆN (GÓC PHẢI TRÊN - CÓ NÚT THU GỌN) ==================== -->
+  <aside id="rightPlayersPanel" class="wood-panel fixed top-14 right-2 md:right-3 w-56 md:w-64 z-20 flex flex-col overflow-hidden transition-all duration-150">
+    <div onclick="toggleRightPanelCollapse()" class="wood-panel-header px-3 py-1.5 flex items-center justify-between cursor-pointer">
+      <span class="text-xs font-extrabold tracking-wide uppercase flex items-center gap-1">
+        🧘 ĐẠO HỮU HIỆN DIỆN
+      </span>
+      <div class="flex items-center gap-1.5">
+        <span class="text-[11px] font-extrabold text-[#6fcf97]">🟢 <span id="onlineCounterText">0</span> Online</span>
+        <span id="rightCollapseIcon" class="text-xs font-black text-[#ffd166] px-1 bg-[#361c0c] rounded">−</span>
+      </div>
     </div>
-    <div class="p-1.5 bg-[#1b0e07] border-b border-[#5c381f] flex flex-wrap gap-1 text-[10px]">
-      <button onclick="setDeptFilter('ALL')" class="px-1.5 py-0.5 rounded bg-[#6e421f] text-[#ffd166] font-bold">Tất cả</button>
-      <button onclick="setDeptFilter('PROC')" class="px-1.5 py-0.5 rounded bg-[#362214] text-[#e0c097]">PROC</button>
-      <button onclick="setDeptFilter('IBD Cost')" class="px-1.5 py-0.5 rounded bg-[#362214] text-[#e0c097]">IBD Cost</button>
-      <button onclick="setDeptFilter('IBD Sale')" class="px-1.5 py-0.5 rounded bg-[#362214] text-[#e0c097]">IBD Sale</button>
-      <button onclick="setDeptFilter('Logistic')" class="px-1.5 py-0.5 rounded bg-[#362214] text-[#e0c097]">Logistic</button>
-      <button onclick="setDeptFilter('HR-GA')" class="px-1.5 py-0.5 rounded bg-[#362214] text-[#e0c097]">HR-GA</button>
-      <button onclick="setDeptFilter('Tech')" class="px-1.5 py-0.5 rounded bg-[#362214] text-[#e0c097]">Tech</button>
+
+    <div id="rightPanelBody" class="flex flex-col max-h-[38dvh] md:max-h-[48dvh]">
+      <div class="px-2 py-1.5 bg-[#21130a] border-b border-[#5e3b1f] flex flex-wrap gap-1 text-[10px]">
+        <button onclick="setDeptFilter('ALL')" class="px-1.5 py-0.5 rounded bg-[#6e421f] text-[#ffd166] font-bold">Tất cả</button>
+        <button onclick="setDeptFilter('PROC')" class="px-1.5 py-0.5 rounded bg-[#36281b] hover:bg-[#523d29] text-[#e0c097]">PROC</button>
+        <button onclick="setDeptFilter('IBD Cost')" class="px-1.5 py-0.5 rounded bg-[#36281b] hover:bg-[#523d29] text-[#e0c097]">IBD Cost</button>
+        <button onclick="setDeptFilter('IBD Sale')" class="px-1.5 py-0.5 rounded bg-[#36281b] hover:bg-[#523d29] text-[#e0c097]">IBD Sale</button>
+        <button onclick="setDeptFilter('Logistic')" class="px-1.5 py-0.5 rounded bg-[#36281b] hover:bg-[#523d29] text-[#e0c097]">Logistic</button>
+        <button onclick="setDeptFilter('HR-GA')" class="px-1.5 py-0.5 rounded bg-[#36281b] hover:bg-[#523d29] text-[#e0c097]">HR-GA</button>
+        <button onclick="setDeptFilter('Tech')" class="px-1.5 py-0.5 rounded bg-[#36281b] hover:bg-[#523d29] text-[#e0c097]">Tech</button>
+      </div>
+      <div id="onlinePlayersList" class="p-2 overflow-y-auto space-y-1 text-xs flex-1"></div>
     </div>
-    <div id="onlineListContainer" class="p-2 overflow-y-auto space-y-1 text-xs flex-1"></div>
   </aside>
 
-  <!-- ==================== 6. MODAL CHAT CHỐNG BÀN PHÍM ẢO CHE KHUẤT ==================== -->
-  <!-- Đặt ở nửa trên màn hình (items-start pt-11) để khi bàn phím điện thoại bật lên từ dưới không che mất ô nhập và dòng chat mới -->
-  <div id="chatModal" class="hidden fixed inset-0 bg-black/60 z-40 flex items-start justify-center pt-11 px-2">
-    <div class="wood-card w-full max-w-lg flex flex-col overflow-hidden max-h-[52dvh] sm:max-h-[65dvh] border-2 border-[#ffd166]">
-      <div class="bg-[#422310] px-3 py-1.5 border-b border-[#8c5a32] flex items-center justify-between">
-        <span class="text-xs font-extrabold text-[#ffd166]">📜 Kinh Văn & Tâm Sự Tổ Môn</span>
-        <button onclick="toggleChatModal()" class="text-xs font-extrabold text-[#ff9b85] px-2 py-0.5 rounded bg-[#2a1408]">Đóng ✕</button>
+  <!-- ==================== 5. BẢNG KINH VĂN & TÂM SỰ + Ô NHẬP CHAT TÍCH HỢP ==================== -->
+  <!-- Tích hợp ô nhập chat vào ngay trong bảng Kinh Văn, tự nhảy lên trên khi bật bàn phím ảo trên Mobile -->
+  <section id="leftChatPanel" class="wood-panel fixed bottom-20 md:bottom-3 left-2 md:left-3 w-72 sm:w-80 md:w-96 z-20 flex flex-col overflow-hidden transition-all duration-150">
+    <div onclick="toggleLeftChatCollapse()" class="wood-panel-header px-3 py-1.5 flex items-center justify-between text-xs font-bold cursor-pointer">
+      <span>📜 Kinh Văn & Tâm Sự Tổ Môn</span>
+      <div class="flex items-center gap-1.5">
+        <span id="activeCharIndicator" class="text-[10px] text-[#6fcf97] truncate max-w-[110px]">...</span>
+        <span id="leftCollapseIcon" class="text-xs font-black text-[#ffd166] px-1 bg-[#361c0c] rounded">−</span>
       </div>
-      <!-- Ô nhập chat đặt ngay trên để không bao giờ bị bàn phím che -->
-      <div class="p-2 bg-[#1c0f08] border-b border-[#6e472b] flex items-center gap-1.5">
+    </div>
+
+    <div id="leftChatBody" class="flex flex-col h-36 md:h-48">
+      <div id="chatLogContainer" class="p-2 overflow-y-auto flex-1 space-y-1.5 text-xs leading-relaxed"></div>
+      <div class="p-1.5 bg-[#1e1008] border-t border-[#7c4d28] flex items-center gap-1.5">
         <input
-          id="chatInputBox"
+          id="chatInput"
           type="text"
           placeholder="Nhập lời khấn / tâm sự..."
-          class="flex-1 bg-[#fdf6e9] text-[#2c1608] text-xs font-bold px-3 py-2 rounded border border-[#b07d4f] focus:outline-none"
+          class="flex-1 bg-[#fdf6e9] text-[#2c1608] placeholder-[#8c6d53] text-xs font-bold px-2.5 py-1.5 rounded border border-[#7c4d28] focus:outline-none focus:border-[#d48a29]"
         />
-        <button onclick="sendChatMessage()" class="px-4 py-2 rounded bg-[#2e7d32] hover:bg-[#388e3c] text-white font-extrabold text-xs shrink-0 shadow">
+        <button
+          onclick="sendCustomChat()"
+          class="px-3 py-1.5 rounded bg-[#3b7a57] hover:bg-[#4b966d] text-white font-extrabold text-xs border border-[#88d4ab] shadow shrink-0"
+        >
           Gửi
         </button>
       </div>
-      <!-- Lịch sử chat tự cuộn xuống dưới cùng -->
-      <div id="fullChatLog" class="p-2.5 overflow-y-auto flex-1 space-y-1.5 text-xs leading-relaxed bg-[#140b06]/90"></div>
     </div>
-  </div>
+  </section>
 
-  <!-- ==================== 7. THANH PHÍM CHỨC NĂNG DƯỚI CÙNG (GỌN GÀNG, CUỘN MƯỢT) ==================== -->
-  <nav class="fixed bottom-1.5 left-1/2 -translate-x-1/2 z-30 max-w-[98vw] overflow-x-auto no-scrollbar flex items-center gap-1 md:gap-1.5 px-2 py-1 rounded-xl bg-[#211108]/95 border border-[#a47143] shadow-2xl">
-    <button onclick="performMyAction('wave')" class="dock-btn px-2.5 py-1.5 flex items-center gap-1">
-      <span class="text-sm md:text-base">😄</span>
-      <span class="text-[10px] md:text-xs font-bold text-[#ffebb3]">Chào</span>
+  <!-- ==================== 6. THANH 8 PHÍM CHỨC NĂNG & HÀNH LỄ DƯỚI CÙNG ==================== -->
+  <nav id="bottomActionDock" class="fixed bottom-1.5 left-1/2 md:left-auto md:right-3 -translate-x-1/2 md:translate-x-0 z-20 max-w-[98vw] overflow-x-auto no-scrollbar flex items-center gap-1 md:gap-1.5 px-2 py-1.5 rounded-xl bg-[#24150b]/95 border-2 border-[#8c5a32] shadow-2xl">
+    <button onclick="performAction('wave')" class="action-card w-14 md:w-16 h-14 md:h-16 flex flex-col items-center justify-center p-1">
+      <span class="hotkey-badge">1</span>
+      <span class="text-base md:text-xl">😄</span>
+      <span class="text-[9px] md:text-[10px] font-bold text-[#ffebb3] leading-tight">Chào</span>
     </button>
-    <button onclick="performMyAction('meditate')" class="dock-btn px-2.5 py-1.5 flex items-center gap-1 border-[#ffd166]">
-      <span class="text-sm md:text-base">🧘</span>
-      <span class="text-[10px] md:text-xs font-extrabold text-[#ffd166]">Tọa Thiền</span>
+
+    <button onclick="performAction('deadline')" class="action-card w-14 md:w-16 h-14 md:h-16 flex flex-col items-center justify-center p-1">
+      <span class="hotkey-badge">2</span>
+      <span class="text-base md:text-xl">⚡</span>
+      <span class="text-[9px] md:text-[10px] font-bold text-[#ff9b85] leading-tight">Deadline</span>
     </button>
-    <button onclick="performMyAction('knock')" class="dock-btn px-2.5 py-1.5 flex items-center gap-1">
-      <span class="text-sm md:text-base">🥁</span>
-      <span class="text-[10px] md:text-xs font-bold text-[#6fcf97]">Gõ Mõ</span>
+
+    <button onclick="performAction('meditate')" class="action-card w-14 md:w-16 h-14 md:h-16 flex flex-col items-center justify-center p-1 border-[#ffd166]">
+      <span class="hotkey-badge">3</span>
+      <span class="text-base md:text-xl">🧘</span>
+      <span class="text-[9px] md:text-[10px] font-extrabold text-[#ffd166] leading-tight">Tọa Thiền</span>
     </button>
-    <button onclick="performMyAction('incense')" class="dock-btn px-2.5 py-1.5 flex items-center gap-1">
-      <span class="text-sm md:text-base">🔥</span>
-      <span class="text-[10px] md:text-xs font-bold text-[#ffb4a2]">Thắp Hương</span>
+
+    <button onclick="performAction('knock')" class="action-card w-14 md:w-16 h-14 md:h-16 flex flex-col items-center justify-center p-1">
+      <span class="hotkey-badge">4</span>
+      <span class="text-base md:text-xl">🥁</span>
+      <span class="text-[9px] md:text-[10px] font-bold text-[#6fcf97] leading-tight">Gõ Mõ</span>
     </button>
-    <button onclick="performMyAction('eat')" class="dock-btn px-2.5 py-1.5 flex items-center gap-1">
-      <span class="text-sm md:text-base">🍱</span>
-      <span class="text-[10px] md:text-xs font-bold text-[#fde047]">Ăn Pantry</span>
+
+    <button onclick="performAction('incense')" class="action-card w-15 md:w-17 h-14 md:h-16 flex flex-col items-center justify-center p-1 border-[#ff9b85]">
+      <span class="hotkey-badge">5</span>
+      <span class="text-base md:text-xl">🔥</span>
+      <span class="text-[9px] md:text-[10px] font-extrabold text-[#ffd166] leading-tight">Thắp Hương</span>
     </button>
-    <button onclick="performMyAction('waterfall')" class="dock-btn px-2.5 py-1.5 flex items-center gap-1">
-      <span class="text-sm md:text-base">🐟</span>
-      <span class="text-[10px] md:text-xs font-bold text-[#81ecec]">Hồ Koi</span>
+
+    <button onclick="performAction('waterfall')" class="action-card w-15 md:w-17 h-14 md:h-16 flex flex-col items-center justify-center p-1">
+      <span class="hotkey-badge">6</span>
+      <span class="text-base md:text-xl">🏞️</span>
+      <span class="text-[9px] md:text-[10px] font-bold text-[#81ecec] leading-tight">Ngắm Thác</span>
     </button>
-    <button onclick="performMyAction('leave')" class="dock-btn px-2.5 py-1.5 flex items-center gap-1 bg-red-950/90 border-red-400">
-      <span class="text-sm md:text-base">🏃</span>
-      <span class="text-[10px] md:text-xs font-extrabold text-[#ff9b85]">Hạ Sơn (Out)</span>
+
+    <button onclick="performAction('eat')" class="action-card w-15 md:w-17 h-14 md:h-16 flex flex-col items-center justify-center p-1 border-[#f5b041]">
+      <span class="hotkey-badge">7</span>
+      <span class="text-base md:text-xl">🍱</span>
+      <span class="text-[9px] md:text-[10px] font-extrabold text-[#fde047] leading-tight">Ăn Pantry</span>
+    </button>
+
+    <button onclick="performAction('leave')" class="action-card w-14 md:w-16 h-14 md:h-16 flex flex-col items-center justify-center p-1 bg-red-950/90 border-red-400">
+      <span class="hotkey-badge">8</span>
+      <span class="text-base md:text-xl">🏃</span>
+      <span class="text-[9px] md:text-[10px] font-extrabold text-[#ffb4a2] leading-tight">Hạ Sơn</span>
     </button>
   </nav>
 
-  <!-- ==================== 8. MODAL ĐĂNG NHẬP TẠO ACC (TINH GỌN, KHÔNG LỘ MÔ TẢ) ==================== -->
-  <div id="loginModal" class="fixed inset-0 bg-black/85 z-50 flex items-center justify-center p-3">
-    <div class="wood-card w-full max-w-md overflow-hidden border-2 border-[#ffd166]">
-      <div class="bg-[#4a2511] px-4 py-3 border-b border-[#a47143] text-center">
+  <!-- ==================== 7. MODAL ĐĂNG NHẬP & XIN XUẤT GIA (BẮT BUỘC CHỮ "THÍCH") ==================== -->
+  <div id="authModal" class="fixed inset-0 bg-black/85 z-50 flex items-center justify-center p-3">
+    <div class="wood-panel w-full max-w-md overflow-hidden border-2 border-[#ffd166]">
+      <div class="wood-panel-header px-5 py-3 text-center">
         <h2 class="text-base md:text-lg font-extrabold uppercase text-[#ffd166]">⛩️ SƯƠNG MINH TỔ MÔN</h2>
-        <p class="text-[11px] text-[#e0c097]">Khởi tạo pháp danh để bước vào Tổ Môn</p>
+        <p class="text-[11px] text-[#e0c097]">Hệ Thống Văn Phòng Thiền Viện Trực Tuyến</p>
       </div>
 
-      <div class="p-4 space-y-3 text-xs">
+      <!-- Chuyển tab Đăng Nhập / Xin Xuất Gia -->
+      <div class="grid grid-cols-2 bg-[#1c0f07] border-b border-[#8c5a32] text-xs font-extrabold">
+        <button id="tabBtnLogin" onclick="switchAuthTab('login')" class="py-2.5 text-[#ffd166] bg-[#4a2611] border-b-2 border-[#ffd166]">
+          🔑 Đăng Nhập (Nhập Tự)
+        </button>
+        <button id="tabBtnRegister" onclick="switchAuthTab('register')" class="py-2.5 text-[#c2a383] hover:text-white">
+          🪷 Xin Xuất Gia (Tạo Acc)
+        </button>
+      </div>
+
+      <!-- Thông báo lỗi / thành công -->
+      <div id="authAlertBox" class="hidden mx-4 mt-3 p-2.5 rounded text-xs font-bold border"></div>
+
+      <!-- FORM 1: ĐĂNG NHẬP -->
+      <div id="formLogin" class="p-4 space-y-3 text-xs">
         <div>
-          <label class="block font-bold text-[#ffd166] mb-1">✍️ Pháp Danh / Tên của bạn:</label>
+          <label class="block font-bold text-[#ffd166] mb-1">🧘 Pháp Danh (Bắt đầu bằng chữ Thích):</label>
           <input
-            id="loginNameInput"
+            id="loginUsername"
             type="text"
-            placeholder="Nhập tên của bạn..."
-            class="w-full bg-[#fdf6e9] text-[#2c1608] font-bold px-3 py-2 rounded border-2 border-[#b07d4f] focus:outline-none"
+            value="Thích Báo Giá"
+            placeholder="VD: Thích Báo Giá"
+            class="w-full bg-[#fdf6e9] text-[#2c1608] font-extrabold px-3 py-2 rounded border-2 border-[#b07d4f] focus:outline-none"
+          />
+        </div>
+        <div>
+          <label class="block font-bold text-[#ffd166] mb-1">🔒 Mật Khẩu:</label>
+          <input
+            id="loginPassword"
+            type="password"
+            placeholder="Nhập mật khẩu..."
+            class="w-full bg-[#fdf6e9] text-[#2c1608] font-extrabold px-3 py-2 rounded border-2 border-[#b07d4f] focus:outline-none"
+          />
+        </div>
+        <button
+          onclick="handleLoginSubmit()"
+          class="w-full py-2.5 rounded-lg bg-gradient-to-b from-[#d97706] to-[#9a3412] hover:from-[#f59e0b] hover:to-[#b45309] border-2 border-[#fde047] text-white font-extrabold text-sm uppercase tracking-wider shadow-lg"
+        >
+          🚪 Bước Vào Tổ Môn
+        </button>
+        <div class="text-[11px] text-[#d4b483] text-center pt-1">
+          Chưa có tài khoản? Bấm sang tab <span onclick="switchAuthTab('register')" class="text-[#ffd166] font-extrabold underline cursor-pointer">Xin Xuất Gia</span> để đăng ký và chờ <b>Thích Báo Giá</b> phê duyệt!
+        </div>
+      </div>
+
+      <!-- FORM 2: XIN XUẤT GIA (TẠO ACC MỚI) -->
+      <div id="formRegister" class="hidden p-4 space-y-3 text-xs">
+        <div>
+          <label class="block font-bold text-[#ffd166] mb-1">✍️ Pháp Danh (Bắt buộc chữ "Thích" ở đầu):</label>
+          <div class="flex items-center">
+            <span class="bg-[#5c3214] text-[#ffd166] font-extrabold px-3 py-2 rounded-l border-2 border-r-0 border-[#b07d4f]">Thích</span>
+            <input
+              id="regSuffixName"
+              type="text"
+              placeholder="Nhập tên pháp danh (VD: Tịnh Tâm)..."
+              class="flex-1 bg-[#fdf6e9] text-[#2c1608] font-extrabold px-3 py-2 rounded-r border-2 border-[#b07d4f] focus:outline-none"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-[#ffd166] mb-1">🔒 Mật Khẩu Đăng Nhập:</label>
+          <input
+            id="regPassword"
+            type="password"
+            placeholder="Tạo mật khẩu..."
+            class="w-full bg-[#fdf6e9] text-[#2c1608] font-extrabold px-3 py-2 rounded border-2 border-[#b07d4f] focus:outline-none"
           />
         </div>
 
         <div class="grid grid-cols-2 gap-2.5">
           <div>
             <label class="block font-bold text-[#ffd166] mb-1">🏢 Phòng Ban:</label>
-            <select id="loginDeptSelect" class="w-full bg-[#fdf6e9] text-[#2c1608] font-bold px-2.5 py-2 rounded border-2 border-[#b07d4f] focus:outline-none">
+            <select id="regDept" class="w-full bg-[#fdf6e9] text-[#2c1608] font-extrabold px-2.5 py-2 rounded border-2 border-[#b07d4f] focus:outline-none">
               <option value="PROC">PROC</option>
               <option value="IBD Cost" selected>IBD Cost</option>
               <option value="IBD Sale">IBD Sale</option>
@@ -258,8 +379,8 @@
 
           <div>
             <label class="block font-bold text-[#ffd166] mb-1">⚡ Tầng Tu Vi:</label>
-            <!-- Chỉ để lại đúng tầng tu vi, tuyệt đối không ghi mô tả có cánh hay trang phục -->
-            <select id="loginLevelSelect" class="w-full bg-[#fdf6e9] text-[#2c1608] font-bold px-2.5 py-2 rounded border-2 border-[#b07d4f] focus:outline-none">
+            <!-- Chỉ để đúng tên tầng Tu Vi, không ghi chữ mô tả cánh/áo -->
+            <select id="regLevel" class="w-full bg-[#fdf6e9] text-[#2c1608] font-extrabold px-2.5 py-2 rounded border-2 border-[#b07d4f] focus:outline-none">
               <option value="ST2">ST2</option>
               <option value="ST3" selected>ST3</option>
               <option value="Group Lead">Group Lead</option>
@@ -273,28 +394,60 @@
           <label class="block font-bold text-[#ffd166] mb-1">👤 Hình Tướng:</label>
           <div class="grid grid-cols-2 gap-2">
             <label class="flex items-center justify-center gap-1.5 bg-[#2d180c] border border-[#8c5a32] py-1.5 rounded cursor-pointer font-bold">
-              <input type="radio" name="genderRadio" value="M" checked /> Nam Đạo Hữu
+              <input type="radio" name="regGender" value="M" checked /> Nam Tăng
             </label>
             <label class="flex items-center justify-center gap-1.5 bg-[#2d180c] border border-[#8c5a32] py-1.5 rounded cursor-pointer font-bold">
-              <input type="radio" name="genderRadio" value="F" /> Nữ Đạo Hữu
+              <input type="radio" name="regGender" value="F" /> Nữ Ni
             </label>
           </div>
         </div>
 
         <button
-          onclick="submitJoinTemple()"
-          class="w-full py-2.5 rounded-lg bg-gradient-to-b from-[#d97706] to-[#9a3412] hover:from-[#f59e0b] hover:to-[#b45309] border-2 border-[#fde047] text-white font-extrabold text-sm uppercase tracking-wider shadow-lg"
+          onclick="handleRegisterSubmit()"
+          class="w-full py-2.5 rounded-lg bg-gradient-to-b from-[#2e7d32] to-[#1b5e20] hover:from-[#388e3c] hover:to-[#2e7d32] border-2 border-[#88d4ab] text-white font-extrabold text-sm uppercase tracking-wider shadow-lg"
         >
-          🚪 Bước Vào Tổ Môn
+          📜 Gửi Đơn Xin Xuất Gia (Chờ Duyệt)
         </button>
       </div>
     </div>
   </div>
 
-  <!-- ==================== 9. SOCKET.IO & ENGINE 2.5D ==================== -->
+  <!-- ==================== 8. MODAL QUẢN LÝ ACC (DÀNH CHO THÍCH BÁO GIÁ - MK: 123456) ==================== -->
+  <div id="adminModal" class="fixed inset-0 bg-black/80 z-50 hidden items-center justify-center p-3">
+    <div class="wood-panel w-full max-w-3xl max-h-[88dvh] flex flex-col overflow-hidden border-2 border-[#ffd166]">
+      <div class="wood-panel-header px-4 py-3 flex items-center justify-between">
+        <div>
+          <h2 class="text-sm md:text-base font-extrabold uppercase text-[#ffd166]">
+            👑 SỔ SINH TỬ - QUẢN LÝ & PHÊ DUYỆT ĐẠO HỮU (TRỤ TRÌ: THÍCH BÁO GIÁ)
+          </h2>
+          <p class="text-[11px] text-[#e0c097]">Phê duyệt đơn Xin Xuất Gia, sắc phong Tầng Tu Vi (ST2 → Manager) và điều chuyển Phòng Ban</p>
+        </div>
+        <button onclick="closeAdminModal()" class="text-lg text-[#ff9b85] hover:text-white font-bold px-2">✕</button>
+      </div>
+
+      <!-- Khung xác thực nếu chưa đăng nhập bằng acc Thích Báo Giá -->
+      <div id="adminPassGate" class="p-3 bg-[#1c0f08] border-b border-[#6e472b] flex flex-wrap items-center justify-between gap-2 text-xs">
+        <span class="text-[#ffd166] font-bold">🔑 Mật lệnh Trụ Trì (Thích Báo Giá):</span>
+        <div class="flex items-center gap-2">
+          <input id="adminQuickPass" type="password" placeholder="Nhập mật khẩu Trụ Trì (123456)..." class="bg-[#fdf6e9] text-[#2c1608] font-bold px-2.5 py-1 rounded border border-[#b07d4f]" />
+          <span class="text-[11px] text-[#6fcf97] font-bold" id="adminAuthStatus"></span>
+        </div>
+      </div>
+
+      <div id="adminAccountsContainer" class="p-3 overflow-y-auto space-y-2 text-xs flex-1"></div>
+
+      <div class="p-2.5 bg-[#1a0e07] border-t border-[#6e472b] flex justify-end">
+        <button onclick="closeAdminModal()" class="px-5 py-1.5 rounded bg-[#6e421f] hover:bg-[#8a5429] text-xs font-extrabold text-white">
+          Đóng Sổ Sinh Tử
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 9. SOCKET.IO & ENGINE ĐỒ HỌA 2.5D SIÊU CHI TIẾT ==================== -->
   <script src="/socket.io/socket.io.js"></script>
   <script>
-    // --- 1. ÂM THANH ---
+    // --- 1. ÂM THANH CHÙA (MÕ GỖ & ĐẠI HỒNG CHUNG) ---
     const AudioCtx = window.AudioContext || window.webkitAudioContext;
     let audioCtx = null;
     let soundMuted = false;
@@ -304,12 +457,13 @@
       if (audioCtx.state === 'suspended') audioCtx.resume();
     }
 
-    function toggleSound() {
+    function toggleAudioMute() {
       soundMuted = !soundMuted;
-      document.getElementById('btnSound').textContent = soundMuted ? '🔇' : '🔊';
+      const btn = document.getElementById('btnAudio');
+      btn.textContent = soundMuted ? '🔇' : '🔊';
     }
 
-    function playWoodKnock(pitch = 1.0) {
+    function playMokugyoSound(pitch = 1.0) {
       if (soundMuted) return;
       try {
         ensureAudio();
@@ -317,10 +471,10 @@
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         osc.type = 'triangle';
-        osc.frequency.setValueAtTime(750 * pitch, now);
-        osc.frequency.exponentialRampToValueAtTime(290 * pitch, now + 0.07);
-        gain.gain.setValueAtTime(0.3, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+        osc.frequency.setValueAtTime(760 * pitch, now);
+        osc.frequency.exponentialRampToValueAtTime(300 * pitch, now + 0.068);
+        gain.gain.setValueAtTime(0.32, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.078);
         osc.connect(gain);
         gain.connect(audioCtx.destination);
         osc.start(now);
@@ -328,178 +482,206 @@
       } catch (e) {}
     }
 
-    function playBell() {
+    function playTempleBellSound() {
       if (soundMuted) return;
       try {
         ensureAudio();
         const now = audioCtx.currentTime;
-        [220, 440, 660].forEach((f, i) => {
+        [216, 432, 648].forEach((freq, idx) => {
           const osc = audioCtx.createOscillator();
           const gain = audioCtx.createGain();
           osc.type = 'sine';
-          osc.frequency.setValueAtTime(f, now);
-          gain.gain.setValueAtTime(0.25 / (i + 1), now);
-          gain.gain.exponentialRampToValueAtTime(0.0001, now + 2.2 - i * 0.4);
+          osc.frequency.setValueAtTime(freq, now);
+          gain.gain.setValueAtTime(0.3 / (idx + 1), now);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 2.6 - idx * 0.45);
           osc.connect(gain);
           gain.connect(audioCtx.destination);
           osc.start(now);
-          osc.stop(now + 2.3);
+          osc.stop(now + 2.7);
         });
       } catch (e) {}
     }
 
-    // --- 2. TOÀN MÀN HÌNH (FULLSCREEN) KHI XOAY NGANG ---
-    function toggleFullScreen() {
-      const el = document.documentElement;
-      if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-        if (el.requestFullscreen) el.requestFullscreen().catch(() => {});
-        else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
-      } else {
-        if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
-        else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
-      }
-    }
-
-    // --- 3. KIẾN TRÚC BẢN ĐỒ SƯƠNG MINH TỔ MÔN ---
+    // --- 2. KIẾN TRÚC BẢN ĐỒ SƯƠNG MINH TỔ MÔN (26 x 18) ---
     const MAP_W = 26;
     const MAP_H = 18;
-    const ISO_W = 58;
-    const ISO_H = 29;
+    const ISO_TILE_W = 60;
+    const ISO_TILE_H = 30;
 
-    const INCENSE_ALTAR = { x: 9.2, y: 9.6, standX: 9.2, standY: 10.4 };
-    const KOI_POND = { x: 0.7, y: 0.6, w: 5.8, h: 3.5, standX: 3.6, standY: 4.15 };
+    const INCENSE_ALTAR = { x: 9.2, y: 9.6, standX: 9.2, standY: 10.45 };
+    const WATERFALL_ZONE = { x: 0.6, y: 0.5, w: 5.8, h: 3.6, viewX: 3.8, viewY: 4.15 };
+    // Khu vực mới: Cây Bồ Đề Cổ Thụ & Lầu Chuông Đại Hồng Chung
+    const BODHI_BELL_ZONE = { x: 17.0, y: 0.6, w: 1.8, h: 3.2, bellX: 17.6, bellY: 2.3, standX: 17.6, standY: 3.6 };
 
-    // 6 Phòng ban chuẩn xác + Chánh Điện + Pantry + Cầu Thang Hạ Sơn
     const ZONES = {
       DIRECTOR: {
         id: 'DIRECTOR', deptKey: null,
-        title: '⛩️ ĐẠI HÙNG BẢO ĐIỆN',
-        rx: 7.0, ry: 0.5, rw: 9.6, rh: 3.4,
-        doorX: 11.8, doorY: 3.9, doorSide: 'south',
-        approachX: 11.8, approachY: 4.35,
+        shortName: 'Đại Hùng Bảo Điện',
+        doorTitle: '⛩️ ĐẠI HÙNG BẢO ĐIỆN',
+        subLabel: '(Tượng Phật Vàng & Chánh Điện)',
+        rx: 6.8, ry: 0.5, rw: 9.8, rh: 3.4,
+        doorX: 11.7, doorY: 3.9, doorSide: 'south',
+        approachX: 11.7, approachY: 4.3,
         floorColor: '#691b16', wallColor: '#b5835a', badgeColor: '#dc2626'
       },
       PROC: {
         id: 'PROC', deptKey: 'PROC',
-        title: 'PROC',
+        shortName: 'PROC',
+        doorTitle: '🚪 PROC',
+        subLabel: '(Tàng Kinh Các)',
         rx: 0.8, ry: 4.5, rw: 5.0, rh: 4.2,
-        deskX: 2.4, deskY: 5.1, deskW: 1.8, deskH: 3.0,
+        deskX: 2.4, deskY: 5.0, deskW: 1.8, deskH: 3.1,
         doorX: 3.3, doorY: 8.7, doorSide: 'south',
         approachX: 3.3, approachY: 9.3,
-        spawnX: 1.7, spawnY: 6.4,
+        spawnX: 1.7, spawnY: 6.3,
         floorColor: '#7a4e2d', wallColor: '#c99b68', badgeColor: '#d97706'
       },
       Logistic: {
         id: 'Logistic', deptKey: 'Logistic',
-        title: 'Logistic',
+        shortName: 'Logistic',
+        doorTitle: '🚪 Logistic',
+        subLabel: '(Thỉnh Kinh Viện)',
         rx: 6.7, ry: 4.5, rw: 5.0, rh: 4.2,
-        deskX: 8.3, deskY: 5.1, deskW: 1.8, deskH: 3.0,
+        deskX: 8.3, deskY: 5.0, deskW: 1.8, deskH: 3.1,
         doorX: 9.2, doorY: 8.7, doorSide: 'south',
         approachX: 9.2, approachY: 9.3,
-        spawnX: 7.6, spawnY: 6.4,
+        spawnX: 7.6, spawnY: 6.3,
         floorColor: '#70482a', wallColor: '#c99b68', badgeColor: '#2563eb'
       },
       'HR-GA': {
         id: 'HR-GA', deptKey: 'HR-GA',
-        title: 'HR-GA',
+        shortName: 'HR-GA',
+        doorTitle: '🚪 HR-GA',
+        subLabel: '(Pháp Đường)',
         rx: 12.6, ry: 4.5, rw: 5.0, rh: 4.2,
-        deskX: 14.2, deskY: 5.1, deskW: 1.8, deskH: 3.0,
+        deskX: 14.2, deskY: 5.0, deskW: 1.8, deskH: 3.1,
         doorX: 15.1, doorY: 8.7, doorSide: 'south',
         approachX: 15.1, approachY: 9.3,
-        spawnX: 13.5, spawnY: 6.4,
+        spawnX: 13.5, spawnY: 6.3,
         floorColor: '#7a4e2d', wallColor: '#c99b68', badgeColor: '#db2777'
       },
       Tech: {
         id: 'Tech', deptKey: 'Tech',
-        title: 'Tech',
+        shortName: 'Tech',
+        doorTitle: '🚪 Tech',
+        subLabel: '(Lò Luyện Đơn)',
         rx: 0.8, ry: 11.3, rw: 5.0, rh: 4.5,
-        deskX: 2.4, deskY: 11.9, deskW: 1.8, deskH: 3.2,
+        deskX: 2.4, deskY: 11.9, deskW: 1.8, deskH: 3.3,
         doorX: 3.3, doorY: 11.3, doorSide: 'north',
         approachX: 3.3, approachY: 10.6,
-        spawnX: 1.7, spawnY: 13.4,
+        spawnX: 1.7, spawnY: 13.3,
         floorColor: '#70482a', wallColor: '#c99b68', badgeColor: '#059669'
       },
       'IBD Cost': {
         id: 'IBD Cost', deptKey: 'IBD Cost',
-        title: 'IBD Cost',
+        shortName: 'IBD Cost',
+        doorTitle: '🚪 IBD Cost',
+        subLabel: '(Đàn Cầu Siêu)',
         rx: 6.7, ry: 11.3, rw: 5.0, rh: 4.5,
-        deskX: 8.3, deskY: 11.9, deskW: 1.8, deskH: 3.2,
+        deskX: 8.3, deskY: 11.9, deskW: 1.8, deskH: 3.3,
         doorX: 9.2, doorY: 11.3, doorSide: 'north',
         approachX: 9.2, approachY: 10.6,
-        spawnX: 7.6, spawnY: 13.4,
+        spawnX: 7.6, spawnY: 13.3,
         floorColor: '#78472a', wallColor: '#c99b68', badgeColor: '#7c3aed'
       },
       'IBD Sale': {
         id: 'IBD Sale', deptKey: 'IBD Sale',
-        title: 'IBD Sale',
+        shortName: 'IBD Sale',
+        doorTitle: '🚪 IBD Sale',
+        subLabel: '(Hộ Pháp Đường)',
         rx: 12.6, ry: 11.3, rw: 5.0, rh: 4.5,
-        deskX: 14.2, deskY: 11.9, deskW: 1.8, deskH: 3.2,
+        deskX: 14.2, deskY: 11.9, deskW: 1.8, deskH: 3.3,
         doorX: 15.1, doorY: 11.3, doorSide: 'north',
         approachX: 15.1, approachY: 10.6,
-        spawnX: 13.5, spawnY: 13.4,
+        spawnX: 13.5, spawnY: 13.3,
         floorColor: '#70482a', wallColor: '#c99b68', badgeColor: '#dc2626'
       },
       PANTRY: {
         id: 'PANTRY', deptKey: null,
-        title: '🍱 PANTRY (Tủ Lạnh & Bàn Ăn)',
-        rx: 19.0, ry: 1.0, rw: 6.0, rh: 7.0,
-        doorX: 22.0, doorY: 8.0, doorSide: 'south',
-        approachX: 22.0, approachY: 9.2,
-        eatX: 21.8, eatY: 4.8,
-        floorColor: '#5c4028', wallColor: '#d4a373', badgeColor: '#eab308'
+        shortName: 'Pantry',
+        doorTitle: '🍵 PANTRY - TRAI ĐƯỜNG',
+        subLabel: '(Tủ Lạnh & Bàn Ăn +Công Đức)',
+        rx: 19.2, ry: 1.2, rw: 5.8, rh: 6.8,
+        doorX: 22.1, doorY: 8.0, doorSide: 'south',
+        approachX: 22.1, approachY: 9.2,
+        eatX: 22.0, eatY: 5.0,
+        floorColor: '#5c4433', wallColor: '#d4a373', badgeColor: '#ca8a04'
       },
       STAIRS: {
         id: 'STAIRS', deptKey: null,
-        title: '🏃 CẦU THANG HẠ SƠN (Out Nick)',
-        rx: 19.2, ry: 11.2, rw: 5.6, rh: 5.2,
-        doorX: 22.0, doorY: 11.2, doorSide: 'north',
-        approachX: 22.0, approachY: 10.2,
-        exitX: 22.0, exitY: 13.6,
+        shortName: 'Hạ Sơn',
+        doorTitle: '🪜 CỔNG HẠ SƠN (Out Nick)',
+        subLabel: '(Bước Xuống Để Đăng Xuất)',
+        rx: 19.4, ry: 11.2, rw: 5.4, rh: 5.4,
+        doorX: 22.1, doorY: 11.2, doorSide: 'north',
+        approachX: 22.1, approachY: 10.2,
+        exitX: 22.1, exitY: 13.8,
         floorColor: '#292524', wallColor: '#a8a29e', badgeColor: '#0891b2'
       }
     };
 
-    // --- 4. BIẾN TRẠNG THÁI & CAMERA ---
+    // --- 3. STATE & CAMERA ---
     const canvas = document.getElementById('templeCanvas');
     const ctx = canvas.getContext('2d');
     const socket = typeof io !== 'undefined' ? io() : null;
 
     let isTopDown2D = false;
     let isNightMode = false;
-    let camZoom = 0.85;
+    let allPanelsHidden = false;
+    let isRightCollapsed = window.innerWidth < 768;
+    let isLeftCollapsed = false;
+
+    let camZoom = 1.0;
     let camOffsetX = 0;
     let camOffsetY = 0;
 
     let myId = null;
-    let players = {}; // Chỉ chứa những acc đang online thực tế
+    let myAccount = null;
+    let players = {}; // Chỉ hiển thị các đạo hữu thực sự đăng nhập
+    let accountsList = [];
     let activeDeptFilter = 'ALL';
-    let selectedTargetId = null;
-    let pendingInteraction = null; // { targetId, type: 'punch' | 'kiss' }
+    let selectedCombatTargetId = null;
+    let pendingProximityTask = null;
+
     let activeIncenseSticks = 9;
     let simTick = 0;
 
-    let floatingTexts = [];
     let smokeParticles = [];
+    let waterfallParticles = [];
+    let waterRipples = [];
+    let floatingLabels = [];
+    let bellShockwaves = [];
+    let goldenMotes = [];
     let heartParticles = [];
-    let waterfallDrops = [];
 
-    for (let i = 0; i < 75; i++) {
-      waterfallDrops.push({
-        stream: i % 3,
-        prog: Math.random(),
-        speed: 0.02 + Math.random() * 0.015,
-        offX: (Math.random() - 0.5) * 0.25,
-        size: 1.8 + Math.random() * 2.2
+    for (let i = 0; i < 95; i++) {
+      waterfallParticles.push({
+        streamIdx: i % 3,
+        progress: Math.random(),
+        speed: 0.018 + Math.random() * 0.013,
+        offsetX: (Math.random() - 0.5) * 0.28,
+        size: 2 + Math.random() * 2.5
       });
     }
 
-    const koiFish = [
-      { a: 0.2, sp: 0.022, rx: 1.4, ry: 0.7, cx: 3.6, cy: 2.7, c: '#ff4d4d', spot: '#ffffff' },
-      { a: 1.5, sp: 0.018, rx: 1.7, ry: 0.8, cx: 3.5, cy: 2.6, c: '#fbbf24', spot: '#dc2626' },
-      { a: 2.8, sp: 0.025, rx: 1.1, ry: 0.55, cx: 3.8, cy: 2.8, c: '#ffffff', spot: '#ef4444' },
-      { a: 4.1, sp: 0.020, rx: 1.5, ry: 0.65, cx: 3.4, cy: 2.5, c: '#f97316', spot: '#111827' },
-      { a: 5.4, sp: 0.019, rx: 1.25, ry: 0.6, cx: 3.9, cy: 2.6, c: '#fde047', spot: '#b91c1c' }
+    const koiFishList = [
+      { angle: 0.2, speed: 0.022, rx: 1.35, ry: 0.68, cx: 3.5, cy: 2.6, color: '#ff4d4d', spot: '#ffffff' },
+      { angle: 1.6, speed: 0.018, rx: 1.6, ry: 0.75, cx: 3.4, cy: 2.55, color: '#fbbf24', spot: '#dc2626' },
+      { angle: 2.9, speed: 0.025, rx: 1.05, ry: 0.52, cx: 3.7, cy: 2.7, color: '#f97316', spot: '#ffffff' },
+      { angle: 4.1, speed: 0.017, rx: 1.4, ry: 0.62, cx: 3.3, cy: 2.5, color: '#ffffff', spot: '#ef4444' },
+      { angle: 5.2, speed: 0.021, rx: 1.2, ry: 0.58, cx: 3.8, cy: 2.48, color: '#f59e0b', spot: '#111827' },
+      { angle: 0.9, speed: 0.020, rx: 0.85, ry: 0.45, cx: 2.9, cy: 2.75, color: '#fde047', spot: '#dc2626' }
     ];
+
+    for (let i = 0; i < 40; i++) {
+      goldenMotes.push({
+        gx: Math.random() * MAP_W,
+        gy: Math.random() * MAP_H,
+        gz: 8 + Math.random() * 55,
+        phase: Math.random() * Math.PI * 2,
+        size: 1.5 + Math.random() * 2
+      });
+    }
 
     function resizeCanvas() {
       canvas.width = window.innerWidth;
@@ -509,27 +691,25 @@
     window.addEventListener('resize', resizeCanvas);
 
     function resetCameraView() {
-      const w = window.innerWidth;
-      const h = window.innerHeight;
       if (!isTopDown2D) {
-        camZoom = Math.min(w / 1450, h / 820);
-        camZoom = Math.max(0.48, Math.min(1.15, camZoom));
-        camOffsetX = w * 0.44;
-        camOffsetY = h * 0.12;
+        camZoom = Math.min(window.innerWidth / 1560, window.innerHeight / 900);
+        camZoom = Math.max(0.52, Math.min(1.15, camZoom));
+        camOffsetX = window.innerWidth * 0.43;
+        camOffsetY = window.innerHeight * 0.1;
       } else {
-        camZoom = Math.min(w / (MAP_W * 38), (h - 110) / (MAP_H * 38));
-        camOffsetX = (w - MAP_W * 38 * camZoom) / 2;
-        camOffsetY = 55;
+        camZoom = Math.min((window.innerWidth - 40) / (MAP_W * 40), (window.innerHeight - 130) / (MAP_H * 40));
+        camOffsetX = (window.innerWidth - MAP_W * 40 * camZoom) * 0.5;
+        camOffsetY = 60;
       }
     }
 
     function worldToScreen(gx, gy, gz = 0) {
       if (isTopDown2D) {
-        const cell = 38 * camZoom;
+        const cell = 40 * camZoom;
         return { x: camOffsetX + gx * cell, y: camOffsetY + gy * cell };
       }
-      const tw = ISO_W * camZoom;
-      const th = ISO_H * camZoom;
+      const tw = ISO_TILE_W * camZoom;
+      const th = ISO_TILE_H * camZoom;
       return {
         x: camOffsetX + (gx - gy) * (tw / 2),
         y: camOffsetY + (gx + gy) * (th / 2) - gz * camZoom
@@ -538,11 +718,11 @@
 
     function screenToWorld(sx, sy) {
       if (isTopDown2D) {
-        const cell = 38 * camZoom;
+        const cell = 40 * camZoom;
         return { x: (sx - camOffsetX) / cell, y: (sy - camOffsetY) / cell };
       }
-      const tw = ISO_W * camZoom;
-      const th = ISO_H * camZoom;
+      const tw = ISO_TILE_W * camZoom;
+      const th = ISO_TILE_H * camZoom;
       const dx = sx - camOffsetX;
       const dy = sy - camOffsetY;
       return {
@@ -551,7 +731,299 @@
       };
     }
 
-    function getZoneAt(gx, gy) {
+    // --- 4. GIAO DIỆN MOBILE / XOAY NGANG & CHỐNG BÀN PHÍM CHE ---
+    function applyPanelCollapseStates() {
+      const rBody = document.getElementById('rightPanelBody');
+      const rIcon = document.getElementById('rightCollapseIcon');
+      if (isRightCollapsed) {
+        rBody.classList.add('hidden');
+        rIcon.textContent = '+';
+      } else {
+        rBody.classList.remove('hidden');
+        rIcon.textContent = '−';
+      }
+
+      const lBody = document.getElementById('leftChatBody');
+      const lIcon = document.getElementById('leftCollapseIcon');
+      if (isLeftCollapsed) {
+        lBody.classList.add('hidden');
+        lIcon.textContent = '+';
+      } else {
+        lBody.classList.remove('hidden');
+        lIcon.textContent = '−';
+      }
+    }
+
+    function toggleRightPanelCollapse() {
+      isRightCollapsed = !isRightCollapsed;
+      applyPanelCollapseStates();
+    }
+
+    function toggleLeftChatCollapse() {
+      isLeftCollapsed = !isLeftCollapsed;
+      applyPanelCollapseStates();
+      if (!isLeftCollapsed) scrollToNewestChat();
+    }
+
+    function toggleAllPanelsUI() {
+      allPanelsHidden = !allPanelsHidden;
+      document.getElementById('rightPlayersPanel').classList.toggle('hidden', allPanelsHidden);
+      document.getElementById('leftChatPanel').classList.toggle('hidden', allPanelsHidden);
+      document.getElementById('bottomActionDock').classList.toggle('hidden', allPanelsHidden);
+    }
+
+    function toggleFullScreen() {
+      const docEl = document.documentElement;
+      if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+        if (docEl.requestFullscreen) docEl.requestFullscreen().catch(() => {});
+        else if (docEl.webkitRequestFullscreen) docEl.webkitRequestFullscreen();
+      } else {
+        if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
+        else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+      }
+    }
+
+    // Khi focus vào ô nhập chat trên điện thoại: Đẩy khung chat lên sát dưới Header để bàn phím ảo không che khuất
+    const chatInputEl = document.getElementById('chatInput');
+    chatInputEl.addEventListener('focus', () => {
+      const panel = document.getElementById('leftChatPanel');
+      panel.style.bottom = 'auto';
+      panel.style.top = '50px';
+      scrollToNewestChat();
+    });
+    chatInputEl.addEventListener('blur', () => {
+      const panel = document.getElementById('leftChatPanel');
+      panel.style.top = '';
+      panel.style.bottom = '';
+    });
+    chatInputEl.addEventListener('keydown', (e) => {
+      e.stopPropagation();
+      if (e.key === 'Enter') sendCustomChat();
+    });
+
+    function scrollToNewestChat() {
+      requestAnimationFrame(() => {
+        const box = document.getElementById('chatLogContainer');
+        if (box) box.scrollTop = box.scrollHeight;
+      });
+    }
+
+    // --- 5. HỆ THỐNG ĐĂNG NHẬP / XIN XUẤT GIA / QUẢN LÝ ACC ---
+    function switchAuthTab(tab) {
+      const isLogin = tab === 'login';
+      document.getElementById('formLogin').classList.toggle('hidden', !isLogin);
+      document.getElementById('formRegister').classList.toggle('hidden', isLogin);
+
+      const btnL = document.getElementById('tabBtnLogin');
+      const btnR = document.getElementById('tabBtnRegister');
+      if (isLogin) {
+        btnL.className = 'py-2.5 text-[#ffd166] bg-[#4a2611] border-b-2 border-[#ffd166]';
+        btnR.className = 'py-2.5 text-[#c2a383] hover:text-white';
+      } else {
+        btnR.className = 'py-2.5 text-[#ffd166] bg-[#4a2611] border-b-2 border-[#ffd166]';
+        btnL.className = 'py-2.5 text-[#c2a383] hover:text-white';
+      }
+      hideAuthAlert();
+    }
+
+    function showAuthAlert(msg, isSuccess = false) {
+      const box = document.getElementById('authAlertBox');
+      box.classList.remove('hidden');
+      box.className = `mx-4 mt-3 p-2.5 rounded text-xs font-bold border ${
+        isSuccess
+          ? 'bg-green-950/90 border-green-400 text-green-200'
+          : 'bg-red-950/90 border-red-400 text-red-200'
+      }`;
+      box.textContent = msg;
+    }
+
+    function hideAuthAlert() {
+      document.getElementById('authAlertBox').classList.add('hidden');
+    }
+
+    function handleRegisterSubmit() {
+      let suffix = document.getElementById('regSuffixName').value.trim();
+      const password = document.getElementById('regPassword').value.trim();
+      const dept = document.getElementById('regDept').value;
+      const level = document.getElementById('regLevel').value;
+      const genderEl = document.querySelector('input[name="regGender"]:checked');
+      const gender = genderEl ? genderEl.value : 'M';
+
+      if (!suffix) {
+        return showAuthAlert('⚠️ Vui lòng nhập Pháp Danh sau chữ "Thích"!');
+      }
+      if (!password) {
+        return showAuthAlert('⚠️ Vui lòng nhập Mật Khẩu!');
+      }
+
+      // Đảm bảo bắt đầu bằng chữ "Thích "
+      const fullName = suffix.toLowerCase().startsWith('thích ') || suffix.toLowerCase().startsWith('thich ')
+        ? suffix
+        : `Thích ${suffix}`;
+
+      if (socket) {
+        socket.emit('register_account', { name: fullName, password, dept, level, gender }, (res) => {
+          if (!res.ok) {
+            showAuthAlert(res.msg, false);
+          } else {
+            playTempleBellSound();
+            showAuthAlert(`✅ ${res.msg}`, true);
+            document.getElementById('loginUsername').value = res.name;
+            document.getElementById('loginPassword').value = password;
+            setTimeout(() => switchAuthTab('login'), 1800);
+          }
+        });
+      }
+    }
+
+    function handleLoginSubmit() {
+      const name = document.getElementById('loginUsername').value.trim();
+      const password = document.getElementById('loginPassword').value.trim();
+      if (!name || !password) {
+        return showAuthAlert('⚠️ Vui lòng nhập Pháp Danh và Mật Khẩu!');
+      }
+
+      if (socket) {
+        socket.emit('login_account', { name, password }, (res) => {
+          if (!res.ok) {
+            showAuthAlert(res.msg, false);
+          } else {
+            myId = socket.id;
+            myAccount = res.player;
+            accountsList = res.accountsList || accountsList;
+
+            // Đưa nhân vật về đúng phòng ban của mình khi đăng nhập
+            const homeZ = ZONES[myAccount.dept] || ZONES['IBD Cost'];
+            const sx = homeZ.spawnX + (Math.random() - 0.5) * 0.6;
+            const sy = homeZ.spawnY + (Math.random() - 0.5) * 0.6;
+            socket.emit('sync_pos', { x: sx, y: sy, state: 'idle' });
+            if (players[myId]) {
+              players[myId].x = sx;
+              players[myId].y = sy;
+            }
+
+            document.getElementById('authModal').classList.add('hidden');
+            ensureAudio();
+            playTempleBellSound();
+            renderOnlinePlayersUI();
+            renderAdminAccountsUI();
+          }
+        });
+      }
+    }
+
+    function openAdminModal() {
+      document.getElementById('adminModal').classList.remove('hidden');
+      document.getElementById('adminModal').classList.add('flex');
+      if (myAccount && myAccount.isAdmin) {
+        document.getElementById('adminQuickPass').value = '123456';
+        document.getElementById('adminAuthStatus').textContent = '✅ Đã xác thực quyền Trụ Trì Thích Báo Giá';
+      }
+      renderAdminAccountsUI();
+    }
+
+    function closeAdminModal() {
+      document.getElementById('adminModal').classList.add('hidden');
+      document.getElementById('adminModal').classList.remove('flex');
+    }
+
+    function renderAdminAccountsUI() {
+      const container = document.getElementById('adminAccountsContainer');
+      const badge = document.getElementById('pendingCountBadge');
+      if (!container) return;
+
+      const pendingCount = accountsList.filter(a => a.status === 'pending').length;
+      if (pendingCount > 0) {
+        badge.textContent = pendingCount;
+        badge.classList.remove('hidden');
+      } else {
+        badge.classList.add('hidden');
+      }
+
+      container.innerHTML = '';
+      const sorted = [...accountsList].sort((a, b) => {
+        if (a.status === 'pending' && b.status !== 'pending') return -1;
+        if (a.status !== 'pending' && b.status === 'pending') return 1;
+        return a.name.localeCompare(b.name);
+      });
+
+      sorted.forEach(acc => {
+        const isPending = acc.status === 'pending';
+        const row = document.createElement('div');
+        row.className = `p-2.5 rounded border flex flex-col md:flex-row items-start md:items-center justify-between gap-2 ${
+          isPending ? 'bg-[#4a2210] border-[#facc15]' : 'bg-[#26150b] border-[#6e472b]'
+        }`;
+
+        row.innerHTML = `
+          <div class="flex flex-col">
+            <div class="flex items-center gap-2">
+              <span class="font-extrabold text-sm text-[#ffd166]">${acc.name}</span>
+              <span class="px-2 py-0.5 rounded text-[10px] font-extrabold ${
+                isPending ? 'bg-yellow-500 text-black' : 'bg-green-800 text-green-200'
+              }">
+                ${isPending ? '⏳ Chờ Phê Duyệt' : '✅ Đã Duyệt'}
+              </span>
+              ${acc.isAdmin ? '<span class="px-1.5 py-0.5 rounded bg-red-700 text-white text-[9px] font-black">TRỤ TRÌ</span>' : ''}
+            </div>
+            <span class="text-[11px] text-[#e0c097]">Công Đức: <b>${(acc.merit || 0).toLocaleString()} 🪷</b></span>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-1.5 w-full md:w-auto justify-end">
+            <select id="admDept_${acc.usernameKey}" class="bg-[#160c06] text-[#fff3cd] px-2 py-1 rounded border border-[#8c5a32] text-xs font-bold">
+              ${['PROC', 'IBD Cost', 'IBD Sale', 'Logistic', 'HR-GA', 'Tech'].map(d =>
+                `<option value="${d}" ${acc.dept === d ? 'selected' : ''}>${d}</option>`
+              ).join('')}
+            </select>
+
+            <select id="admLevel_${acc.usernameKey}" class="bg-[#160c06] text-[#ffd166] px-2 py-1 rounded border border-[#8c5a32] text-xs font-bold">
+              ${['ST2', 'ST3', 'Group Lead', 'AM', 'Manager'].map(lv =>
+                `<option value="${lv}" ${acc.level === lv ? 'selected' : ''}>${lv}</option>`
+              ).join('')}
+            </select>
+
+            ${isPending ? `
+              <button onclick="adminDoAction('approve', '${acc.usernameKey}')" class="px-3 py-1 rounded bg-green-600 hover:bg-green-500 text-white font-extrabold text-xs shadow">
+                ✅ Duyệt Ngay
+              </button>
+            ` : ''}
+
+            <button onclick="adminDoAction('update_role', '${acc.usernameKey}')" class="px-2.5 py-1 rounded bg-[#c97a1c] hover:bg-[#e08b24] text-white font-extrabold text-xs">
+              💾 Lưu Tu Vi
+            </button>
+
+            ${!acc.isAdmin ? `
+              <button onclick="adminDoAction('delete', '${acc.usernameKey}')" class="px-2 py-1 rounded bg-red-800 hover:bg-red-700 text-white font-bold text-xs">
+                🗑️ Xóa
+              </button>
+            ` : ''}
+          </div>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function adminDoAction(actionType, targetKey) {
+      const adminPass = document.getElementById('adminQuickPass').value.trim();
+      const deptSel = document.getElementById(`admDept_${targetKey}`);
+      const levelSel = document.getElementById(`admLevel_${targetKey}`);
+
+      socket.emit('admin_action', {
+        adminPass,
+        actionType,
+        targetKey,
+        newDept: deptSel ? deptSel.value : undefined,
+        newLevel: levelSel ? levelSel.value : undefined
+      }, (res) => {
+        if (res && !res.ok) {
+          alert(res.msg);
+        } else {
+          playMokugyoSound(1.2);
+        }
+      });
+    }
+
+    // --- 6. THUẬT TOÁN TÌM ĐƯỜNG THÔNG MINH QUA CỬA PHÒNG ---
+    function getContainingZone(gx, gy) {
       for (const z of Object.values(ZONES)) {
         if (gx >= z.rx && gx <= z.rx + z.rw && gy >= z.ry && gy <= z.ry + z.rh) {
           return z;
@@ -560,37 +1032,44 @@
       return null;
     }
 
-    function buildSmartWaypoints(startX, startY, destX, destY) {
-      const cx = Math.max(0.8, Math.min(MAP_W - 0.8, destX));
-      const cy = Math.max(1.0, Math.min(MAP_H - 0.8, destY));
+    function buildWaypoints(startX, startY, destX, destY) {
+      const clampedX = Math.max(0.8, Math.min(MAP_W - 0.8, destX));
+      const clampedY = Math.max(1.0, Math.min(MAP_H - 0.8, destY));
       const wp = [];
-      const startZ = getZoneAt(startX, startY);
-      const endZ = getZoneAt(cx, cy);
 
-      if (startZ && (!endZ || startZ.id !== endZ.id)) {
-        wp.push({ x: startZ.doorX, y: startZ.doorY });
-        wp.push({ x: startZ.approachX, y: startZ.approachY });
+      const startZone = getContainingZone(startX, startY);
+      const endZone = getContainingZone(clampedX, clampedY);
+
+      if (startZone && (!endZone || startZone.id !== endZone.id)) {
+        wp.push({ x: startZone.doorX, y: startZone.doorY });
+        wp.push({ x: startZone.approachX, y: startZone.approachY });
       }
-      const startRight = startX > 18.2;
-      const endRight = cx > 18.2;
-      if (startRight !== endRight) {
-        if (!startRight) wp.push({ x: 17.6, y: 9.7 }, { x: 18.8, y: 9.7 });
-        else wp.push({ x: 18.8, y: 9.7 }, { x: 17.6, y: 9.7 });
+
+      const currentlyRightWing = startX > 18.2;
+      const targetRightWing = clampedX > 18.2;
+      if (currentlyRightWing !== targetRightWing) {
+        const gateLeft = { x: 17.6, y: 9.7 };
+        const gateRight = { x: 18.8, y: 9.7 };
+        if (!currentlyRightWing) wp.push(gateLeft, gateRight);
+        else wp.push(gateRight, gateLeft);
       }
-      if (endZ && (!startZ || startZ.id !== endZ.id)) {
-        wp.push({ x: endZ.approachX, y: endZ.approachY });
-        wp.push({ x: endZ.doorX, y: endZ.doorY });
+
+      if (endZone && (!startZone || startZone.id !== endZone.id)) {
+        wp.push({ x: endZone.approachX, y: endZone.approachY });
+        wp.push({ x: endZone.doorX, y: endZone.doorY });
       }
-      wp.push({ x: cx, y: cy });
+
+      wp.push({ x: clampedX, y: clampedY });
       return wp;
     }
 
-    function sendMyMove(destX, destY, afterAction = null) {
+    function moveMyCharacter(destX, destY, afterAction = null) {
       const me = players[myId];
       if (!me) return;
-      me.waypoints = buildSmartWaypoints(me.x, me.y, destX, destY);
-      me.targetX = me.waypoints[0].x;
-      me.targetY = me.waypoints[0].y;
+      const wp = buildWaypoints(me.x, me.y, destX, destY);
+      me.waypoints = wp;
+      me.targetX = wp[0].x;
+      me.targetY = wp[0].y;
       me.afterWalkAction = afterAction;
       me.state = 'walk';
 
@@ -598,119 +1077,104 @@
         socket.emit('move', {
           x: me.x,
           y: me.y,
-          destX,
-          destY,
+          destX: clampedCoord(destX, MAP_W),
+          destY: clampedCoord(destY, MAP_H),
           state: 'walk'
         });
       }
     }
 
-    // --- 5. ĐĂNG NHẬP & HÀNH ĐỘNG ---
-    function submitJoinTemple() {
-      const nameVal = document.getElementById('loginNameInput').value.trim() || 'Đạo Hữu';
-      const deptVal = document.getElementById('loginDeptSelect').value;
-      const levelVal = document.getElementById('loginLevelSelect').value;
-      const genderEl = document.querySelector('input[name="genderRadio"]:checked');
-      const genderVal = genderEl ? genderEl.value : 'M';
-
-      const z = ZONES[deptVal] || ZONES['IBD Cost'];
-      const sx = z.spawnX + (Math.random() - 0.5) * 0.6;
-      const sy = z.spawnY + (Math.random() - 0.5) * 0.6;
-
-      ensureAudio();
-      playBell();
-
-      if (socket) {
-        myId = socket.id;
-        socket.emit('join_temple', {
-          name: nameVal,
-          dept: deptVal,
-          level: levelVal,
-          gender: genderVal,
-          x: sx,
-          y: sy
-        });
-      }
-      document.getElementById('loginModal').classList.add('hidden');
+    function clampedCoord(v, max) {
+      return Math.max(0.8, Math.min(max - 0.8, v));
     }
 
-    function performMyAction(type) {
+    // --- 7. HÀNH LỄ, TỌA THIỀN TRỘM CÔNG ĐỨC, ĂN PANTRY, HẠ SƠN OUT NICK ---
+    function performAction(type) {
       const me = players[myId];
       if (!me) return;
 
       if (type === 'meditate') {
-        const currentRoom = getZoneAt(me.x, me.y);
-        const roomDept = currentRoom ? currentRoom.deptKey : null;
+        const z = getContainingZone(me.x, me.y);
+        const roomDept = z ? z.deptKey : null;
         me.waypoints = [];
         me.state = 'meditate';
-        playBell();
-        if (socket) {
-          socket.emit('meditate_room', { roomDept, x: me.x, y: me.y });
-        }
+        playTempleBellSound();
+        socket.emit('meditate_room', { roomDept, x: me.x, y: me.y });
         return;
       }
 
       if (type === 'incense') {
-        sendMyMove(INCENSE_ALTAR.standX + (Math.random() - 0.5) * 0.6, INCENSE_ALTAR.standY, 'do_incense');
-        return;
-      }
-
-      if (type === 'eat') {
-        sendMyMove(ZONES.PANTRY.eatX + (Math.random() - 0.5) * 0.7, ZONES.PANTRY.eatY, 'do_eat');
+        moveMyCharacter(INCENSE_ALTAR.standX + (Math.random() - 0.5) * 0.6, INCENSE_ALTAR.standY, 'do_incense');
+        me.bubbleText = 'Ra Đỉnh Đồng dâng 3 nén nhang trầm! 🔥';
+        me.bubbleTimer = 150;
+        playMokugyoSound(1.1);
         return;
       }
 
       if (type === 'waterfall') {
-        sendMyMove(KOI_POND.standX + (Math.random() - 0.5) * 0.8, KOI_POND.standY, 'do_waterfall');
+        moveMyCharacter(WATERFALL_ZONE.viewX + (Math.random() - 0.5) * 0.8, WATERFALL_ZONE.viewY, 'do_waterfall');
+        me.bubbleText = 'Ra Cầu Gỗ ngắm Thác Nước & Cá Koi! 🏞️';
+        me.bubbleTimer = 150;
+        playMokugyoSound(1.2);
+        return;
+      }
+
+      if (type === 'eat') {
+        moveMyCharacter(ZONES.PANTRY.eatX + (Math.random() - 0.5) * 0.8, ZONES.PANTRY.eatY, 'do_eat');
+        me.bubbleText = 'Qua Pantry mở Tủ Lạnh thụ lộc! 🍱';
+        me.bubbleTimer = 150;
+        playMokugyoSound(1.15);
         return;
       }
 
       if (type === 'leave') {
-        // Đi ra Cầu Thang Hạ Sơn để Out Nick
-        sendMyMove(ZONES.STAIRS.exitX, ZONES.STAIRS.exitY, 'do_logout');
-        spawnFloatText(me.x, me.y, '🏃 Đang ra Cầu Thang Hạ Sơn...', '#ff9b85');
+        moveMyCharacter(ZONES.STAIRS.exitX, ZONES.STAIRS.exitY, 'do_logout');
+        me.bubbleText = 'Ra Cầu Thang Hạ Sơn (Out Nick)! 🏃';
+        me.bubbleTimer = 160;
+        playTempleBellSound();
         return;
       }
 
-      playWoodKnock();
-      if (socket) socket.emit('action', { type });
+      me.waypoints = [];
+      playMokugyoSound(type === 'deadline' ? 0.75 : 1.0);
+      socket.emit('action', { type });
     }
 
-    function executeLogoutHason() {
-      playBell();
+    function executeHasonLogout() {
       if (socket) socket.emit('leave_temple');
-      closeTargetMenu();
-      document.getElementById('loginModal').classList.remove('hidden');
+      closeCombatPopup();
+      myAccount = null;
+      document.getElementById('headerMyName').textContent = 'Chưa Nhập Tự';
+      document.getElementById('authModal').classList.remove('hidden');
+      showAuthAlert('🏃 Đạo hữu đã Hạ Sơn (Đăng xuất) bình an!', true);
     }
 
-    // --- 6. TƯƠNG TÁC CẬN CHIẾN (ĐẤM / HÔN) ---
-    function selectTargetPlayer(targetId) {
+    // --- 8. CẬN CHIẾN: ĐẤM (-15 HP) & HÔN (+10 HP) ---
+    function openCombatPopup(targetId) {
       if (!targetId || targetId === myId || !players[targetId]) return;
-      selectedTargetId = targetId;
+      selectedCombatTargetId = targetId;
       const t = players[targetId];
-      document.getElementById('targetPlayerName').textContent = `[${t.level}] ${t.name}`;
-      document.getElementById('targetPlayerHp').textContent = `(${t.hp} HP)`;
-      document.getElementById('targetActionMenu').classList.remove('hidden');
+      document.getElementById('combatTargetName').textContent = `[${t.level}] ${t.name}`;
+      document.getElementById('combatTargetHp').textContent = `(${t.hp} HP)`;
+      document.getElementById('combatPopup').classList.remove('hidden');
     }
 
-    function closeTargetMenu() {
-      selectedTargetId = null;
-      pendingInteraction = null;
-      document.getElementById('targetActionMenu').classList.add('hidden');
+    function closeCombatPopup() {
+      selectedCombatTargetId = null;
+      pendingProximityTask = null;
+      document.getElementById('combatPopup').classList.add('hidden');
     }
 
-    function triggerProximityInteraction(type) {
+    function triggerCombatAction(type) {
       const me = players[myId];
-      const target = players[selectedTargetId];
+      const target = players[selectedCombatTargetId];
       if (!me || !target) {
-        closeTargetMenu();
+        closeCombatPopup();
         return;
       }
 
       const dist = Math.hypot(me.x - target.x, me.y - target.y);
       if (dist <= 2.3) {
-        // Đã đứng gần -> Tương tác ngay!
-        playWoodKnock(type === 'punch' ? 0.65 : 1.35);
         socket.emit('interact_target', {
           targetId: target.id,
           type,
@@ -718,66 +1182,28 @@
           myY: me.y
         });
       } else {
-        // Đang ở xa -> Tự động chạy lại gần mục tiêu rồi mới Đấm / Hôn
-        pendingInteraction = { targetId: target.id, type };
-        sendMyMove(target.x + (me.x < target.x ? -0.7 : 0.7), target.y);
-        spawnFloatText(me.x, me.y, type === 'punch' ? '🏃 Đang lao tới đấm!' : '🏃 Đang chạy tới hôn!', '#ffd166');
+        // Tự động chạy tới sát mục tiêu rồi mới tung đòn Đấm hoặc Hôn
+        pendingProximityTask = { targetId: target.id, type };
+        moveMyCharacter(target.x + (me.x < target.x ? -0.65 : 0.65), target.y);
+        spawnFloatingText(me.x, me.y, type === 'punch' ? '🏃 Lao tới đấm!' : '🏃 Chạy tới hôn!', '#ffd166');
       }
     }
 
-    // --- 7. GIAO DIỆN NGĂN KÉO & CHAT CHỐNG CHE BÀN PHÍM ---
-    function toggleDrawer(id) {
-      const el = document.getElementById(id);
-      el.classList.toggle('hidden');
-    }
-
-    function toggleChatModal() {
-      const modal = document.getElementById('chatModal');
-      const isHidden = modal.classList.contains('hidden');
-      if (isHidden) {
-        modal.classList.remove('hidden');
-        document.getElementById('unreadDot').classList.add('hidden');
-        scrollToNewestChat();
-        setTimeout(() => document.getElementById('chatInputBox').focus(), 80);
-      } else {
-        modal.classList.add('hidden');
-        document.getElementById('chatInputBox').blur();
-      }
-    }
-
-    function scrollToNewestChat() {
-      requestAnimationFrame(() => {
-        const fullLog = document.getElementById('fullChatLog');
-        if (fullLog) fullLog.scrollTop = fullLog.scrollHeight;
-      });
-    }
-
-    function appendChatUI(item) {
-      const fullLog = document.getElementById('fullChatLog');
-      const miniLog = document.getElementById('miniChatPreview');
-
-      const row = document.createElement('div');
-      row.className = item.isSystem
-        ? 'p-1.5 rounded bg-[#4a1c10]/90 border border-[#f59e0b] text-[#fde68a] font-bold'
-        : 'text-[#f5e6d3]';
-      row.innerHTML = `<span class="font-extrabold text-[#ffd166]">[${item.level || 'Tổ Môn'}] ${item.name}:</span> <span>${item.text}</span>`;
-      fullLog.appendChild(row);
-      while (fullLog.children.length > 40) fullLog.removeChild(fullLog.firstChild);
+    // --- 9. CHAT & DANH SÁCH ONLINE ---
+    function appendChatLog(item) {
+      const box = document.getElementById('chatLogContainer');
+      const div = document.createElement('div');
+      div.className = item.isSystem
+        ? 'p-1.5 rounded bg-[#4f2812]/90 border border-[#f5b041] text-[#fff3cd]'
+        : 'text-[#e6ccb2]';
+      div.innerHTML = `<span class="font-extrabold" style="color:${item.isSystem ? '#ffd166' : '#7bed9f'}">${item.name}:</span> <span>${item.text}</span>`;
+      box.appendChild(div);
+      while (box.children.length > 45) box.removeChild(box.firstChild);
       scrollToNewestChat();
-
-      const miniRow = document.createElement('div');
-      miniRow.className = 'truncate';
-      miniRow.innerHTML = `<span class="font-extrabold text-[#ffd166]">${item.name}:</span> <span>${item.text}</span>`;
-      miniLog.appendChild(miniRow);
-      while (miniLog.children.length > 2) miniLog.removeChild(miniLog.firstChild);
-
-      if (document.getElementById('chatModal').classList.contains('hidden')) {
-        document.getElementById('unreadDot').classList.remove('hidden');
-      }
     }
 
-    function sendChatMessage() {
-      const inp = document.getElementById('chatInputBox');
+    function sendCustomChat() {
+      const inp = document.getElementById('chatInput');
       const text = inp.value.trim();
       if (!text || !socket) return;
       socket.emit('chat', { text });
@@ -785,97 +1211,119 @@
       scrollToNewestChat();
     }
 
-    document.getElementById('chatInputBox').addEventListener('keydown', (e) => {
-      e.stopPropagation();
-      if (e.key === 'Enter') sendChatMessage();
-    });
-
     function setDeptFilter(dept) {
       activeDeptFilter = dept;
-      renderOnlineList();
+      renderOnlinePlayersUI();
     }
 
-    function renderOnlineList() {
-      const listEl = document.getElementById('onlineListContainer');
-      const allArr = Object.values(players);
-      document.getElementById('onlineBadgeCount').textContent = allArr.length;
+    function renderOnlinePlayersUI() {
+      const container = document.getElementById('onlinePlayersList');
+      const list = Object.values(players);
+      document.getElementById('onlineCounterText').textContent = list.length;
 
       const me = players[myId];
       if (me) {
-        document.getElementById('myHpHeader').textContent = `${me.hp}`;
-        document.getElementById('myMeritHeader').textContent = me.merit.toLocaleString();
-        document.getElementById('myIdentityTag').textContent = `${me.name} [${me.level}]`;
+        document.getElementById('headerHpText').textContent = `${me.hp}`;
+        document.getElementById('headerMeritText').textContent = (me.merit || 0).toLocaleString();
+        document.getElementById('headerMyName').textContent = `${me.name} [${me.level}]`;
+        document.getElementById('activeCharIndicator').textContent = `${me.name} (${me.level})`;
       }
 
-      if (selectedTargetId && players[selectedTargetId]) {
-        const t = players[selectedTargetId];
-        document.getElementById('targetPlayerHp').textContent = `(${t.hp} HP)`;
+      if (selectedCombatTargetId && players[selectedCombatTargetId]) {
+        document.getElementById('combatTargetHp').textContent = `(${players[selectedCombatTargetId].hp} HP)`;
       }
 
-      listEl.innerHTML = '';
-      const filtered = allArr.filter(p => activeDeptFilter === 'ALL' || p.dept === activeDeptFilter);
+      container.innerHTML = '';
+      const filtered = list.filter(p => activeDeptFilter === 'ALL' || p.dept === activeDeptFilter);
       filtered.forEach(p => {
         const isMe = p.id === myId;
-        const div = document.createElement('div');
-        div.className = `flex items-center justify-between p-1.5 rounded border cursor-pointer ${
-          isMe ? 'bg-[#5c3416] border-[#ffd166]' : 'bg-[#2a160b] border-[#6e472b] hover:bg-[#3d2211]'
+        const badgeColor = ZONES[p.dept]?.badgeColor || '#b45309';
+        const row = document.createElement('div');
+        row.className = `flex items-center justify-between px-2 py-1.5 rounded cursor-pointer transition ${
+          isMe ? 'bg-[#6e421f] border border-[#ffd166]' : 'bg-[#2c180c] hover:bg-[#422614] border border-[#5e3b1f]'
         }`;
-        div.innerHTML = `
-          <div class="truncate pr-1">
-            <div class="font-extrabold text-[#ffd166] truncate">${isMe ? '👉 ' : ''}[${p.level}] ${p.name}</div>
-            <div class="text-[10px] text-[#e0c097]">${p.dept} • ❤️ ${p.hp} • 🪷 ${p.merit}</div>
+        row.innerHTML = `
+          <div class="flex flex-col truncate pr-1">
+            <span class="font-extrabold ${isMe ? 'text-[#ffd166]' : 'text-[#6fcf97]'} truncate">
+              ${isMe ? '👉 ' : ''}[${p.level}] ${p.name}
+            </span>
+            <span class="text-[10px] text-[#e0c097]">❤️ ${p.hp} HP • 🪷 ${p.merit}</span>
           </div>
-          ${!isMe ? `<span class="text-[10px] px-1.5 py-0.5 rounded bg-red-800 text-white font-bold shrink-0">Tương tác</span>` : ''}
+          <span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded text-white shrink-0" style="background:${badgeColor}">
+            ${p.dept}
+          </span>
         `;
-        div.onclick = () => {
-          if (!isMe) selectTargetPlayer(p.id);
+        row.onclick = () => {
+          if (!isMe) openCombatPopup(p.id);
         };
-        listEl.appendChild(div);
+        container.appendChild(row);
       });
     }
 
-    function spawnFloatText(gx, gy, text, color = '#ffd166') {
-      floatingTexts.push({ gx, gy, gz: 48, text, color, life: 75 });
+    function spawnFloatingText(gx, gy, text, color = '#ffd166') {
+      floatingLabels.push({ gx, gy, gz: 52, text, color, life: 75 });
     }
 
-    // --- 8. SOCKET LISTENERS ---
+    // --- 10. SOCKET LISTENERS ---
     if (socket) {
-      socket.on('init_state', ({ templeState, players: serverPlayers }) => {
+      socket.on('init_state', ({ templeState, players: srvPlayers, accountsList: srvAccs }) => {
         myId = socket.id;
         activeIncenseSticks = templeState.activeIncenseSticks || 9;
+        accountsList = srvAccs || [];
         players = {};
-        Object.values(serverPlayers || {}).forEach(p => {
+        Object.values(srvPlayers || {}).forEach(p => {
           players[p.id] = { ...p, waypoints: [], targetX: p.x, targetY: p.y };
         });
-        document.getElementById('fullChatLog').innerHTML = '';
-        (templeState.chatHistory || []).forEach(item => appendChatUI(item));
-        renderOnlineList();
+        document.getElementById('chatLogContainer').innerHTML = '';
+        (templeState.chatHistory || []).forEach(item => appendChatLog(item));
+        renderOnlinePlayersUI();
+        renderAdminAccountsUI();
       });
 
-      socket.on('players_sync', (serverPlayers) => {
+      socket.on('accounts_updated', (srvAccs) => {
+        accountsList = srvAccs || [];
+        renderAdminAccountsUI();
+      });
+
+      socket.on('account_approved_notice', ({ name }) => {
+        const curInput = document.getElementById('loginUsername').value.trim().toLowerCase();
+        if (curInput && name.toLowerCase().includes(curInput.replace('thích ', ''))) {
+          showAuthAlert(`🎉 Trụ Trì Thích Báo Giá vừa phê duyệt pháp danh "${name}"! Bạn có thể bấm Đăng Nhập ngay!`, true);
+          playTempleBellSound();
+        }
+      });
+
+      socket.on('force_logout', (reason) => {
+        myAccount = null;
+        document.getElementById('authModal').classList.remove('hidden');
+        showAuthAlert(reason, false);
+      });
+
+      socket.on('players_sync', (srvPlayers) => {
         myId = socket.id;
-        const updated = {};
-        Object.values(serverPlayers || {}).forEach(sp => {
-          const existing = players[sp.id];
-          if (existing) {
-            updated[sp.id] = {
-              ...existing,
+        const next = {};
+        Object.values(srvPlayers || {}).forEach(sp => {
+          const old = players[sp.id];
+          if (old) {
+            next[sp.id] = {
+              ...old,
               ...sp,
-              x: sp.id === myId ? existing.x : sp.x,
-              y: sp.id === myId ? existing.y : sp.y
+              x: sp.id === myId ? old.x : sp.x,
+              y: sp.id === myId ? old.y : sp.y
             };
           } else {
-            updated[sp.id] = { ...sp, waypoints: [], targetX: sp.x, targetY: sp.y };
+            next[sp.id] = { ...sp, waypoints: [], targetX: sp.x, targetY: sp.y };
           }
         });
-        players = updated;
-        renderOnlineList();
+        players = next;
+        if (players[myId]) myAccount = players[myId];
+        renderOnlinePlayersUI();
       });
 
-      socket.on('player_moved', ({ id, x, y, destX, destY }) => {
+      socket.on('player_moved', ({ id, destX, destY }) => {
         const p = players[id];
         if (!p || id === myId) return;
-        p.waypoints = buildSmartWaypoints(p.x, p.y, destX, destY);
+        p.waypoints = buildWaypoints(p.x, p.y, destX, destY);
         p.targetX = p.waypoints[0].x;
         p.targetY = p.waypoints[0].y;
         p.state = 'walk';
@@ -888,24 +1336,28 @@
       socket.on('effect_event', (ev) => {
         if (ev.type === 'incense_burn') {
           activeIncenseSticks = ev.sticks || activeIncenseSticks;
-          playBell();
+          playTempleBellSound();
+          bellShockwaves.push({ gx: INCENSE_ALTAR.x, gy: INCENSE_ALTAR.y, radius: 5, maxRadius: 230 });
+        } else if (ev.type === 'bell_ring') {
+          playTempleBellSound();
+          bellShockwaves.push({ gx: BODHI_BELL_ZONE.bellX, gy: BODHI_BELL_ZONE.bellY, radius: 5, maxRadius: 380 });
         } else if (ev.type === 'punch_hit') {
-          playWoodKnock(0.6);
+          playMokugyoSound(0.62);
         } else if (ev.type === 'kiss_heart') {
-          playWoodKnock(1.4);
+          playMokugyoSound(1.4);
           for (let i = 0; i < 8; i++) {
             heartParticles.push({
               gx: ev.x + (Math.random() - 0.5) * 0.6,
               gy: ev.y + (Math.random() - 0.5) * 0.6,
-              gz: 25 + Math.random() * 15,
-              life: 60
+              gz: 24 + Math.random() * 14,
+              life: 65
             });
           }
         } else if (ev.type === 'ko_blast') {
-          playBell();
-          // Nếu bản thân bị đấm gục thì đưa về phòng ban của mình
-          const me = players[myId];
-          if (me && Math.hypot(me.x - ev.x, me.y - ev.y) < 1.5) {
+          playTempleBellSound();
+          bellShockwaves.push({ gx: ev.x, gy: ev.y, radius: 6, maxRadius: 260 });
+          if (ev.targetId === myId && players[myId]) {
+            const me = players[myId];
             const homeZ = ZONES[me.dept] || ZONES['IBD Cost'];
             me.x = homeZ.spawnX;
             me.y = homeZ.spawnY;
@@ -913,7 +1365,7 @@
             socket.emit('sync_pos', { x: me.x, y: me.y, state: 'idle' });
           }
         }
-        if (ev.text) spawnFloatText(ev.x, ev.y, ev.text, ev.color);
+        if (ev.text) spawnFloatingText(ev.x, ev.y, ev.text, ev.color);
       });
 
       socket.on('chat_message', (item) => {
@@ -921,673 +1373,1080 @@
           players[item.id].bubbleText = item.text;
           players[item.id].bubbleTimer = 220;
         }
-        appendChatUI(item);
+        playMokugyoSound(1.06);
+        appendChatLog(item);
       });
     }
 
-    // --- 9. ĐIỀU KHIỂN CẢM ỨNG (TOUCH) & CHUỘT ---
-    let isDragging = false;
-    let startX = 0, startY = 0, movedDist = 0;
-    let pinchStartDist = 0, pinchStartZoom = 1;
+    // --- 11. TƯƠNG TÁC CHUỘT, CẢM ỨNG MOBILE & PHÍM TẮT ---
+    let isDraggingCam = false;
+    let dragStartX = 0, dragStartY = 0, pointerMovedDist = 0;
+    let pinchDist0 = 0, pinchZoom0 = 1;
 
-    function handlePointerDown(cx, cy) {
-      isDragging = true;
-      startX = cx;
-      startY = cy;
-      movedDist = 0;
+    function onPointerDown(cx, cy) {
+      isDraggingCam = true;
+      dragStartX = cx;
+      dragStartY = cy;
+      pointerMovedDist = 0;
     }
 
-    function handlePointerMove(cx, cy) {
-      if (!isDragging) return;
-      const dx = cx - startX;
-      const dy = cy - startY;
-      movedDist += Math.hypot(dx, dy);
+    function onPointerMove(cx, cy) {
+      if (!isDraggingCam) return;
+      const dx = cx - dragStartX;
+      const dy = cy - dragStartY;
+      pointerMovedDist += Math.hypot(dx, dy);
       camOffsetX += dx;
       camOffsetY += dy;
-      startX = cx;
-      startY = cy;
+      dragStartX = cx;
+      dragStartY = cy;
     }
 
-    function handlePointerUp(cx, cy) {
-      if (!isDragging) return;
-      isDragging = false;
-      if (movedDist < 9) handleTapOnCanvas(cx, cy);
+    function onPointerUp(cx, cy) {
+      if (!isDraggingCam) return;
+      isDraggingCam = false;
+      if (pointerMovedDist < 8) handleCanvasTap(cx, cy);
     }
 
-    canvas.addEventListener('mousedown', e => handlePointerDown(e.clientX, e.clientY));
-    window.addEventListener('mousemove', e => handlePointerMove(e.clientX, e.clientY));
-    window.addEventListener('mouseup', e => handlePointerUp(e.clientX, e.clientY));
+    canvas.addEventListener('mousedown', e => { if (e.button === 0) onPointerDown(e.clientX, e.clientY); });
+    window.addEventListener('mousemove', e => onPointerMove(e.clientX, e.clientY));
+    window.addEventListener('mouseup', e => onPointerUp(e.clientX, e.clientY));
 
     canvas.addEventListener('touchstart', e => {
       if (e.touches.length === 2) {
-        isDragging = false;
-        pinchStartDist = Math.hypot(
+        isDraggingCam = false;
+        pinchDist0 = Math.hypot(
           e.touches[0].clientX - e.touches[1].clientX,
           e.touches[0].clientY - e.touches[1].clientY
         );
-        pinchStartZoom = camZoom;
+        pinchZoom0 = camZoom;
       } else if (e.touches.length === 1) {
-        handlePointerDown(e.touches[0].clientX, e.touches[0].clientY);
+        onPointerDown(e.touches[0].clientX, e.touches[0].clientY);
       }
     }, { passive: true });
 
     canvas.addEventListener('touchmove', e => {
-      if (e.touches.length === 2 && pinchStartDist > 0) {
+      if (e.touches.length === 2 && pinchDist0 > 0) {
         const d = Math.hypot(
           e.touches[0].clientX - e.touches[1].clientX,
           e.touches[0].clientY - e.touches[1].clientY
         );
-        camZoom = Math.max(0.45, Math.min(1.5, pinchStartZoom * (d / pinchStartDist)));
+        camZoom = Math.max(0.45, Math.min(1.6, pinchZoom0 * (d / pinchDist0)));
       } else if (e.touches.length === 1) {
-        handlePointerMove(e.touches[0].clientX, e.touches[0].clientY);
+        onPointerMove(e.touches[0].clientX, e.touches[0].clientY);
       }
     }, { passive: true });
 
     canvas.addEventListener('touchend', e => {
       if (e.changedTouches.length === 1) {
-        handlePointerUp(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+        onPointerUp(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
       }
     });
 
     canvas.addEventListener('wheel', e => {
       e.preventDefault();
-      camZoom = Math.max(0.45, Math.min(1.6, camZoom * (e.deltaY < 0 ? 1.08 : 0.92)));
+      camZoom = Math.max(0.48, Math.min(1.65, camZoom * (e.deltaY < 0 ? 1.08 : 0.92)));
     }, { passive: false });
 
-    function handleTapOnCanvas(sx, sy) {
+    function handleCanvasTap(sx, sy) {
       if (!myId || !players[myId]) return;
 
-      // 1. Kiểm tra xem có chạm vào người chơi khác để Đấm / Hôn không
-      const pList = Object.values(players);
-      for (let i = pList.length - 1; i >= 0; i--) {
-        const p = pList[i];
-        if (p.id === myId) continue;
-        const sp = worldToScreen(p.x, p.y, 18);
-        if (Math.hypot(sx - sp.x, sy - sp.y) < 28 * camZoom) {
-          selectTargetPlayer(p.id);
+      // 1. Click vào người chơi khác -> Mở thanh Đấm / Hôn
+      const pArr = Object.values(players);
+      for (let i = pArr.length - 1; i >= 0; i--) {
+        const ch = pArr[i];
+        if (ch.id === myId) continue;
+        const p = worldToScreen(ch.x, ch.y, 18);
+        if (Math.hypot(sx - p.x, sy - p.y) < 26 * camZoom) {
+          openCombatPopup(ch.id);
           return;
         }
       }
 
-      closeTargetMenu();
-      const wp = screenToWorld(sx, sy);
+      closeCombatPopup();
+      const worldPos = screenToWorld(sx, sy);
 
-      // 2. Chạm vào Đỉnh Hương
-      if (Math.hypot(wp.x - INCENSE_ALTAR.x, wp.y - INCENSE_ALTAR.y) < 1.35) {
-        performMyAction('incense');
+      // 2. Click vào Đỉnh Hương Trung Tâm
+      if (Math.hypot(worldPos.x - INCENSE_ALTAR.x, worldPos.y - INCENSE_ALTAR.y) < 1.35) {
+        performAction('incense');
         return;
       }
 
-      // 3. Chạm vào Hồ Cá Koi
-      if (wp.x >= KOI_POND.x && wp.x <= KOI_POND.x + KOI_POND.w && wp.y >= KOI_POND.y && wp.y <= KOI_POND.y + KOI_POND.h) {
-        performMyAction('waterfall');
+      // 3. Click vào Hồ Cá Koi & Thác Nước
+      if (worldPos.x >= 0.5 && worldPos.x <= 6.4 && worldPos.y >= 0.5 && worldPos.y <= 4.1) {
+        performAction('waterfall');
         return;
       }
 
-      // 4. Chạm vào Phòng Pantry (Tủ Lạnh / Bàn Ăn)
+      // 4. Click vào Cây Bồ Đề & Lầu Chuông Đại Hồng Chung
+      if (worldPos.x >= 16.7 && worldPos.x <= 18.8 && worldPos.y >= 0.5 && worldPos.y <= 3.9) {
+        moveMyCharacter(BODHI_BELL_ZONE.standX, BODHI_BELL_ZONE.standY, 'do_bell');
+        spawnFloatingText(worldPos.x, worldPos.y, '🔔 Thỉnh Đại Hồng Chung', '#ffd166');
+        return;
+      }
+
+      // 5. Click vào Pantry (Tủ Lạnh / Bàn Ăn)
       const pt = ZONES.PANTRY;
-      if (wp.x >= pt.rx && wp.x <= pt.rx + pt.rw && wp.y >= pt.ry && wp.y <= pt.ry + pt.rh) {
-        performMyAction('eat');
+      if (worldPos.x >= pt.rx && worldPos.x <= pt.rx + pt.rw && worldPos.y >= pt.ry && worldPos.y <= pt.ry + pt.rh) {
+        performAction('eat');
         return;
       }
 
-      // 5. Chạm vào Cầu Thang Hạ Sơn -> Đi ra Out Nick
+      // 6. Click vào Cầu Thang Hạ Sơn -> Out Nick
       const st = ZONES.STAIRS;
-      if (wp.x >= st.rx && wp.x <= st.rx + st.rw && wp.y >= st.ry && wp.y <= st.ry + st.rh) {
-        performMyAction('leave');
+      if (worldPos.x >= st.rx && worldPos.x <= st.rx + st.rw && worldPos.y >= st.ry && worldPos.y <= st.ry + st.rh) {
+        performAction('leave');
         return;
       }
 
-      // 6. Di chuyển bình thường
-      if (wp.x >= 0.6 && wp.x <= MAP_W - 0.6 && wp.y >= 0.6 && wp.y <= MAP_H - 0.6) {
-        sendMyMove(wp.x, wp.y);
-        spawnFloatText(wp.x, wp.y, '📍 Đi tới đây', '#fde68a');
+      // 7. Click sàn di chuyển qua cửa phòng
+      if (worldPos.x >= 0.6 && worldPos.x <= MAP_W - 0.6 && worldPos.y >= 0.8 && worldPos.y <= MAP_H - 0.6) {
+        moveMyCharacter(worldPos.x, worldPos.y);
+        spawnFloatingText(worldPos.x, worldPos.y, '📍 Đi tới đây', '#ffeaa7');
       }
     }
 
-    function toggleProjection() {
-      isTopDown2D = !isTopDown2D;
-      document.getElementById('projLabel').textContent = isTopDown2D ? '2D' : '2.5D';
-      resetCameraView();
-    }
+    window.addEventListener('keydown', (e) => {
+      if (document.activeElement && ['INPUT', 'SELECT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+      if (e.key === '1') performAction('wave');
+      else if (e.key === '2') performAction('deadline');
+      else if (e.key === '3') performAction('meditate');
+      else if (e.key === '4') performAction('knock');
+      else if (e.key === '5') performAction('incense');
+      else if (e.key === '6') performAction('waterfall');
+      else if (e.key === '7') performAction('eat');
+      else if (e.key === '8') performAction('leave');
+    });
 
-    function toggleNight() {
+    function toggleNightMode() {
       isNightMode = !isNightMode;
     }
 
-    // --- 10. VÒNG LẶP VẬT LÝ & ĐỒ HỌA 2.5D CHI TIẾT ---
+    function toggleCameraProjection() {
+      isTopDown2D = !isTopDown2D;
+      document.getElementById('viewModeLabel').textContent = isTopDown2D ? 'Sơ Đồ 2D' : '2.5D Chi Tiết';
+      resetCameraView();
+    }
+
+    // --- 12. VÒNG LẶP VẬT LÝ & HẠT MÔI TRƯỜNG ---
     function updateSimulation() {
       simTick++;
 
-      waterfallDrops.forEach(d => {
-        d.prog += d.speed;
-        if (d.prog >= 1) d.prog = 0;
+      waterfallParticles.forEach(wp => {
+        wp.progress += wp.speed;
+        if (wp.progress >= 1.0) {
+          wp.progress = 0;
+          if (Math.random() < 0.28) {
+            const streamX = 1.6 + wp.streamIdx * 1.1 + wp.offsetX;
+            waterRipples.push({
+              gx: streamX + (Math.random() - 0.5) * 0.4,
+              gy: 2.15 + Math.random() * 0.35,
+              r: 2,
+              maxR: 16 + Math.random() * 10
+            });
+          }
+        }
       });
-      koiFish.forEach(k => { k.a += k.sp; });
 
-      if (simTick % 6 === 0) {
-        smokeParticles.push({
-          gx: INCENSE_ALTAR.x + (Math.random() - 0.5) * 0.25,
-          gy: INCENSE_ALTAR.y + (Math.random() - 0.5) * 0.25,
-          gz: 24,
-          alpha: 0.75,
-          size: 3 + Math.random() * 3
+      waterRipples.forEach(wr => { wr.r += 0.38; });
+      waterRipples = waterRipples.filter(wr => wr.r < wr.maxR);
+      koiFishList.forEach(koi => { koi.angle += koi.speed; });
+
+      if (simTick % 5 === 0) {
+        [
+          { x: INCENSE_ALTAR.x, y: INCENSE_ALTAR.y, z: 26, gold: true },
+          { x: 9.6, y: 2.0, z: 24, gold: false },
+          { x: 14.0, y: 2.0, z: 24, gold: false }
+        ].forEach(burner => {
+          smokeParticles.push({
+            gx: burner.x + (Math.random() * 0.22 - 0.11),
+            gy: burner.y + (Math.random() * 0.22 - 0.11),
+            gz: burner.z,
+            alpha: 0.72,
+            size: 3 + Math.random() * 3.2,
+            goldTint: burner.gold
+          });
         });
       }
-      smokeParticles.forEach(s => {
-        s.gz += 0.35;
-        s.gx += Math.sin(simTick * 0.05 + s.gz) * 0.008;
-        s.alpha -= 0.009;
-      });
-      smokeParticles = smokeParticles.filter(s => s.alpha > 0);
 
-      heartParticles.forEach(h => {
-        h.gz += 0.45;
-        h.life--;
+      smokeParticles.forEach(sp => {
+        sp.gz += 0.38;
+        sp.gx += Math.sin(simTick * 0.06 + sp.gz * 0.15) * 0.008;
+        sp.alpha -= 0.0075;
+        sp.size += 0.065;
       });
+      smokeParticles = smokeParticles.filter(sp => sp.alpha > 0.02);
+
+      goldenMotes.forEach(m => {
+        m.gz += Math.sin(simTick * 0.03 + m.phase) * 0.15;
+        m.gx += Math.cos(simTick * 0.02 + m.phase) * 0.004;
+      });
+
+      heartParticles.forEach(h => { h.gz += 0.45; h.life--; });
       heartParticles = heartParticles.filter(h => h.life > 0);
 
-      floatingTexts.forEach(f => {
-        f.gz += 0.5;
-        f.life--;
-      });
-      floatingTexts = floatingTexts.filter(f => f.life > 0);
+      floatingLabels.forEach(fl => { fl.gz += 0.52; fl.life--; });
+      floatingLabels = floatingLabels.filter(fl => fl.life > 0);
 
-      // Cập nhật di chuyển của tất cả người chơi
-      Object.values(players).forEach(p => {
-        if (p.bubbleTimer > 0) {
-          p.bubbleTimer--;
-          if (p.bubbleTimer === 0) p.bubbleText = '';
+      bellShockwaves.forEach(bw => { bw.radius += 8.5; });
+      bellShockwaves = bellShockwaves.filter(bw => bw.radius < bw.maxRadius);
+
+      // Di chuyển người chơi mượt mà qua cửa phòng
+      Object.values(players).forEach(c => {
+        if (c.bubbleTimer > 0) {
+          c.bubbleTimer--;
+          if (c.bubbleTimer === 0) c.bubbleText = '';
         }
 
-        if (p.waypoints && p.waypoints.length > 0) {
-          const tx = p.waypoints[0].x;
-          const ty = p.waypoints[0].y;
-          const dx = tx - p.x;
-          const dy = ty - p.y;
+        if (c.waypoints && c.waypoints.length > 0) {
+          const tx = c.waypoints[0].x;
+          const ty = c.waypoints[0].y;
+          const dx = tx - c.x;
+          const dy = ty - c.y;
           const dist = Math.hypot(dx, dy);
 
-          if (dist > 0.07) {
-            p.x += (dx / dist) * 0.075;
-            p.y += (dy / dist) * 0.075;
-            p.state = 'walk';
+          if (dist > 0.065) {
+            c.x += (dx / dist) * 0.072;
+            c.y += (dy / dist) * 0.072;
+            c.state = 'walk';
           } else {
-            p.x = tx;
-            p.y = ty;
-            p.waypoints.shift();
+            c.x = tx;
+            c.y = ty;
+            c.waypoints.shift();
 
-            if (p.waypoints.length === 0) {
-              if (p.id === myId) {
-                if (p.afterWalkAction === 'do_incense') {
-                  p.afterWalkAction = null;
+            if (c.waypoints.length === 0) {
+              if (c.id === myId) {
+                if (c.afterWalkAction === 'do_incense') {
+                  c.afterWalkAction = null;
                   socket.emit('action', { type: 'incense' });
-                } else if (p.afterWalkAction === 'do_eat') {
-                  p.afterWalkAction = null;
-                  socket.emit('action', { type: 'eat' });
-                } else if (p.afterWalkAction === 'do_waterfall') {
-                  p.afterWalkAction = null;
+                } else if (c.afterWalkAction === 'do_waterfall') {
+                  c.afterWalkAction = null;
                   socket.emit('action', { type: 'waterfall' });
-                } else if (p.afterWalkAction === 'do_logout') {
-                  p.afterWalkAction = null;
-                  executeLogoutHason();
+                } else if (c.afterWalkAction === 'do_eat') {
+                  c.afterWalkAction = null;
+                  socket.emit('action', { type: 'eat' });
+                } else if (c.afterWalkAction === 'do_bell') {
+                  c.afterWalkAction = null;
+                  socket.emit('action', { type: 'bell' });
+                } else if (c.afterWalkAction === 'do_logout') {
+                  c.afterWalkAction = null;
+                  executeHasonLogout();
                   return;
                 }
-                socket.emit('sync_pos', { x: p.x, y: p.y, state: 'idle' });
+                socket.emit('sync_pos', { x: c.x, y: c.y, state: 'idle' });
               }
-              if (p.state === 'walk') p.state = 'idle';
+              if (c.state === 'walk') c.state = 'idle';
             }
           }
         }
 
-        // Kiểm tra nếu đang chạy lại gần để Đấm / Hôn
-        if (p.id === myId && pendingInteraction) {
-          const target = players[pendingInteraction.targetId];
+        // Tự động tung đòn Đấm / Hôn khi đã chạy lại gần mục tiêu
+        if (c.id === myId && pendingProximityTask) {
+          const target = players[pendingProximityTask.targetId];
           if (!target) {
-            pendingInteraction = null;
-          } else if (Math.hypot(p.x - target.x, p.y - target.y) <= 2.2) {
-            const actType = pendingInteraction.type;
-            const tId = target.id;
-            pendingInteraction = null;
-            p.waypoints = [];
+            pendingProximityTask = null;
+          } else if (Math.hypot(c.x - target.x, c.y - target.y) <= 2.2) {
+            const act = pendingProximityTask.type;
+            const tid = target.id;
+            pendingProximityTask = null;
+            c.waypoints = [];
             socket.emit('interact_target', {
-              targetId: tId,
-              type: actType,
-              myX: p.x,
-              myY: p.y
+              targetId: tid,
+              type: act,
+              myX: c.x,
+              myY: c.y
             });
           }
         }
       });
 
       if (simTick % 30 === 0 && myId && players[myId] && socket) {
-        const me = players[myId];
-        socket.emit('sync_pos', { x: me.x, y: me.y, state: me.state });
+        socket.emit('sync_pos', { x: players[myId].x, y: players[myId].y, state: players[myId].state });
       }
     }
 
-    // --- 11. CÁC HÀM VẼ KIẾN TRÚC & NHÂN VẬT THEO TU VI ---
+    // --- 13. HỆ THỐNG VẼ KIẾN TRÚC CHÙA 2.5D SIÊU CHI TIẾT ---
     function drawIsoBlock(gx, gy, w, d, h, topCol, leftCol, rightCol, strokeCol = null) {
       if (isTopDown2D) {
         const p1 = worldToScreen(gx, gy);
         const p2 = worldToScreen(gx + w, gy + d);
         ctx.fillStyle = topCol;
         ctx.fillRect(p1.x, p1.y, p2.x - p1.x, p2.y - p1.y);
+        if (strokeCol) {
+          ctx.strokeStyle = strokeCol;
+          ctx.lineWidth = 1;
+          ctx.strokeRect(p1.x, p1.y, p2.x - p1.x, p2.y - p1.y);
+        }
         return;
       }
+
       const p1 = worldToScreen(gx, gy, h);
       const p2 = worldToScreen(gx + w, gy, h);
       const p3 = worldToScreen(gx + w, gy + d, h);
       const p4 = worldToScreen(gx, gy + d, h);
+
       const b2 = worldToScreen(gx + w, gy, 0);
       const b3 = worldToScreen(gx + w, gy + d, 0);
       const b4 = worldToScreen(gx, gy + d, 0);
 
       ctx.fillStyle = leftCol;
-      ctx.beginPath(); ctx.moveTo(p4.x, p4.y); ctx.lineTo(p3.x, p3.y); ctx.lineTo(b3.x, b3.y); ctx.lineTo(b4.x, b4.y); ctx.closePath(); ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(p4.x, p4.y); ctx.lineTo(p3.x, p3.y); ctx.lineTo(b3.x, b3.y); ctx.lineTo(b4.x, b4.y);
+      ctx.closePath(); ctx.fill();
+
       ctx.fillStyle = rightCol;
-      ctx.beginPath(); ctx.moveTo(p2.x, p2.y); ctx.lineTo(p3.x, p3.y); ctx.lineTo(b3.x, b3.y); ctx.lineTo(b2.x, b2.y); ctx.closePath(); ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(p2.x, p2.y); ctx.lineTo(p3.x, p3.y); ctx.lineTo(b3.x, b3.y); ctx.lineTo(b2.x, b2.y);
+      ctx.closePath(); ctx.fill();
+
       ctx.fillStyle = topCol;
-      ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.lineTo(p3.x, p3.y); ctx.lineTo(p4.x, p4.y); ctx.closePath(); ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.lineTo(p3.x, p3.y); ctx.lineTo(p4.x, p4.y);
+      ctx.closePath(); ctx.fill();
+
       if (strokeCol) {
         ctx.strokeStyle = strokeCol;
-        ctx.lineWidth = 0.8 * camZoom;
+        ctx.lineWidth = 0.9 * camZoom;
         ctx.stroke();
       }
     }
 
-    function drawFloorCarpet(gx, gy, w, d, fillCol, borderCol) {
-      const p1 = worldToScreen(gx, gy, 0.4);
-      const p2 = worldToScreen(gx + w, gy, 0.4);
-      const p3 = worldToScreen(gx + w, gy + d, 0.4);
-      const p4 = worldToScreen(gx, gy + d, 0.4);
+    function drawOrnateFloor(gx, gy, w, d, fillCol, borderCol) {
+      const p1 = worldToScreen(gx, gy, 0.5);
+      const p2 = worldToScreen(gx + w, gy, 0.5);
+      const p3 = worldToScreen(gx + w, gy + d, 0.5);
+      const p4 = worldToScreen(gx, gy + d, 0.5);
+
       ctx.fillStyle = fillCol;
-      ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.lineTo(p3.x, p3.y); ctx.lineTo(p4.x, p4.y); ctx.closePath(); ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.lineTo(p3.x, p3.y); ctx.lineTo(p4.x, p4.y);
+      ctx.closePath(); ctx.fill();
+
       ctx.strokeStyle = borderCol;
-      ctx.lineWidth = 1.8 * camZoom;
+      ctx.lineWidth = 2 * camZoom;
       ctx.stroke();
     }
 
-    function drawRoomAndDoor(z) {
-      const { rx, ry, rw, rh, doorX, doorY, doorSide, floorColor, wallColor, badgeColor, title } = z;
-      const wt = 0.22;
-      const bh = 22;
-      const fh = 11;
-      const gap = 0.95;
+    function drawHangingLantern(gx, gy, gz) {
+      if (isTopDown2D) return;
+      const p = worldToScreen(gx, gy, gz);
+      const swing = Math.sin(simTick * 0.05 + gx) * 2 * camZoom;
+      const lx = p.x + swing;
+      const ly = p.y;
 
-      drawFloorCarpet(rx + 0.08, ry + 0.08, rw - 0.16, rh - 0.16, floorColor, badgeColor);
-
-      if (doorSide === 'north') {
-        drawIsoBlock(rx, ry, (doorX - gap) - rx, wt, bh, wallColor, '#8c5a32', '#6b4223');
-        drawIsoBlock(doorX + gap, ry, (rx + rw) - (doorX + gap), wt, bh, wallColor, '#8c5a32', '#6b4223');
-      } else {
-        drawIsoBlock(rx, ry, rw, wt, bh, wallColor, '#8c5a32', '#6b4223');
-      }
-      drawIsoBlock(rx, ry, wt, rh, bh, wallColor, '#8c5a32', '#6b4223');
-      drawIsoBlock(rx + rw - wt, ry, wt, rh, fh, wallColor, '#8c5a32', '#6b4223');
-
-      if (doorSide === 'south') {
-        drawIsoBlock(rx, ry + rh - wt, (doorX - gap) - rx, wt, fh, wallColor, '#8c5a32', '#6b4223');
-        drawIsoBlock(doorX + gap, ry + rh - wt, (rx + rw) - (doorX + gap), wt, fh, wallColor, '#8c5a32', '#6b4223');
-      } else {
-        drawIsoBlock(rx, ry + rh - wt, rw, wt, fh, wallColor, '#8c5a32', '#6b4223');
-      }
-
-      if (z.deskX !== undefined) {
-        drawIsoBlock(z.deskX, z.deskY, z.deskW, z.deskH, 13, '#c89666', '#9c6b3f', '#7a502c', '#4a2c11');
-      }
-
-      // Cổng vòm & Biển tên ngắn gọn
-      drawIsoBlock(doorX - 0.85, doorY - 0.2, 1.7, 0.4, 2, '#fcd34d', '#d97706', '#92400e');
-      if (!isTopDown2D) {
-        drawIsoBlock(doorX - 0.85, doorY - 0.12, 0.2, 0.24, 32, '#dc2626', '#991b1b', '#7f1d1d');
-        drawIsoBlock(doorX + 0.65, doorY - 0.12, 0.2, 0.24, 32, '#dc2626', '#991b1b', '#7f1d1d');
-      }
-
-      const pos = worldToScreen(doorX, doorY, isTopDown2D ? 0 : 36);
-      ctx.save();
-      ctx.font = `800 ${Math.max(9, Math.round(10.5 * camZoom))}px 'Be Vietnam Pro', sans-serif`;
-      ctx.textAlign = 'center';
-      const tw = ctx.measureText(title).width + 14 * camZoom;
-      const th = 19 * camZoom;
-      ctx.fillStyle = 'rgba(24, 12, 5, 0.92)';
+      const glowRadius = (isNightMode ? 28 : 14) * camZoom;
+      const grad = ctx.createRadialGradient(lx, ly, 2 * camZoom, lx, ly, glowRadius);
+      grad.addColorStop(0, isNightMode ? 'rgba(255, 200, 70, 0.85)' : 'rgba(255, 180, 50, 0.45)');
+      grad.addColorStop(1, 'rgba(255, 120, 20, 0)');
+      ctx.fillStyle = grad;
       ctx.beginPath();
-      ctx.roundRect(pos.x - tw / 2, pos.y - th / 2, tw, th, 5 * camZoom);
+      ctx.arc(lx, ly, glowRadius, 0, Math.PI * 2);
       ctx.fill();
-      ctx.strokeStyle = badgeColor;
-      ctx.lineWidth = 1.8 * camZoom;
+
+      ctx.strokeStyle = '#fbbf24';
+      ctx.lineWidth = 1.2 * camZoom;
+      ctx.beginPath();
+      ctx.moveTo(p.x, p.y - 8 * camZoom);
+      ctx.lineTo(lx, ly - 3 * camZoom);
       ctx.stroke();
+
+      ctx.fillStyle = '#dc2626';
+      ctx.beginPath();
+      ctx.ellipse(lx, ly, 5.5 * camZoom, 7 * camZoom, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#fbbf24';
+      ctx.lineWidth = 1 * camZoom;
+      ctx.stroke();
+    }
+
+    function drawDoorwayArchWithPlaque(doorX, doorY, doorTitle, subLabel, badgeColor, isGrandAltar = false) {
+      const pillarH = isGrandAltar ? 48 : 38;
+      const span = isGrandAltar ? 1.25 : 0.95;
+
+      drawIsoBlock(doorX - span, doorY - 0.25, span * 2, 0.5, 2.5, '#fcd34d', '#d97706', '#92400e');
+
+      if (!isTopDown2D) {
+        drawIsoBlock(doorX - span, doorY - 0.14, 0.24, 0.28, pillarH, '#dc2626', '#991b1b', '#7f1d1d', '#fbbf24');
+        drawIsoBlock(doorX + span - 0.24, doorY - 0.14, 0.24, 0.28, pillarH, '#dc2626', '#991b1b', '#7f1d1d', '#fbbf24');
+
+        const leftTop = worldToScreen(doorX - span - 0.2, doorY, pillarH);
+        const rightTop = worldToScreen(doorX + span + 0.2, doorY, pillarH);
+        const midTop = worldToScreen(doorX, doorY, pillarH + 8);
+
+        ctx.fillStyle = '#451a03';
+        ctx.strokeStyle = '#fbbf24';
+        ctx.lineWidth = 2 * camZoom;
+        ctx.beginPath();
+        ctx.moveTo(leftTop.x - 10 * camZoom, leftTop.y + 2 * camZoom);
+        ctx.quadraticCurveTo(midTop.x, midTop.y - 10 * camZoom, rightTop.x + 10 * camZoom, rightTop.y + 2 * camZoom);
+        ctx.lineTo(rightTop.x + 4 * camZoom, rightTop.y + 8 * camZoom);
+        ctx.quadraticCurveTo(midTop.x, midTop.y - 2 * camZoom, leftTop.x - 4 * camZoom, leftTop.y + 8 * camZoom);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        drawHangingLantern(doorX - span + 0.1, doorY + 0.1, pillarH - 8);
+        drawHangingLantern(doorX + span - 0.1, doorY + 0.1, pillarH - 8);
+      }
+
+      const plaquePos = worldToScreen(doorX, doorY, isTopDown2D ? 0 : pillarH + 11);
+      ctx.save();
+      ctx.font = `800 ${Math.max(9, Math.round((isGrandAltar ? 12 : 11) * camZoom))}px 'Be Vietnam Pro', sans-serif`;
+      ctx.textAlign = 'center';
+      const titleW = ctx.measureText(doorTitle).width;
+      const boxW = titleW + 18 * camZoom;
+      const boxH = 22 * camZoom;
+
+      ctx.fillStyle = isGrandAltar ? '#5c110b' : 'rgba(28, 15, 7, 0.94)';
+      ctx.beginPath();
+      ctx.roundRect(plaquePos.x - boxW / 2, plaquePos.y - boxH / 2, boxW, boxH, 6 * camZoom);
+      ctx.fill();
+
+      ctx.strokeStyle = badgeColor || '#ffd166';
+      ctx.lineWidth = 2.2 * camZoom;
+      ctx.stroke();
+
       ctx.fillStyle = '#ffd166';
-      ctx.fillText(title, pos.x, pos.y + 3.5 * camZoom);
+      ctx.fillText(doorTitle, plaquePos.x, plaquePos.y + 4 * camZoom);
       ctx.restore();
     }
 
-    // Vẽ Hồ Cá Koi & Thác Nước Linh Sơn Nâng Cấp
-    function drawKoiPondAndWaterfall() {
-      const kz = KOI_POND;
-      // Thành hồ đá xanh ngọc
-      drawIsoBlock(kz.x, kz.y, kz.w, kz.h, 3.5, '#0d9488', '#0f766e', '#115e59', '#5eead4');
-      drawFloorCarpet(kz.x + 0.2, kz.y + 0.2, kz.w - 0.4, kz.h - 0.4, '#0369a1', '#38bdf8');
+    function drawEnclosedRoom(zone) {
+      const { rx, ry, rw, rh, doorX, doorY, doorSide, floorColor, wallColor, badgeColor, doorTitle, subLabel } = zone;
+      const wallThick = 0.24;
+      const backWallH = 26;
+      const frontWallH = 13;
+      const doorGap = 1.05;
+
+      drawOrnateFloor(rx + 0.1, ry + 0.1, rw - 0.2, rh - 0.2, floorColor, badgeColor);
+
+      if (doorSide === 'north') {
+        const leftLen = (doorX - doorGap) - rx;
+        const rightStart = doorX + doorGap;
+        const rightLen = (rx + rw) - rightStart;
+        if (leftLen > 0) drawIsoBlock(rx, ry, leftLen, wallThick, backWallH, wallColor, '#8c5a32', '#6b4223', '#422006');
+        if (rightLen > 0) drawIsoBlock(rightStart, ry, rightLen, wallThick, backWallH, wallColor, '#8c5a32', '#6b4223', '#422006');
+      } else {
+        drawIsoBlock(rx, ry, rw, wallThick, backWallH, wallColor, '#8c5a32', '#6b4223', '#422006');
+      }
+
+      drawIsoBlock(rx, ry, wallThick, rh, backWallH, wallColor, '#8c5a32', '#6b4223', '#422006');
+      drawIsoBlock(rx + rw - wallThick, ry, wallThick, rh, frontWallH, wallColor, '#8c5a32', '#6b4223', '#422006');
+
+      if (doorSide === 'south') {
+        const leftLen = (doorX - doorGap) - rx;
+        const rightStart = doorX + doorGap;
+        const rightLen = (rx + rw) - rightStart;
+        if (leftLen > 0) drawIsoBlock(rx, ry + rh - wallThick, leftLen, wallThick, frontWallH, wallColor, '#8c5a32', '#6b4223', '#422006');
+        if (rightLen > 0) drawIsoBlock(rightStart, ry + rh - wallThick, rightLen, wallThick, frontWallH, wallColor, '#8c5a32', '#6b4223', '#422006');
+      } else {
+        drawIsoBlock(rx, ry + rh - wallThick, rw, wallThick, frontWallH, wallColor, '#8c5a32', '#6b4223', '#422006');
+      }
+
+      // 4 Cột trụ gỗ đỏ góc phòng
+      [
+        [rx, ry],
+        [rx + rw - 0.28, ry],
+        [rx, ry + rh - 0.28],
+        [rx + rw - 0.28, ry + rh - 0.28]
+      ].forEach(([px, py]) => {
+        drawIsoBlock(px, py, 0.28, 0.28, backWallH + 4, '#7f1d1d', '#450a0a', '#2b0606', '#fbbf24');
+      });
+
+      // Bàn làm việc, màn hình máy tính, mõ gỗ và bồ đoàn tọa thiền trong phòng
+      if (zone.deskX !== undefined) {
+        const { deskX, deskY, deskW, deskH } = zone;
+        const halfW = deskW / 2;
+
+        for (let r = 0; r < 2; r++) {
+          const sy = deskY + 0.35 + r * 1.45;
+          drawIsoBlock(deskX - 0.75, sy, 0.5, 0.75, 8, '#5c4033', '#3e2723', '#271714', '#8d6e63');
+          drawIsoBlock(deskX + deskW + 0.25, sy, 0.5, 0.75, 8, '#5c4033', '#3e2723', '#271714', '#8d6e63');
+        }
+
+        drawIsoBlock(deskX, deskY, halfW, deskH, 15, '#c89666', '#9c6b3f', '#7a502c', '#4a2c11');
+        drawIsoBlock(deskX + halfW, deskY, halfW, deskH, 15, '#c28e5c', '#9c6b3f', '#7a502c', '#4a2c11');
+
+        if (!isTopDown2D) {
+          for (let r = 0; r < 2; r++) {
+            const py = deskY + 0.7 + r * 1.45;
+            const mLeft = worldToScreen(deskX + 0.35, py, 19);
+            const mRight = worldToScreen(deskX + deskW - 0.35, py, 19);
+
+            [mLeft, mRight].forEach((mp, sideIdx) => {
+              ctx.fillStyle = '#1e293b';
+              ctx.fillRect(mp.x - 8 * camZoom, mp.y - 11 * camZoom, 16 * camZoom, 11 * camZoom);
+              ctx.fillStyle = '#38bdf8';
+              ctx.fillRect(mp.x - 6.5 * camZoom, mp.y - 9.5 * camZoom, 13 * camZoom, 8 * camZoom);
+
+              ctx.fillStyle = '#ea580c';
+              ctx.beginPath();
+              ctx.arc(mp.x + (sideIdx === 0 ? -11 : 11) * camZoom, mp.y + 1 * camZoom, 3.8 * camZoom, 0, Math.PI * 2);
+              ctx.fill();
+            });
+          }
+        }
+      }
+
+      drawDoorwayArchWithPlaque(doorX, doorY, doorTitle, subLabel, badgeColor, zone.id === 'DIRECTOR');
+    }
+
+    // Vẽ Hồ Cá Koi, Thác Nước 3 Tầng, Cầu Gỗ Đỏ & Đèn Đá
+    function drawWaterfallAndKoiPond() {
+      const wz = WATERFALL_ZONE;
+
+      drawIsoBlock(wz.x, wz.y, wz.w, wz.h, 3.5, '#0d9488', '#0f766e', '#115e59', '#5eead4');
+      drawOrnateFloor(wz.x + 0.25, wz.y + 0.25, wz.w - 0.5, wz.h - 0.5, '#0284c7', '#38bdf8');
 
       // Đàn cá Koi bơi lội
-      koiFish.forEach(k => {
-        const fx = k.cx + Math.cos(k.a) * k.rx;
-        const fy = k.cy + Math.sin(k.a) * k.ry;
+      koiFishList.forEach(koi => {
+        const fx = koi.cx + Math.cos(koi.angle) * koi.rx;
+        const fy = koi.cy + Math.sin(koi.angle) * koi.ry;
         const fp = worldToScreen(fx, fy, 2);
-        const ang = Math.atan2(Math.cos(k.a) * k.ry, -Math.sin(k.a) * k.rx);
+        const dirAngle = Math.atan2(Math.cos(koi.angle) * koi.ry, -Math.sin(koi.angle) * koi.rx);
+
         ctx.save();
         ctx.translate(fp.x, fp.y);
-        ctx.rotate(ang);
-        ctx.fillStyle = k.c;
+        ctx.rotate(dirAngle);
+        ctx.fillStyle = koi.color;
         ctx.beginPath();
-        ctx.ellipse(0, 0, 6.5 * camZoom, 3 * camZoom, 0, 0, Math.PI * 2);
+        ctx.ellipse(0, 0, 7 * camZoom, 3.2 * camZoom, 0, 0, Math.PI * 2);
         ctx.fill();
-        ctx.fillStyle = k.spot;
+        ctx.fillStyle = koi.spot;
         ctx.beginPath();
-        ctx.arc(1.5 * camZoom, 0, 2 * camZoom, 0, Math.PI * 2);
+        ctx.arc(1.5 * camZoom, 0, 2.1 * camZoom, 0, Math.PI * 2);
         ctx.fill();
-        // Đuôi cá vẫy
-        const wag = Math.sin(simTick * 0.35 + k.a) * 2.5 * camZoom;
-        ctx.fillStyle = k.c;
+        const tailWag = Math.sin(simTick * 0.32 + koi.angle) * 2.5 * camZoom;
+        ctx.fillStyle = koi.color;
         ctx.beginPath();
-        ctx.moveTo(-6 * camZoom, 0);
-        ctx.lineTo(-10.5 * camZoom, -3 * camZoom + wag);
-        ctx.lineTo(-10.5 * camZoom, 3 * camZoom + wag);
+        ctx.moveTo(-6.5 * camZoom, 0);
+        ctx.lineTo(-11 * camZoom, -3.2 * camZoom + tailWag);
+        ctx.lineTo(-11 * camZoom, 3.2 * camZoom + tailWag);
         ctx.closePath();
         ctx.fill();
         ctx.restore();
       });
 
-      // Lá sen & Hoa sen hồng
+      // Hoa sen & Lá sen
       [
-        { x: 2.1, y: 2.9, flower: true },
-        { x: 4.9, y: 2.8, flower: true },
-        { x: 5.4, y: 1.9, flower: false },
-        { x: 2.6, y: 3.5, flower: true }
-      ].forEach(lt => {
-        const lp = worldToScreen(lt.x, lt.y, 2.5);
+        { x: 2.2, y: 3.1, hasFlower: true },
+        { x: 4.7, y: 2.9, hasFlower: true },
+        { x: 5.2, y: 1.9, hasFlower: false },
+        { x: 2.8, y: 3.55, hasFlower: true }
+      ].forEach(lotus => {
+        const lp = worldToScreen(lotus.x, lotus.y, 2.5);
         ctx.fillStyle = '#15803d';
         ctx.beginPath();
         ctx.ellipse(lp.x, lp.y, 8.5 * camZoom, 4.8 * camZoom, 0, 0, Math.PI * 1.85);
         ctx.fill();
-        if (lt.flower) {
+
+        if (lotus.hasFlower) {
           ctx.fillStyle = '#f472b6';
           ctx.beginPath();
-          ctx.arc(lp.x, lp.y - 3 * camZoom, 4.5 * camZoom, 0, Math.PI * 2);
+          ctx.arc(lp.x, lp.y - 3 * camZoom, 4.8 * camZoom, 0, Math.PI * 2);
           ctx.fill();
           ctx.fillStyle = '#fef08a';
           ctx.beginPath();
-          ctx.arc(lp.x, lp.y - 3 * camZoom, 1.8 * camZoom, 0, Math.PI * 2);
+          ctx.arc(lp.x, lp.y - 3 * camZoom, 2 * camZoom, 0, Math.PI * 2);
           ctx.fill();
         }
       });
 
-      // Cầu gỗ đỏ Nhật Bản bắc qua góc hồ
-      drawIsoBlock(5.3, 2.5, 1.0, 1.4, 6, '#dc2626', '#991b1b', '#7f1d1d', '#fbbf24');
+      // Sóng nước lan tỏa
+      waterRipples.forEach(wr => {
+        const rp = worldToScreen(wr.gx, wr.gy, 2.5);
+        const alpha = Math.max(0, 1 - wr.r / wr.maxR);
+        ctx.strokeStyle = `rgba(224, 242, 254, ${alpha * 0.8})`;
+        ctx.lineWidth = 1.4 * camZoom;
+        ctx.beginPath();
+        ctx.ellipse(rp.x, rp.y, wr.r * camZoom, wr.r * 0.5 * camZoom, 0, 0, Math.PI * 2);
+        ctx.stroke();
+      });
+
+      // Cầu Gỗ Đỏ Nhật Nguyệt bắc qua góc hồ + Đèn Đá (Thạch Đăng)
+      drawIsoBlock(5.15, 2.4, 1.05, 1.5, 6.5, '#dc2626', '#991b1b', '#7f1d1d', '#fbbf24');
+      drawIsoBlock(5.9, 0.7, 0.4, 0.4, 18, '#94a3b8', '#64748b', '#475569', '#fde047');
 
       // Núi đá thác nước 3 tầng
-      drawIsoBlock(0.8, 0.6, 4.8, 1.1, 38, '#64748b', '#475569', '#334155');
-      drawIsoBlock(1.1, 0.85, 4.0, 0.9, 24, '#475569', '#334155', '#1e293b');
+      drawIsoBlock(0.7, 0.6, 5.0, 1.25, 44, '#64748b', '#475569', '#334155', '#94a3b8');
+      drawIsoBlock(1.0, 0.8, 4.2, 1.05, 30, '#475569', '#334155', '#1e293b', '#64748b');
+      drawIsoBlock(1.3, 1.1, 3.4, 0.85, 16, '#334155', '#1e293b', '#0f172a', '#475569');
 
       if (!isTopDown2D) {
-        [1.8, 2.9, 4.0].forEach(sx => {
-          const topP = worldToScreen(sx, 1.1, 36);
-          const botP = worldToScreen(sx, 2.0, 3);
-          ctx.strokeStyle = 'rgba(125, 211, 252, 0.85)';
-          ctx.lineWidth = 10 * camZoom;
+        [1.7, 2.8, 3.9].forEach((sx) => {
+          const topP = worldToScreen(sx, 1.2, 42);
+          const botP = worldToScreen(sx, 2.1, 3);
+          const wGrad = ctx.createLinearGradient(topP.x, topP.y, botP.x, botP.y);
+          wGrad.addColorStop(0, 'rgba(186, 230, 253, 0.92)');
+          wGrad.addColorStop(0.5, 'rgba(56, 189, 248, 0.85)');
+          wGrad.addColorStop(1, 'rgba(255, 255, 255, 0.95)');
+
+          ctx.strokeStyle = wGrad;
+          ctx.lineWidth = 12 * camZoom;
           ctx.lineCap = 'round';
           ctx.beginPath();
           ctx.moveTo(topP.x, topP.y);
           ctx.lineTo(botP.x, botP.y);
           ctx.stroke();
         });
-        waterfallDrops.forEach(d => {
-          const sx = 1.8 + d.stream * 1.1 + d.offX;
-          const sy = 1.1 + d.prog * 0.9;
-          const sz = 36 * (1 - d.prog) + 3;
+
+        waterfallParticles.forEach(wp => {
+          const sx = 1.7 + wp.streamIdx * 1.1 + wp.offsetX;
+          const sy = 1.2 + wp.progress * 0.95;
+          const sz = 42 * (1 - wp.progress) + 3;
           const p = worldToScreen(sx, sy, sz);
-          ctx.fillStyle = '#e0f2fe';
+
+          ctx.fillStyle = wp.progress > 0.82 ? '#ffffff' : '#e0f2fe';
           ctx.beginPath();
-          ctx.arc(p.x, p.y, d.size * camZoom, 0, Math.PI * 2);
+          ctx.arc(p.x, p.y, wp.size * camZoom, 0, Math.PI * 2);
           ctx.fill();
         });
+
+        const pinePos = worldToScreen(1.2, 0.9, 46);
+        ctx.fillStyle = '#451a03';
+        ctx.fillRect(pinePos.x - 3 * camZoom, pinePos.y - 12 * camZoom, 6 * camZoom, 14 * camZoom);
+        ctx.fillStyle = '#15803d';
+        ctx.beginPath();
+        ctx.arc(pinePos.x, pinePos.y - 16 * camZoom, 14 * camZoom, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#22c55e';
+        ctx.beginPath();
+        ctx.arc(pinePos.x + 6 * camZoom, pinePos.y - 20 * camZoom, 10 * camZoom, 0, Math.PI * 2);
+        ctx.fill();
       }
     }
 
-    // Vẽ Phòng Pantry Chi Tiết (Tủ Lạnh 2 Cánh + Bàn Ăn Thụ Lộc)
-    function drawPantryDetails() {
-      const pt = ZONES.PANTRY;
-      drawRoomAndDoor(pt);
+    // Khu vực mới: Cổ Thụ Bồ Đề & Lầu Chuông Đại Hồng Chung
+    function drawBodhiTreeAndBellTower() {
+      const bz = BODHI_BELL_ZONE;
+      drawOrnateFloor(bz.x, bz.y, bz.w, bz.h, '#422006', '#f59e0b');
+      // Bệ đá Lầu Chuông
+      drawIsoBlock(bz.x + 0.2, bz.y + 1.2, 1.4, 1.4, 8, '#78350f', '#451a03', '#271202', '#fbbf24');
 
-      // 1. Tủ Lạnh Inox 2 cánh lớn ở góc Bắc Pantry
-      drawIsoBlock(pt.rx + 0.5, pt.ry + 0.4, 1.3, 0.9, 32, '#e2e8f0', '#94a3b8', '#64748b', '#38bdf8');
       if (!isTopDown2D) {
-        const fridgeFront = worldToScreen(pt.rx + 1.15, pt.ry + 1.3, 18);
-        ctx.strokeStyle = '#1e293b';
+        // Cây Bồ Đề Cổ Thụ tán vàng rực
+        const treeP = worldToScreen(bz.x + 0.9, bz.y + 0.6, 12);
+        ctx.fillStyle = '#5c2c16';
+        ctx.fillRect(treeP.x - 4 * camZoom, treeP.y - 26 * camZoom, 8 * camZoom, 26 * camZoom);
+        ctx.fillStyle = '#ca8a04';
+        ctx.beginPath();
+        ctx.arc(treeP.x, treeP.y - 32 * camZoom, 18 * camZoom, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#facc15';
+        ctx.beginPath();
+        ctx.arc(treeP.x - 6 * camZoom, treeP.y - 36 * camZoom, 12 * camZoom, 0, Math.PI * 2);
+        ctx.arc(treeP.x + 7 * camZoom, treeP.y - 34 * camZoom, 11 * camZoom, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Đại Hồng Chung (Chuông đồng vàng)
+        const bellP = worldToScreen(bz.bellX, bz.bellY, 22);
+        ctx.fillStyle = '#d97706';
+        ctx.strokeStyle = '#fef08a';
         ctx.lineWidth = 1.5 * camZoom;
         ctx.beginPath();
-        ctx.moveTo(fridgeFront.x, fridgeFront.y - 12 * camZoom);
-        ctx.lineTo(fridgeFront.x, fridgeFront.y + 10 * camZoom);
-        ctx.stroke();
-        // Tay nắm tủ lạnh vàng
-        ctx.fillStyle = '#fbbf24';
-        ctx.fillRect(fridgeFront.x - 4 * camZoom, fridgeFront.y - 4 * camZoom, 2 * camZoom, 7 * camZoom);
-        ctx.fillRect(fridgeFront.x + 2 * camZoom, fridgeFront.y - 4 * camZoom, 2 * camZoom, 7 * camZoom);
-      }
-
-      // 2. Quầy Bar / Kệ Trà & Máy Pha Cà Phê
-      drawIsoBlock(pt.rx + 2.1, pt.ry + 0.4, 3.2, 0.9, 15, '#a16207', '#713f12', '#422006', '#fde047');
-
-      // 3. Bàn Ăn lớn ở giữa Pantry + Đĩa thức ăn, trà bánh
-      const tx = pt.rx + 1.4;
-      const ty = pt.ry + 2.7;
-      drawIsoBlock(tx, ty, 3.2, 2.0, 12, '#b45309', '#78350f', '#451a03', '#fcd34d');
-      // Ghế ngồi quanh bàn ăn
-      drawIsoBlock(tx + 0.4, ty - 0.55, 0.8, 0.45, 7, '#5c4033', '#3e2723', '#271714');
-      drawIsoBlock(tx + 1.9, ty - 0.55, 0.8, 0.45, 7, '#5c4033', '#3e2723', '#271714');
-      drawIsoBlock(tx + 0.4, ty + 2.1, 0.8, 0.45, 7, '#5c4033', '#3e2723', '#271714');
-      drawIsoBlock(tx + 1.9, ty + 2.1, 0.8, 0.45, 7, '#5c4033', '#3e2723', '#271714');
-
-      if (!isTopDown2D) {
-        // Mâm đồ ăn trên bàn
-        [
-          { x: tx + 0.9, y: ty + 0.9, c: '#f97316' },
-          { x: tx + 1.7, y: ty + 0.9, c: '#22c55e' },
-          { x: tx + 2.4, y: ty + 1.1, c: '#eab308' }
-        ].forEach(food => {
-          const fp = worldToScreen(food.x, food.y, 13.5);
-          ctx.fillStyle = '#ffffff';
-          ctx.beginPath();
-          ctx.ellipse(fp.x, fp.y, 6 * camZoom, 3.5 * camZoom, 0, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.fillStyle = food.c;
-          ctx.beginPath();
-          ctx.arc(fp.x, fp.y - 1.5 * camZoom, 3.2 * camZoom, 0, Math.PI * 2);
-          ctx.fill();
-        });
-      }
-    }
-
-    // Vẽ Đôi Cánh Vẫy Vẫy (Chỉ dành cho AM và Manager)
-    function drawAngelWings(cx, cy, scale, isManager) {
-      const flap = Math.sin(simTick * 0.22) * 0.38;
-      const wingSpan = (isManager ? 26 : 19) * scale;
-      const wingH = (isManager ? 22 : 16) * scale;
-
-      [-1, 1].forEach(dir => {
-        ctx.save();
-        ctx.translate(cx + dir * 5 * scale, cy);
-        ctx.rotate(dir * (0.35 + flap));
-
-        const grad = ctx.createLinearGradient(0, 0, dir * wingSpan, -wingH);
-        if (isManager) {
-          grad.addColorStop(0, '#fef08a');
-          grad.addColorStop(0.6, '#f59e0b');
-          grad.addColorStop(1, '#dc2626');
-        } else {
-          grad.addColorStop(0, '#ffffff');
-          grad.addColorStop(0.6, '#7dd3fc');
-          grad.addColorStop(1, '#38bdf8');
-        }
-
-        ctx.fillStyle = grad;
-        ctx.strokeStyle = isManager ? '#fde047' : '#bae6fd';
-        ctx.lineWidth = 1.4 * scale;
-
-        ctx.beginPath();
-        ctx.moveTo(0, 0);
-        ctx.quadraticCurveTo(dir * wingSpan * 0.6, -wingH * 1.1, dir * wingSpan, -wingH * 0.35);
-        ctx.quadraticCurveTo(dir * wingSpan * 0.75, wingH * 0.2, dir * wingSpan * 0.55, wingH * 0.45);
-        ctx.quadraticCurveTo(dir * wingSpan * 0.25, wingH * 0.3, 0, 4 * scale);
+        ctx.arc(bellP.x, bellP.y - 6 * camZoom, 9 * camZoom, Math.PI, 0);
+        ctx.lineTo(bellP.x + 11 * camZoom, bellP.y + 6 * camZoom);
+        ctx.lineTo(bellP.x - 11 * camZoom, bellP.y + 6 * camZoom);
         ctx.closePath();
         ctx.fill();
         ctx.stroke();
+      }
+    }
+
+    function drawDetailedBuddhaAndChanhDien() {
+      const z = ZONES.DIRECTOR;
+      drawEnclosedRoom(z);
+
+      drawIsoBlock(9.7, 1.5, 4.0, 0.95, 20, '#9a3412', '#7c2d12', '#431407', '#fbbf24');
+
+      const bx = 11.7;
+      const by = 1.05;
+      const statuePos = worldToScreen(bx, by, 26);
+
+      if (!isTopDown2D) {
+        const haloCenterY = statuePos.y - 26 * camZoom;
+        const haloR = (38 + Math.sin(simTick * 0.05) * 3) * camZoom;
+        const grad = ctx.createRadialGradient(statuePos.x, haloCenterY, 5 * camZoom, statuePos.x, haloCenterY, haloR);
+        grad.addColorStop(0, 'rgba(255, 250, 190, 0.95)');
+        grad.addColorStop(0.55, 'rgba(251, 191, 36, 0.65)');
+        grad.addColorStop(1, 'rgba(245, 158, 11, 0)');
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(statuePos.x, haloCenterY, haloR, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.save();
+        ctx.translate(statuePos.x, haloCenterY);
+        ctx.rotate(simTick * 0.008);
+        ctx.strokeStyle = 'rgba(254, 240, 138, 0.55)';
+        ctx.lineWidth = 1.5 * camZoom;
+        for (let r = 0; r < 12; r++) {
+          const ang = (r * Math.PI) / 6;
+          ctx.beginPath();
+          ctx.moveTo(Math.cos(ang) * 14 * camZoom, Math.sin(ang) * 14 * camZoom);
+          ctx.lineTo(Math.cos(ang) * 33 * camZoom, Math.sin(ang) * 33 * camZoom);
+          ctx.stroke();
+        }
         ctx.restore();
+
+        ctx.fillStyle = '#b45309';
+        ctx.beginPath();
+        ctx.ellipse(statuePos.x, statuePos.y + 4 * camZoom, 24 * camZoom, 10 * camZoom, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#f59e0b';
+        ctx.strokeStyle = '#78350f';
+        ctx.lineWidth = 1.5 * camZoom;
+        ctx.beginPath();
+        ctx.ellipse(statuePos.x, statuePos.y, 20 * camZoom, 8 * camZoom, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = '#f59e0b';
+        ctx.beginPath();
+        ctx.roundRect(statuePos.x - 13 * camZoom, statuePos.y - 26 * camZoom, 26 * camZoom, 22 * camZoom, 9 * camZoom);
+        ctx.fill();
+        ctx.strokeStyle = '#fef08a';
+        ctx.lineWidth = 1.5 * camZoom;
+        ctx.stroke();
+
+        const bHeadY = statuePos.y - 34 * camZoom;
+        ctx.fillStyle = '#fbbf24';
+        ctx.beginPath();
+        ctx.arc(statuePos.x, bHeadY, 10.5 * camZoom, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#d97706';
+        ctx.beginPath();
+        ctx.arc(statuePos.x, bHeadY - 10 * camZoom, 5 * camZoom, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    function drawCentralIncenseSanctuary() {
+      const ix = INCENSE_ALTAR.x;
+      const iy = INCENSE_ALTAR.y;
+
+      drawOrnateFloor(ix - 1.55, iy - 1.05, 3.1, 2.2, '#7f1d1d', '#fbbf24');
+      drawIsoBlock(ix - 1.1, iy - 0.65, 2.2, 1.3, 6, '#991b1b', '#7f1d1d', '#450a0a', '#fcd34d');
+      drawIsoBlock(ix - 0.75, iy - 0.4, 1.5, 0.75, 14, '#b45309', '#78350f', '#451a03', '#fde047');
+
+      const urnPos = worldToScreen(ix, iy, 18);
+      if (!isTopDown2D) {
+        const urnGrad = ctx.createRadialGradient(urnPos.x - 3 * camZoom, urnPos.y - 6 * camZoom, 2 * camZoom, urnPos.x, urnPos.y - 4 * camZoom, 16 * camZoom);
+        urnGrad.addColorStop(0, '#fef08a');
+        urnGrad.addColorStop(0.6, '#d97706');
+        urnGrad.addColorStop(1, '#78350f');
+        ctx.fillStyle = urnGrad;
+        ctx.beginPath();
+        ctx.ellipse(urnPos.x, urnPos.y - 4 * camZoom, 15 * camZoom, 10 * camZoom, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#fef08a';
+        ctx.lineWidth = 1.5 * camZoom;
+        ctx.stroke();
+
+        const visibleSticks = Math.min(15, activeIncenseSticks);
+        for (let s = 0; s < visibleSticks; s++) {
+          const spread = (s - (visibleSticks - 1) / 2) * 1.9 * camZoom;
+          const sx1 = urnPos.x + spread * 0.5;
+          const sy1 = urnPos.y - 11 * camZoom;
+          const sx2 = urnPos.x + spread * 1.3;
+          const sy2 = urnPos.y - 25 * camZoom - (s % 3) * 2 * camZoom;
+
+          ctx.strokeStyle = '#b91c1c';
+          ctx.lineWidth = 1.4 * camZoom;
+          ctx.beginPath();
+          ctx.moveTo(sx1, sy1);
+          ctx.lineTo(sx2, sy2);
+          ctx.stroke();
+
+          ctx.fillStyle = '#ff4500';
+          ctx.beginPath();
+          ctx.arc(sx2, sy2, 2.2 * camZoom, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+    }
+
+    // Vẽ Khu Pantry (Tủ Lạnh 2 Cánh + Quầy Trà + Bàn Ăn Thụ Lộc) & Cầu Thang Hạ Sơn
+    function drawRightWingRooms() {
+      drawIsoBlock(18.1, 0.5, 0.3, 8.1, 34, '#d4b483', '#8c6239', '#5e3f22', '#3d2610');
+      drawIsoBlock(18.1, 10.9, 0.3, 6.2, 34, '#d4b483', '#8c6239', '#5e3f22', '#3d2610');
+      drawDoorwayArchWithPlaque(18.25, 9.7, '🌙 NGUYỆT MÔN', '', '#f59e0b', false);
+
+      drawEnclosedRoom(ZONES.PANTRY);
+      const pt = ZONES.PANTRY;
+
+      // 1. Tủ Lạnh Inox 2 Cánh Cao Cấp
+      drawIsoBlock(pt.rx + 0.5, pt.ry + 0.5, 1.35, 0.9, 32, '#e2e8f0', '#94a3b8', '#64748b', '#38bdf8');
+      if (!isTopDown2D) {
+        const fp = worldToScreen(pt.rx + 1.15, pt.ry + 1.4, 18);
+        ctx.strokeStyle = '#1e293b';
+        ctx.lineWidth = 1.5 * camZoom;
+        ctx.beginPath();
+        ctx.moveTo(fp.x, fp.y - 12 * camZoom);
+        ctx.lineTo(fp.x, fp.y + 10 * camZoom);
+        ctx.stroke();
+        ctx.fillStyle = '#fbbf24';
+        ctx.fillRect(fp.x - 4 * camZoom, fp.y - 4 * camZoom, 2 * camZoom, 7 * camZoom);
+        ctx.fillRect(fp.x + 2 * camZoom, fp.y - 4 * camZoom, 2 * camZoom, 7 * camZoom);
+      }
+
+      // 2. Quầy Pha Trà / Cà Phê
+      drawIsoBlock(pt.rx + 2.1, pt.ry + 0.5, 3.1, 0.9, 16, '#a16207', '#713f12', '#422006', '#fde047');
+
+      // 3. Bàn Ăn Lớn + Ghế + Mâm Đồ Ăn Tăng Công Đức
+      const bx = pt.rx + 1.35;
+      const by = pt.ry + 2.8;
+      drawIsoBlock(bx, by, 3.1, 1.9, 13, '#78350f', '#451a03', '#271202', '#f59e0b');
+      drawIsoBlock(bx + 0.4, by - 0.5, 0.8, 0.4, 7, '#5c4033', '#3e2723', '#271714');
+      drawIsoBlock(bx + 1.8, by - 0.5, 0.8, 0.4, 7, '#5c4033', '#3e2723', '#271714');
+      drawIsoBlock(bx + 0.4, by + 2.0, 0.8, 0.4, 7, '#5c4033', '#3e2723', '#271714');
+      drawIsoBlock(bx + 1.8, by + 2.0, 0.8, 0.4, 7, '#5c4033', '#3e2723', '#271714');
+
+      if (!isTopDown2D) {
+        [
+          { x: bx + 0.8, y: by + 0.9, c: '#f97316' },
+          { x: bx + 1.6, y: by + 0.9, c: '#22c55e' },
+          { x: bx + 2.3, y: by + 1.0, c: '#eab308' }
+        ].forEach(fd => {
+          const p = worldToScreen(fd.x, fd.y, 14.5);
+          ctx.fillStyle = '#fff';
+          ctx.beginPath();
+          ctx.ellipse(p.x, p.y, 6 * camZoom, 3.5 * camZoom, 0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = fd.c;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y - 1.5 * camZoom, 3.2 * camZoom, 0, Math.PI * 2);
+          ctx.fill();
+        });
+      }
+
+      // Cầu Thang Hạ Sơn
+      drawEnclosedRoom(ZONES.STAIRS);
+      const st = ZONES.STAIRS;
+      const stepCount = 7;
+      const stepH = (st.rh - 1.2) / stepCount;
+      for (let s = 0; s < stepCount; s++) {
+        const sy = st.ry + 0.7 + s * stepH;
+        const shade = Math.max(25, 155 - s * 18);
+        const col = `rgb(${shade}, ${Math.round(shade * 0.78)}, ${Math.round(shade * 0.55)})`;
+        drawIsoBlock(st.rx + 0.6, sy, st.rw - 1.2, stepH - 0.06, Math.max(1, (stepCount - s) * 2.2), col, '#271c15', '#1a120d');
+      }
+    }
+
+    // --- 14. VẼ CÁNH THIÊN THẦN ĐA TẦNG & NHÂN VẬT TIẾN HÓA THEO 5 CẤP TU VI ---
+    function drawMultiLayerWings(cx, cy, scale, isManager) {
+      const flap = Math.sin(simTick * (isManager ? 0.2 : 0.24)) * 0.36;
+      const layers = isManager ? 4 : 3;
+
+      [-1, 1].forEach(dir => {
+        for (let l = 0; l < layers; l++) {
+          ctx.save();
+          ctx.translate(cx + dir * 5 * scale, cy + l * 2.5 * scale);
+          ctx.rotate(dir * (0.28 + flap - l * 0.14));
+
+          const span = (isManager ? 30 - l * 4 : 22 - l * 3) * scale;
+          const h = (isManager ? 24 - l * 3 : 17 - l * 2) * scale;
+
+          const grad = ctx.createLinearGradient(0, 0, dir * span, -h);
+          if (isManager) {
+            grad.addColorStop(0, '#fffbeb');
+            grad.addColorStop(0.5, '#f59e0b');
+            grad.addColorStop(1, '#dc2626');
+          } else {
+            grad.addColorStop(0, '#ffffff');
+            grad.addColorStop(0.55, '#7dd3fc');
+            grad.addColorStop(1, '#0284c7');
+          }
+
+          ctx.fillStyle = grad;
+          ctx.strokeStyle = isManager ? '#fde047' : '#e0f2fe';
+          ctx.lineWidth = 1.2 * scale;
+
+          ctx.beginPath();
+          ctx.moveTo(0, 0);
+          ctx.quadraticCurveTo(dir * span * 0.6, -h * 1.15, dir * span, -h * 0.3);
+          ctx.quadraticCurveTo(dir * span * 0.72, h * 0.25, 0, 4 * scale);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+          ctx.restore();
+        }
       });
     }
 
-    // Vẽ Nhân Vật Theo Cấp Bậc Tu Vi + Thanh Máu 100 HP
-    function drawPlayerCharacter(p) {
-      const isMe = p.id === myId;
-      const isTarget = p.id === selectedTargetId;
-      const bounce = p.state === 'walk' ? Math.abs(Math.sin(simTick * 0.28)) * 5 : 0;
-      const pos = worldToScreen(p.x, p.y, bounce);
-      const sc = camZoom;
+    function drawCharacterSprite(c) {
+      const isSelected = c.id === myId;
+      const isTarget = c.id === selectedCombatTargetId;
+      const bounce = c.state === 'walk' ? Math.abs(Math.sin(simTick * 0.26)) * 5.5 : 0;
+      const isMeditating = c.state === 'meditate';
+
+      const pos = worldToScreen(c.x, c.y, bounce);
+      const scale = camZoom;
 
       ctx.save();
 
-      // 1. Hào quang dưới chân theo cấp bậc Tu Vi
-      if (p.level === 'Group Lead' || p.level === 'AM' || p.level === 'Manager') {
-        const auraR = (p.level === 'Manager' ? 22 : (p.level === 'AM' ? 18 : 14)) * sc;
-        ctx.fillStyle = p.level === 'Manager'
-          ? 'rgba(250, 204, 21, 0.35)'
-          : (p.level === 'AM' ? 'rgba(56, 189, 248, 0.32)' : 'rgba(192, 132, 252, 0.28)');
+      // 1. Trận Pháp Hào Quang dưới chân theo Tu Vi (Group Lead, AM, Manager)
+      if (c.level === 'Group Lead' || c.level === 'AM' || c.level === 'Manager') {
+        const r = (c.level === 'Manager' ? 24 : (c.level === 'AM' ? 19 : 15)) * scale;
+        ctx.fillStyle = c.level === 'Manager'
+          ? 'rgba(250, 204, 21, 0.36)'
+          : (c.level === 'AM' ? 'rgba(56, 189, 248, 0.32)' : 'rgba(192, 132, 252, 0.28)');
         ctx.beginPath();
-        ctx.ellipse(pos.x, pos.y + 1 * sc, auraR, auraR * 0.5, 0, 0, Math.PI * 2);
+        ctx.ellipse(pos.x, pos.y + 1 * scale, r, r * 0.5, 0, 0, Math.PI * 2);
         ctx.fill();
       }
 
-      if (isMe || isTarget) {
-        ctx.strokeStyle = isMe ? '#00f5d4' : '#ff4d4d';
-        ctx.lineWidth = 2.2 * sc;
+      if (isSelected || isTarget) {
+        ctx.strokeStyle = isSelected ? '#00f5d4' : '#ff4d4d';
+        ctx.lineWidth = 2.4 * scale;
         ctx.beginPath();
-        ctx.ellipse(pos.x, pos.y, 16 * sc, 8.5 * sc, 0, 0, Math.PI * 2);
+        ctx.ellipse(pos.x, pos.y, 17 * scale, 9 * scale, 0, 0, Math.PI * 2);
         ctx.stroke();
       }
 
-      // 2. Đôi cánh vẫy vẫy từ cấp AM trở lên (AM & Manager)
-      if (p.level === 'AM' || p.level === 'Manager') {
-        drawAngelWings(pos.x, pos.y - 16 * sc, sc, p.level === 'Manager');
+      // 2. Pháp Luân 12 tia xoay sau lưng cho riêng cấp Manager
+      if (c.level === 'Manager') {
+        const wheelY = pos.y - 22 * scale;
+        ctx.save();
+        ctx.translate(pos.x, wheelY);
+        ctx.rotate(simTick * 0.025);
+        ctx.strokeStyle = 'rgba(253, 224, 71, 0.75)';
+        ctx.lineWidth = 1.6 * scale;
+        ctx.beginPath();
+        ctx.arc(0, 0, 22 * scale, 0, Math.PI * 2);
+        ctx.stroke();
+        for (let i = 0; i < 8; i++) {
+          const a = (i * Math.PI) / 4;
+          ctx.beginPath();
+          ctx.moveTo(0, 0);
+          ctx.lineTo(Math.cos(a) * 22 * scale, Math.sin(a) * 22 * scale);
+          ctx.stroke();
+        }
+        ctx.restore();
       }
 
-      // 3. Đài sen khi Tọa Thiền
-      if (p.state === 'meditate') {
+      // 3. Đôi Cánh Vẫy Vẫy cho AM và Manager
+      if (c.level === 'AM' || c.level === 'Manager') {
+        drawMultiLayerWings(pos.x, pos.y - 17 * scale, scale, c.level === 'Manager');
+      }
+
+      // 4. Đài Sen khi Tọa Thiền
+      if (isMeditating) {
         ctx.fillStyle = '#f59e0b';
-        ctx.strokeStyle = '#fde047';
-        ctx.lineWidth = 1.5 * sc;
+        ctx.strokeStyle = '#b45309';
+        ctx.lineWidth = 2 * scale;
         ctx.beginPath();
-        ctx.ellipse(pos.x, pos.y + 1 * sc, 15 * sc, 7.5 * sc, 0, 0, Math.PI * 2);
+        ctx.ellipse(pos.x, pos.y + 2 * scale, 17 * scale, 9 * scale, 0, 0, Math.PI * 2);
         ctx.fill();
         ctx.stroke();
       }
 
-      // 4. Thân áo theo Tu Vi (cấp càng cao áo càng đẹp)
-      const bodyW = 14.5 * sc;
-      const bodyH = (p.state === 'meditate' ? 15 : 19) * sc;
+      // 5. Pháp Y / Cà Sa theo từng bậc Tu Vi
+      const bodyH = (isMeditating ? 16 : 21) * scale;
+      const bodyW = 15.5 * scale;
       let robeCol = '#475569'; // ST2
-      let trimCol = '#94a3b8';
-      if (p.level === 'ST3') { robeCol = '#0284c7'; trimCol = '#bae6fd'; }
-      else if (p.level === 'Group Lead') { robeCol = '#7c3aed'; trimCol = '#fde047'; }
-      else if (p.level === 'AM') { robeCol = '#ea580c'; trimCol = '#fef08a'; }
-      else if (p.level === 'Manager') { robeCol = '#b91c1c'; trimCol = '#fde047'; }
+      let sashCol = '#94a3b8';
+      if (c.level === 'ST3') { robeCol = '#0284c7'; sashCol = '#bae6fd'; }
+      else if (c.level === 'Group Lead') { robeCol = '#7c3aed'; sashCol = '#fde047'; }
+      else if (c.level === 'AM') { robeCol = '#ea580c'; sashCol = '#fef08a'; }
+      else if (c.level === 'Manager') { robeCol = '#b91c1c'; sashCol = '#fde047'; }
 
       ctx.fillStyle = robeCol;
       ctx.beginPath();
-      ctx.roundRect(pos.x - bodyW / 2, pos.y - bodyH - 3 * sc, bodyW, bodyH, 5 * sc);
+      ctx.roundRect(pos.x - bodyW / 2, pos.y - bodyH - 3 * scale, bodyW, bodyH, 6 * scale);
       ctx.fill();
-      ctx.strokeStyle = trimCol;
-      ctx.lineWidth = 1.8 * sc;
+      ctx.strokeStyle = sashCol;
+      ctx.lineWidth = 2 * scale;
       ctx.stroke();
 
-      // Dải cà sa / đai vàng cho cấp cao
-      if (p.level !== 'ST2') {
-        ctx.strokeStyle = trimCol;
-        ctx.lineWidth = 2 * sc;
-        ctx.beginPath();
-        ctx.moveTo(pos.x - 5 * sc, pos.y - bodyH - 1 * sc);
-        ctx.lineTo(pos.x + 5 * sc, pos.y - 5 * sc);
-        ctx.stroke();
-      }
+      ctx.beginPath();
+      ctx.moveTo(pos.x - 6 * scale, pos.y - bodyH - 1 * scale);
+      ctx.lineTo(pos.x + 6 * scale, pos.y - 6 * scale);
+      ctx.stroke();
 
-      // 5. Đầu & Mão/Vương miện Tu Vi
-      const headY = pos.y - bodyH - 11 * sc;
-      const headR = 9 * sc;
+      // 6. Đầu, Khuôn mặt & Kim Quan (Mão vàng)
+      const headY = pos.y - bodyH - 12 * scale;
+      const headR = 10 * scale;
+
       ctx.fillStyle = '#fed7aa';
       ctx.beginPath();
       ctx.arc(pos.x, headY, headR, 0, Math.PI * 2);
       ctx.fill();
       ctx.strokeStyle = '#431407';
-      ctx.lineWidth = 1 * sc;
+      ctx.lineWidth = 1.2 * scale;
       ctx.stroke();
 
-      // Tóc
-      ctx.fillStyle = p.gender === 'F' ? '#3f1d0b' : '#1e293b';
-      ctx.beginPath();
-      ctx.arc(pos.x, headY - 1.5 * sc, headR + 0.5 * sc, Math.PI, Math.PI * 2);
-      ctx.fill();
+      // Chấm giới hương hoặc tóc
+      ctx.fillStyle = '#9a3412';
+      ctx.fillRect(pos.x - 3 * scale, headY - 6 * scale, 1.6 * scale, 1.6 * scale);
+      ctx.fillRect(pos.x + 1.4 * scale, headY - 6 * scale, 1.6 * scale, 1.6 * scale);
 
-      // Kim quan (Mão vàng) cho Group Lead, AM, Manager
-      if (p.level === 'Group Lead' || p.level === 'AM' || p.level === 'Manager') {
+      if (c.level === 'Group Lead' || c.level === 'AM' || c.level === 'Manager') {
         ctx.fillStyle = '#fbbf24';
         ctx.strokeStyle = '#78350f';
-        ctx.lineWidth = 1 * sc;
+        ctx.lineWidth = 1.2 * scale;
         ctx.beginPath();
-        ctx.moveTo(pos.x - 5 * sc, headY - 9 * sc);
-        ctx.lineTo(pos.x, headY - 15 * sc);
-        ctx.lineTo(pos.x + 5 * sc, headY - 9 * sc);
+        ctx.moveTo(pos.x - 6 * scale, headY - 9 * scale);
+        ctx.lineTo(pos.x, headY - 16 * scale);
+        ctx.lineTo(pos.x + 6 * scale, headY - 9 * scale);
         ctx.closePath();
         ctx.fill();
         ctx.stroke();
       }
 
-      // 6. Thanh Máu (100 HP Bar)
-      const barW = 32 * sc;
-      const barH = 4.5 * sc;
+      // Mắt & Miệng
+      ctx.fillStyle = '#1c1917';
+      ctx.beginPath();
+      ctx.arc(pos.x - 3.5 * scale, headY - 0.5 * scale, 1.5 * scale, 0, Math.PI * 2);
+      ctx.arc(pos.x + 3.5 * scale, headY - 0.5 * scale, 1.5 * scale, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(pos.x, headY + 2.5 * scale, 2.5 * scale, 0, Math.PI);
+      ctx.stroke();
+
+      // 7. Thanh Máu (100 HP)
+      const barW = 34 * scale;
+      const barH = 4.5 * scale;
       const barX = pos.x - barW / 2;
-      const barY = headY - 19 * sc;
-      const hpRatio = Math.max(0, Math.min(1, (p.hp ?? 100) / 100));
+      const barY = headY - 20 * scale;
+      const hpPct = Math.max(0, Math.min(1, (c.hp ?? 100) / 100));
 
-      ctx.fillStyle = 'rgba(0,0,0,0.75)';
+      ctx.fillStyle = 'rgba(0,0,0,0.8)';
       ctx.fillRect(barX - 1, barY - 1, barW + 2, barH + 2);
-      ctx.fillStyle = hpRatio > 0.5 ? '#22c55e' : (hpRatio > 0.25 ? '#f59e0b' : '#ef4444');
-      ctx.fillRect(barX, barY, barW * hpRatio, barH);
+      ctx.fillStyle = hpPct > 0.5 ? '#22c55e' : (hpPct > 0.25 ? '#f59e0b' : '#ef4444');
+      ctx.fillRect(barX, barY, barW * hpPct, barH);
 
-      // 7. Pháp danh & Phòng ban
-      const nameY = barY - 4 * sc;
-      ctx.font = `800 ${Math.max(8, Math.round(9.5 * sc))}px 'Be Vietnam Pro', sans-serif`;
+      // 8. Pháp Danh & Cấp Bậc Tu Vi
+      const nameY = barY - 4 * scale;
+      const fullTitle = `[${c.level}] ${c.name}`;
+      ctx.font = `800 ${Math.max(9, Math.round(10 * scale))}px 'Be Vietnam Pro', sans-serif`;
       ctx.textAlign = 'center';
-      const labelStr = `[${p.level}] ${p.name}`;
-      ctx.strokeStyle = '#000';
-      ctx.lineWidth = 2.8 * sc;
-      ctx.strokeText(labelStr, pos.x, nameY);
-      ctx.fillStyle = isMe ? '#00f5d4' : '#ffffff';
-      ctx.fillText(labelStr, pos.x, nameY);
+      ctx.strokeStyle = 'rgba(0,0,0,0.9)';
+      ctx.lineWidth = 3 * scale;
+      ctx.strokeText(fullTitle, pos.x, nameY);
+      ctx.fillStyle = isSelected ? '#00f5d4' : '#ffffff';
+      ctx.fillText(fullTitle, pos.x, nameY);
 
-      // 8. Bong bóng hội thoại
-      if (p.bubbleText) {
-        ctx.font = `700 ${Math.max(8, Math.round(9.5 * sc))}px 'Be Vietnam Pro', sans-serif`;
-        const tw = ctx.measureText(p.bubbleText).width + 14 * sc;
-        const th = 18 * sc;
-        const bx = pos.x - tw / 2;
-        const by = nameY - 24 * sc;
+      // 9. Bong bóng chat
+      if (c.bubbleText) {
+        ctx.font = `700 ${Math.max(9, Math.round(10.5 * scale))}px 'Be Vietnam Pro', sans-serif`;
+        const padX = 9 * scale;
+        const textW = ctx.measureText(c.bubbleText).width + padX * 2;
+        const boxH = 21 * scale;
+        const bx = pos.x - textW / 2;
+        const by = nameY - 28 * scale;
+
         ctx.fillStyle = '#fffbeb';
         ctx.beginPath();
-        ctx.roundRect(bx, by, tw, th, 5 * sc);
+        ctx.roundRect(bx, by, textW, boxH, 6 * scale);
         ctx.fill();
-        ctx.strokeStyle = '#78350f';
-        ctx.lineWidth = 1.2 * sc;
+        ctx.strokeStyle = '#5c3418';
+        ctx.lineWidth = 1.6 * scale;
         ctx.stroke();
-        ctx.fillStyle = '#1c1917';
-        ctx.fillText(p.bubbleText, pos.x, by + 12.5 * sc);
+
+        ctx.fillStyle = '#29170a';
+        ctx.fillText(c.bubbleText, pos.x, by + 14 * scale);
       }
 
       ctx.restore();
@@ -1596,73 +2455,85 @@
     function renderScene() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // 1. Nền gạch sân chùa
+      // Sàn gạch sân chùa
       for (let gx = 0; gx < MAP_W; gx++) {
         for (let gy = 0; gy < MAP_H; gy++) {
           const p1 = worldToScreen(gx, gy);
           const p2 = worldToScreen(gx + 1, gy);
           const p3 = worldToScreen(gx + 1, gy + 1);
           const p4 = worldToScreen(gx, gy + 1);
-          const isAvenue = gy >= 9 && gy <= 10 && gx < 18;
-          ctx.fillStyle = isAvenue
-            ? ((gx + gy) % 2 === 0 ? '#57534e' : '#44403c')
-            : ((gx + gy) % 2 === 0 ? '#8c562f' : '#7c4a27');
+
+          const isEven = (gx + gy) % 2 === 0;
+          const isCentralAvenue = gy >= 9 && gy <= 10 && gx < 18;
+          let tileCol = isEven ? '#8c562f' : '#804d28';
+
+          if (isCentralAvenue) tileCol = isEven ? '#57534e' : '#44403c';
+          else if (gx >= 18) tileCol = isEven ? '#784725' : '#6e3f20';
+
+          ctx.fillStyle = tileCol;
           ctx.beginPath();
           ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.lineTo(p3.x, p3.y); ctx.lineTo(p4.x, p4.y);
-          ctx.closePath();
-          ctx.fill();
+          ctx.closePath(); ctx.fill();
+
+          ctx.strokeStyle = 'rgba(40, 20, 8, 0.35)';
+          ctx.lineWidth = 0.8;
+          ctx.stroke();
         }
       }
 
-      // 2. Hồ Cá Koi & Thác Nước
-      drawKoiPondAndWaterfall();
-
-      // 3. Chánh Điện & Tượng Phật Vàng
-      drawRoomAndDoor(ZONES.DIRECTOR);
-      const statuePos = worldToScreen(11.8, 1.2, 24);
       if (!isTopDown2D) {
-        ctx.fillStyle = '#fbbf24';
-        ctx.beginPath();
-        ctx.arc(statuePos.x, statuePos.y - 16 * camZoom, 18 * camZoom, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.fillStyle = '#f59e0b';
-        ctx.beginPath();
-        ctx.roundRect(statuePos.x - 11 * camZoom, statuePos.y - 20 * camZoom, 22 * camZoom, 20 * camZoom, 7 * camZoom);
-        ctx.fill();
+        drawIsoBlock(0, 0, MAP_W, 0.3, 48, '#e6ccb2', '#b08968', '#7f5539', '#4a2c11');
+        drawIsoBlock(0, 0, 0.3, MAP_H, 48, '#e6ccb2', '#b08968', '#7f5539', '#4a2c11');
       }
 
-      // 4. 6 Phòng Ban
-      drawRoomAndDoor(ZONES.PROC);
-      drawRoomAndDoor(ZONES.Logistic);
-      drawRoomAndDoor(ZONES['HR-GA']);
-      drawRoomAndDoor(ZONES.Tech);
-      drawRoomAndDoor(ZONES['IBD Cost']);
-      drawRoomAndDoor(ZONES['IBD Sale']);
+      drawWaterfallAndKoiPond();
+      drawDetailedBuddhaAndChanhDien();
+      drawBodhiTreeAndBellTower();
 
-      // 5. Đỉnh Hương Trung Tâm
-      drawFloorCarpet(INCENSE_ALTAR.x - 1.3, INCENSE_ALTAR.y - 0.9, 2.6, 1.8, '#7f1d1d', '#fbbf24');
-      drawIsoBlock(INCENSE_ALTAR.x - 0.7, INCENSE_ALTAR.y - 0.4, 1.4, 0.8, 14, '#b45309', '#78350f', '#451a03', '#fde047');
+      drawEnclosedRoom(ZONES.PROC);
+      drawEnclosedRoom(ZONES.Logistic);
+      drawEnclosedRoom(ZONES['HR-GA']);
 
-      // 6. Pantry (Tủ lạnh + Bàn ăn) & Cầu Thang Hạ Sơn
-      drawPantryDetails();
-      drawRoomAndDoor(ZONES.STAIRS);
-      const st = ZONES.STAIRS;
-      for (let s = 0; s < 6; s++) {
-        drawIsoBlock(st.rx + 0.6, st.ry + 0.7 + s * 0.65, st.rw - 1.2, 0.58, (6 - s) * 2.2, '#78716c', '#44403c', '#292524');
-      }
+      drawCentralIncenseSanctuary();
 
-      // 7. Vẽ Người Chơi Đang Online (Sắp xếp theo chiều sâu)
-      const sortedPlayers = Object.values(players).sort((a, b) => (a.x + a.y) - (b.x + b.y));
-      sortedPlayers.forEach(p => drawPlayerCharacter(p));
+      drawEnclosedRoom(ZONES.Tech);
+      drawEnclosedRoom(ZONES['IBD Cost']);
+      drawEnclosedRoom(ZONES['IBD Sale']);
 
-      // 8. Khói nhang & Tim bay
-      smokeParticles.forEach(s => {
-        const p = worldToScreen(s.gx, s.gy, s.gz);
-        ctx.fillStyle = `rgba(254, 240, 138, ${s.alpha})`;
+      drawRightWingRooms();
+
+      bellShockwaves.forEach(bw => {
+        const center = worldToScreen(bw.gx, bw.gy, 15);
+        ctx.strokeStyle = `rgba(255, 215, 0, ${1 - bw.radius / bw.maxRadius})`;
+        ctx.lineWidth = 3.5;
         ctx.beginPath();
-        ctx.arc(p.x, p.y, s.size * camZoom, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.arc(center.x, center.y, bw.radius, 0, Math.PI * 2);
+        ctx.stroke();
       });
+
+      const sortedChars = Object.values(players).sort((a, b) => (a.x + a.y) - (b.x + b.y));
+      sortedChars.forEach(ch => drawCharacterSprite(ch));
+
+      if (!isTopDown2D) {
+        smokeParticles.forEach(sp => {
+          const p = worldToScreen(sp.gx, sp.gy, sp.gz);
+          ctx.fillStyle = sp.goldTint
+            ? `rgba(254, 240, 138, ${sp.alpha})`
+            : `rgba(235, 235, 245, ${sp.alpha})`;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, sp.size * camZoom, 0, Math.PI * 2);
+          ctx.fill();
+        });
+
+        goldenMotes.forEach(m => {
+          const p = worldToScreen(m.gx, m.gy, m.gz);
+          const alpha = 0.35 + Math.sin(simTick * 0.05 + m.phase) * 0.25;
+          ctx.fillStyle = `rgba(253, 224, 71, ${alpha})`;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, m.size * camZoom, 0, Math.PI * 2);
+          ctx.fill();
+        });
+      }
 
       heartParticles.forEach(h => {
         const p = worldToScreen(h.gx, h.gy, h.gz);
@@ -1671,14 +2542,13 @@
       });
 
       if (isNightMode) {
-        ctx.fillStyle = 'rgba(8, 10, 26, 0.38)';
+        ctx.fillStyle = 'rgba(8, 10, 26, 0.36)';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
       }
 
-      // 9. Chữ nổi (+Công Đức, -15 HP, Trộm Công Đức)
-      floatingTexts.forEach(fl => {
+      floatingLabels.forEach(fl => {
         const p = worldToScreen(fl.gx, fl.gy, fl.gz);
-        ctx.font = `800 ${Math.max(10, Math.round(11.5 * camZoom))}px 'Be Vietnam Pro', sans-serif`;
+        ctx.font = `800 ${Math.round(11.5 * camZoom)}px 'Be Vietnam Pro', sans-serif`;
         ctx.textAlign = 'center';
         ctx.strokeStyle = '#000';
         ctx.lineWidth = 3;
@@ -1688,17 +2558,19 @@
       });
     }
 
-    function startLoop() {
+    function initApp() {
       resizeCanvas();
-      function frame() {
+      applyPanelCollapseStates();
+
+      function animateLoop() {
         updateSimulation();
         renderScene();
-        requestAnimationFrame(frame);
+        requestAnimationFrame(animateLoop);
       }
-      frame();
+      animateLoop();
     }
 
-    window.onload = startLoop;
+    window.onload = initApp;
   </script>
 </body>
 </html>
