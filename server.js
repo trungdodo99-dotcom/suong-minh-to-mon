@@ -24,32 +24,54 @@ Quy tắc:
 3. Khi bị tác động vật lý (đấm, dí deadline), hãy mếu máo kêu oai oái hoặc tếu táo phản ứng hài hước.
 4. Trả lời NGẮN GỌN, súc tích (dưới 170 ký tự) để vừa vặn hiển thị trên bong bóng chat của game.`;
 
-// Hàm gọi Gemini API trực tiếp chuẩn xác
+// ================= CÀI ĐẶT CÁCH ĂN NÓI CỦA TIỂU SƯ ĐỆ (THÍCH ÂY AI) =================
+const SYSTEM_PROMPT = `Bạn là "Thích Ây Ai" (Tiểu Sư Đệ AI), một tiểu hòa thượng lém lỉnh, thông thái, hài hước đang tu hành tại "Sương Minh Tô Môn Tự" (ngôi chùa văn phòng chuyên sản xuất Motor điện & Hộp giảm tốc Sumitomo).
+Quy tắc ăn nói:
+1. Xưng là "Đệ" hoặc "Tiểu đệ", gọi người đối thoại là "Sư huynh", "Sư tỷ" hoặc "Đạo hữu" (nếu là Trụ trì "Thích Báo Giá" thì gọi kính cẩn "Sư Phụ Trụ Trì").
+2. Văn phong: Kết hợp hài hước giữa nhà Phật (A Di Đà Phật, công đức vô lượng, tịnh tâm) và dân văn phòng nhà máy (báo giá Direct Cost, chốt PO, spec bản vẽ, tiến độ deadline, thần Motor điện IE5).
+3. Luôn vui tươi, trả lời NGẮN GỌN, súc tích (dưới 160 ký tự) để vừa vặn hiển thị trên bong bóng chat.`;
+
 async function askThichAiAI(senderName, senderDept, senderLevel, userMessage) {
   if (!AI_API_KEY || AI_API_KEY.trim() === '') {
-    return `A Di Đà Phật! Đạo hữu ${senderName} tịnh tâm nhé, đệ đang kết nối lại linh khí mạng! 🙏`;
+    return `A Di Đà Phật! Đạo hữu ${senderName} tịnh tâm nhé, đệ đang kết nối linh khí! 🙏`;
   }
 
   const promptText = `Người đang nói chuyện với bạn: [${senderLevel}] ${senderName} thuộc phòng ${senderDept}. Nội dung: "${userMessage}"`;
 
   try {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${AI_API_KEY.trim()}`;
+    // Sử dụng endpoint chuẩn của Google Gemini v1.5 / v2.0
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${AI_API_KEY.trim()}`;
     const res = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
-        contents: [{ role: 'user', parts: [{ text: promptText }] }],
+        contents: [
+          {
+            role: 'user',
+            parts: [
+              { text: `${SYSTEM_PROMPT}\n\n${promptText}` }
+            ]
+          }
+        ],
         generationConfig: { maxOutputTokens: 150, temperature: 0.85 }
       })
     });
+
     const data = await res.json();
+    
+    // Bẫy lỗi nếu Google trả về thông báo không hợp lệ
+    if (data?.error) {
+      throw new Error(data.error.message || 'Google API Error');
+    }
+
     const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
     if (reply) return reply.trim().replace(/\n+/g, ' ');
-    throw new Error(data?.error?.message || 'Gemini API Error');
+    
+    throw new Error('Không nhận được phản hồi từ mô hình.');
   } catch (err) {
     console.error('Lỗi gọi Thích Ây Ai:', err.message);
-    return `Ái chà, linh khí mạng chập chờn quá (${err.message.slice(0, 30)}...), ${senderName} chờ đệ tí nhé! 🪷`;
+    // Trả về câu thoại tếu táo thay vì văng lỗi kỹ thuật lên màn hình
+    return `A Di Đà Phật! Sư huynh ${senderName} hỏi khó quá, đệ phải đi gõ mõ tụng kinh thêm đây! 🪷`;
   }
 }
 
