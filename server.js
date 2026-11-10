@@ -26,48 +26,111 @@ Quy tắc:
 3. Khi bị tác động vật lý (đấm, dí deadline), hãy mếu máo kêu oai oái hoặc tếu táo phản ứng hài hước.
 4. Trả lời NGẮN GỌN, súc tích (dưới 160 ký tự) để vừa vặn hiển thị trên bong bóng chat của game.`;
 
-// Hàm gọi Gemini API truyền đồng thời cả Header x-goog-api-key và Query Key
+// Biến lưu tên model hoạt động tốt nhất sau khi tự động dò tìm
+let cachedWorkingModel = null;
+
+// Tự động lấy danh sách các model đang được Google cấp quyền cho Khóa API của bạn
+async function getAvailableGeminiModels(apiKey) {
+  try {
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`, {
+      headers: { 'x-goog-api-key': apiKey }
+    });
+    const data = await res.json();
+    if (!data?.models) return [];
+
+    // Lọc các model hỗ trợ chat (generateContent) và loại bỏ các model chỉ tạo ảnh/âm thanh/nhúng
+    const validModels = data.models
+      .filter(m =>
+        Array.isArray(m.supportedGenerationMethods) &&
+        m.supportedGenerationMethods.includes('generateContent') &&
+        !/embedding|imagen|veo|tts|audio|vision|aqa|bisect/i.test(m.name)
+      )
+      .map(m => m.name.replace(/^models\//, ''));
+
+    // Ưu tiên các dòng flash nhanh nhẹ trước
+    validModels.sort((a, b) => {
+      const aFlash = a.includes('flash') ? 0 : 1;
+      const bFlash = b.includes('flash') ? 0 : 1;
+      return aFlash - bFlash;
+    });
+
+    console.log('✅ Danh sách Model khả dụng cho Thích Ây Ai:', validModels);
+    return validModels;
+  } catch (e) {
+    console.error('Lỗi lấy danh sách model:', e.message);
+    return [];
+  }
+}
+
 async function askThichAiAI(senderName, senderDept, senderLevel, userMessage) {
-  if (!AI_API_KEY || AI_API_KEY.trim() === '') {
+  const key = (AI_API_KEY || '').trim();
+  if (!key) {
     return `A Di Đà Phật! Đạo hữu ${senderName} tịnh tâm nhé, đệ đang kết nối lại linh khí mạng! 🙏`;
   }
 
   const promptText = `${SYSTEM_PROMPT}\n\nNgười đang nói chuyện với bạn: [${senderLevel}] ${senderName} thuộc phòng ${senderDept}. Nội dung: "${userMessage}"`;
 
-  // Thử tự động qua các model chuẩn của Gemini
-  const models = ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-2.5-flash'];
+  // 1. Lấy danh sách model thực tế từ tài khoản Google AI Studio của bạn
+  let candidateModels = [];
+  if (cachedWorkingModel) {
+    candidateModels.push(cachedWorkingModel);
+  }
+  const discovered = await getAvailableGeminiModels(key);
+  candidateModels = [...new Set([
+    ...candidateModels,
+    ...discovered,
+    'gemini-3-flash-preview',
+    'gemini-2.5-flash-lite',
+    'gemini-2.5-pro',
+    'gemini-flash-latest',
+    'gemini-pro-latest'
+  ])];
+
   let lastError = '';
 
-  for (const modelName of models) {
+  // 2. Thử gọi lần lượt cho đến khi có model phản hồi thành công
+  for (const modelName of candidateModels) {
     try {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${AI_API_KEY.trim()}`;
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${key}`;
       const res = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-goog-api-key': AI_API_KEY.trim()
+          'x-goog-api-key': key
         },
         body: JSON.stringify({
           contents: [{ parts: [{ text: promptText }] }],
-          generationConfig: { maxOutputTokens: 150, temperature: 0.85 }
+          generationConfig: {
+            maxOutputTokens: 800,
+            temperature: 0.85
+          }
         })
       });
 
       const data = await res.json();
       if (data?.error) {
-        lastError = data.error.message;
+        lastError = `[${modelName}] ${data.error.message}`;
+        console.warn('⚠️ Bỏ qua model:', lastError);
+        if (cachedWorkingModel === modelName) cachedWorkingModel = null;
         continue;
       }
 
-      const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-      if (reply) return reply.trim().replace(/\n+/g, ' ');
+      // Lọc phần văn bản trả lời (bỏ qua phần thought ẩn của các model đời mới)
+      const parts = data?.candidates?.[0]?.content?.parts || [];
+      const textParts = parts.filter(p => !p.thought && typeof p.text === 'string').map(p => p.text);
+      const reply = (textParts.join(' ') || parts[0]?.text || '').trim().replace(/\n+/g, ' ');
+
+      if (reply) {
+        cachedWorkingModel = modelName; // Lưu lại model thành công để các câu sau trả lời tức thì
+        return reply.slice(0, 220);
+      }
     } catch (err) {
       lastError = err.message;
     }
   }
 
-  console.error('Lỗi gọi Thích Ây Ai:', lastError);
-  return `Ái chà, linh khí mạng chập chờn (${lastError.slice(0, 35)}...), ${senderName} chờ đệ tí nhé! 🪷`;
+  console.error('❌ Lỗi chi tiết Thích Ây Ai:', lastError);
+  return `Ái chà, linh khí mạng chập chờn (${lastError}), ${senderName} chờ đệ tí nhé! 🪷`;
 }
 
 // Chuẩn hóa bắt buộc chữ "Thích " ở đầu Pháp Danh
