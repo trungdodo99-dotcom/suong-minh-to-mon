@@ -33,7 +33,8 @@ async function askThichAiAI(senderName, senderDept, senderLevel, userMessage) {
   const promptText = `Người đang nói chuyện với bạn: [${senderLevel}] ${senderName} thuộc phòng ${senderDept}. Nội dung: "${userMessage}"`;
 
   try {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${AI_API_KEY.trim()}`;
+    // SỬ DỤNG ĐÚNG MÔ HÌNH GEMINI-1.5-FLASH ĐỂ TRÁNH LỖI
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${AI_API_KEY.trim()}`;
     const res = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -43,10 +44,18 @@ async function askThichAiAI(senderName, senderDept, senderLevel, userMessage) {
         generationConfig: { maxOutputTokens: 150, temperature: 0.85 }
       })
     });
+    
     const data = await res.json();
+    
+    // Ném lỗi chi tiết để dễ debug nếu có vấn đề
+    if (data?.error) {
+      throw new Error(data.error.message || 'Lỗi API từ Google');
+    }
+
     const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
     if (reply) return reply.trim().replace(/\n+/g, ' ');
-    throw new Error(data?.error?.message || 'Gemini API Error');
+    
+    throw new Error('Không nhận được phản hồi từ AI.');
   } catch (err) {
     console.error('Lỗi gọi Thích Ây Ai:', err.message);
     return `Ái chà, linh khí mạng chập chờn quá (${err.message.slice(0, 30)}...), ${senderName} chờ đệ tí nhé! 🪷`;
