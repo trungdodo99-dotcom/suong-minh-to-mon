@@ -3000,9 +3000,9 @@
       ctx.textAlign = 'center';
       ctx.strokeStyle = '#000';
       ctx.lineWidth = 3 * camZoom;
-      ctx.strokeText('🐟 AO CÁ KOI LINH SƠN (Click để ngắm cá +15 🪷)', pondLbl.x, pondLbl.y);
+      ctx.strokeText('🐟 AO CÁ KOI', pondLbl.x, pondLbl.y);
       ctx.fillStyle = '#7dd3fc';
-      ctx.fillText('🐟 AO CÁ KOI LINH SƠN (Click để ngắm cá +15 🪷)', pondLbl.x, pondLbl.y);
+      ctx.fillText('🐟 AO CÁ KOI', pondLbl.x, pondLbl.y);
       ctx.restore();
     }
 
@@ -3145,7 +3145,7 @@
       ctx.save();
       ctx.font = `800 ${Math.max(9, Math.round(11 * camZoom))}px 'Be Vietnam Pro', sans-serif`;
       ctx.textAlign = 'center';
-      const text = '⚙️ THẦN MOTOR ĐIỆN ĐẠI VƯƠNG (Click Thắp Hương +50 🪷)';
+      const text = '⚙️ Tượng Thần Motor';
       const tw = ctx.measureText(text).width + 18 * camZoom;
       ctx.fillStyle = 'rgba(15, 23, 42, 0.94)';
       ctx.beginPath();
@@ -3242,7 +3242,7 @@
       drawDoorwayArchWithPlaque(
         COURTYARD_GATE.x,
         COURTYARD_GATE.y,
-        '⛩️ CỔNG SÂN ĐÁ XANH - ĐIỆN THẦN MOTOR',
+        '',
         '(Ao Cá Koi & Tượng Thần Motor)',
         '#38bdf8',
         true
