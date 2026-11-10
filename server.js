@@ -12,7 +12,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 const ACCOUNTS_FILE = path.join(__dirname, 'accounts.json');
 
-// Hàm chuẩn hóa chữ "Thích " ở đầu tên
 function normalizeMonkName(rawName) {
   let clean = (rawName || '').trim().replace(/\s+/g, ' ');
   if (!clean) return 'Thích Vô Danh';
@@ -26,7 +25,6 @@ function normalizeMonkName(rawName) {
   return 'Thích ' + clean;
 }
 
-// Khởi tạo / Đọc danh sách tài khoản từ file accounts.json
 let accounts = {};
 
 function loadAccounts() {
@@ -38,7 +36,6 @@ function loadAccounts() {
     accounts = {};
   }
 
-  // Luôn đảm bảo tài khoản Trụ Trì tối cao: Thích Báo Giá (MK: 123456) tồn tại
   const adminKey = 'thích báo giá';
   if (!accounts[adminKey]) {
     accounts[adminKey] = {
@@ -74,7 +71,6 @@ const templeState = {
   chatHistory: []
 };
 
-// Danh sách người chơi đang thực sự Online trong chùa (socket.id -> player object)
 const onlinePlayers = {};
 
 function getPublicAccountsList() {
@@ -102,15 +98,36 @@ function pushChat(item) {
   io.emit('chat_message', item);
 }
 
+function syncPlayerMeritToAccount(p) {
+  if (p && p.usernameKey && accounts[p.usernameKey]) {
+    accounts[p.usernameKey].merit = p.merit;
+    saveAccounts();
+  }
+}
+
+// VÒNG LẶP HỒI MÁU KHI TỌA THIỀN: 5 HP / 1 PHÚT (Cứ 12 giây hồi +1 HP = 5 HP/phút)
+setInterval(() => {
+  let anyChanged = false;
+  Object.values(onlinePlayers).forEach(p => {
+    if (p.state === 'meditate' && p.hp < p.maxHp) {
+      p.hp = Math.min(p.maxHp, p.hp + 1);
+      anyChanged = true;
+      io.to(p.id).emit('meditate_hp_tick', { hp: p.hp });
+    }
+  });
+  if (anyChanged) {
+    io.emit('players_sync', onlinePlayers);
+  }
+}, 12000);
+
 io.on('connection', (socket) => {
-  // Gửi trạng thái ban đầu khi mở web
   socket.emit('init_state', {
     templeState,
     players: onlinePlayers,
     accountsList: getPublicAccountsList()
   });
 
-  // 1. ĐĂNG KÝ XUẤT GIA (TẠO ACC MỚI -> CHỜ THÍCH BÁO GIÁ PHÊ DUYỆT)
+  // 1. ĐĂNG KÝ XUẤT GIA (Bắt buộc chữ Thích + Chờ Thích Báo Giá duyệt)
   socket.on('register_account', (data, callback) => {
     const rawName = (data.name || '').trim();
     const password = (data.password || '').trim();
@@ -140,7 +157,7 @@ io.on('connection', (socket) => {
       level,
       gender,
       merit: 1080,
-      status: 'pending', // Cần Thích Báo Giá phê duyệt
+      status: 'pending',
       isAdmin: false,
       createdAt: Date.now()
     };
@@ -149,7 +166,7 @@ io.on('connection', (socket) => {
 
     pushChat({
       id: 'SYSTEM',
-      name: 'SƯƠNG MINH TỔ MÔN',
+      name: 'SƯƠNG MINH TÔ MÔN TỰ',
       dept,
       level,
       text: `🪷 Đạo hữu "${formattedName}" (${dept} - ${level}) vừa nộp đơn Xin Xuất Gia! Chờ Trụ Trì [Thích Báo Giá] phê duyệt!`,
@@ -172,7 +189,6 @@ io.on('connection', (socket) => {
       return callback({ ok: false, msg: 'Vui lòng nhập Pháp Danh và Mật Khẩu!' });
     }
 
-    // Hỗ trợ gõ "Thích Báo Giá", "Thich Báo Giá" hoặc quên chữ "Thích"
     const normalized = normalizeMonkName(rawName);
     const key = normalized.toLowerCase();
     const acc = accounts[key];
@@ -185,26 +201,25 @@ io.on('connection', (socket) => {
     }
 
     if (acc.password !== password) {
-      return callback({ ok: false, msg: 'Mật khẩu không chính xác! Vui lòng kiểm tra lại.' });
+      return callback({ ok: false, msg: 'Mật khẩu không chính xác!' });
     }
 
     if (acc.status === 'pending') {
       return callback({
         ok: false,
-        msg: `Pháp danh "${acc.name}" đang chờ Trụ Trì [Thích Báo Giá] phê duyệt! Hãy nhờ Thích Báo Giá bấm duyệt trong mục Quản Lý Acc.`
+        msg: `Pháp danh "${acc.name}" đang chờ Trụ Trì [Thích Báo Giá] phê duyệt!`
       });
     }
 
-    // Nếu tài khoản này đang đăng nhập ở tab khác thì ngắt nhân vật cũ để vào nhân vật mới
     for (const [sid, pl] of Object.entries(onlinePlayers)) {
       if (pl.usernameKey === key && sid !== socket.id) {
         delete onlinePlayers[sid];
-        io.to(sid).emit('force_logout', 'Tài khoản của bạn vừa được đăng nhập ở một thiết bị khác!');
+        io.to(sid).emit('force_logout', 'Tài khoản của bạn vừa được đăng nhập ở thiết bị khác!');
       }
     }
 
     const spawnX = data.spawnX || 7.6;
-    const spawnY = data.spawnY || 13.4;
+    const spawnY = data.spawnY || 13.3;
 
     onlinePlayers[socket.id] = {
       id: socket.id,
@@ -221,6 +236,7 @@ io.on('connection', (socket) => {
       y: spawnY,
       destX: spawnX,
       destY: spawnY,
+      meditateRoomDept: null,
       state: 'idle',
       bubbleText: 'A Di Đà Phật! Bần tăng đã nhập tự 🙏',
       bubbleTimer: 160
@@ -230,10 +246,10 @@ io.on('connection', (socket) => {
 
     pushChat({
       id: socket.id,
-      name: 'SƯƠNG MINH TỔ MÔN',
+      name: 'SƯƠNG MINH TÔ MÔN TỰ',
       dept: acc.dept,
       level: acc.level,
-      text: `🟢 [${acc.level}] ${acc.name} (${acc.dept}) đã quang lâm Tổ Môn!`,
+      text: `🟢 [${acc.level}] ${acc.name} (${acc.dept}) đã quang lâm Sương Minh Tô Môn Tự!`,
       isSystem: true
     });
 
@@ -244,7 +260,7 @@ io.on('connection', (socket) => {
     });
   });
 
-  // 3. QUẢN LÝ ACC (DÀNH CHO THÍCH BÁO GIÁ: DUYỆT ACC, ĐỔI TU VI, ĐỔI PHÒNG BAN, XÓA ACC)
+  // 3. QUẢN LÝ ACC (THÍCH BÁO GIÁ)
   socket.on('admin_action', (payload, callback) => {
     const me = onlinePlayers[socket.id];
     const isMasterAuth = payload && payload.adminPass === '123456';
@@ -253,7 +269,7 @@ io.on('connection', (socket) => {
       return;
     }
 
-    const { actionType, targetKey, newLevel, newDept, meritDelta } = payload;
+    const { actionType, targetKey, newLevel, newDept } = payload;
     const targetAcc = accounts[targetKey];
     if (!targetAcc) {
       if (callback) callback({ ok: false, msg: 'Không tìm thấy tài khoản này!' });
@@ -273,23 +289,16 @@ io.on('connection', (socket) => {
         isSystem: true
       });
       io.emit('account_approved_notice', { usernameKey: targetKey, name: targetAcc.name });
-      if (callback) callback({ ok: true, msg: `Đã duyệt ${targetAcc.name}!` });
+      if (callback) callback({ ok: true });
     } else if (actionType === 'update_role') {
       if (newLevel) targetAcc.level = newLevel;
       if (newDept) targetAcc.dept = newDept;
-      if (typeof meritDelta === 'number' && !isNaN(meritDelta)) {
-        targetAcc.merit = Math.max(0, (targetAcc.merit || 0) + meritDelta);
-      }
-
-      // Cập nhật ngay cho người chơi nếu đang online
       Object.values(onlinePlayers).forEach(pl => {
         if (pl.usernameKey === targetKey) {
           pl.level = targetAcc.level;
           pl.dept = targetAcc.dept;
-          pl.merit = targetAcc.merit;
         }
       });
-
       saveAccounts();
       broadcastAdminData();
       io.emit('players_sync', onlinePlayers);
@@ -298,10 +307,10 @@ io.on('connection', (socket) => {
         name: 'THÍCH BÁO GIÁ (TRỤ TRÌ)',
         dept: targetAcc.dept,
         level: targetAcc.level,
-        text: `✨ Trụ Trì đã sắc phong cho ${targetAcc.name}: Phòng [${targetAcc.dept}] • Tu Vi [${targetAcc.level}] • Công Đức [${targetAcc.merit} 🪷]!`,
+        text: `✨ Trụ Trì đã sắc phong cho ${targetAcc.name}: Phòng [${targetAcc.dept}] • Tu Vi [${targetAcc.level}]!`,
         isSystem: true
       });
-      if (callback) callback({ ok: true, msg: `Đã cập nhật ${targetAcc.name}!` });
+      if (callback) callback({ ok: true });
     } else if (actionType === 'delete') {
       if (targetAcc.isAdmin) {
         if (callback) callback({ ok: false, msg: 'Không thể xóa tài khoản Trụ Trì Thích Báo Giá!' });
@@ -318,14 +327,6 @@ io.on('connection', (socket) => {
       saveAccounts();
       broadcastAdminData();
       io.emit('players_sync', onlinePlayers);
-      pushChat({
-        id: 'SYSTEM',
-        name: 'GIÁM LUẬT ĐƯỜNG',
-        dept: 'HR-GA',
-        level: 'Manager',
-        text: `⚡ Pháp danh "${deletedName}" đã bị xóa khỏi Sổ Sinh Tử Tổ Môn!`,
-        isSystem: true
-      });
       if (callback) callback({ ok: true, msg: `Đã xóa ${deletedName}!` });
     }
   });
@@ -339,6 +340,7 @@ io.on('connection', (socket) => {
     p.destX = destX;
     p.destY = destY;
     p.state = state || 'walk';
+    p.meditateRoomDept = null;
     socket.broadcast.emit('player_moved', {
       id: socket.id,
       x: p.x,
@@ -357,16 +359,8 @@ io.on('connection', (socket) => {
     if (state) p.state = state;
   });
 
-  // Helper lưu đồng bộ merit vào file accounts.json
-  function syncPlayerMeritToAccount(p) {
-    if (p && p.usernameKey && accounts[p.usernameKey]) {
-      accounts[p.usernameKey].merit = p.merit;
-      saveAccounts();
-    }
-  }
-
-  // 5. TỌA THIỀN (ĐÚNG PHÒNG TĂNG CÔNG ĐỨC, KHÁC PHÒNG TRỘM CÔNG ĐỨC)
-  socket.on('meditate_room', ({ roomDept, x, y }) => {
+  // 5. BẮT ĐẦU TỌA THIỀN (Mở góc nhìn thứ nhất + Kiểm tra phòng)
+  socket.on('meditate_start', ({ roomDept, x, y }) => {
     const p = onlinePlayers[socket.id];
     if (!p) return;
     p.x = x;
@@ -374,43 +368,58 @@ io.on('connection', (socket) => {
     p.destX = x;
     p.destY = y;
     p.state = 'meditate';
+    p.meditateRoomDept = roomDept || null;
+    p.bubbleText = '🧘 Đang nhập định tu luyện...';
+    p.bubbleTimer = 300;
 
-    if (!roomDept) {
-      p.merit += 10;
-      syncPlayerMeritToAccount(p);
-      io.emit('effect_event', {
-        type: 'float_text',
-        x: p.x,
-        y: p.y,
-        text: '🧘 +10 Công Đức (Thiền Giữa Sân)',
-        color: '#6fcf97'
+    if (roomDept && roomDept !== p.dept) {
+      pushChat({
+        id: p.id,
+        name: 'BÁO ĐỘNG TRỘM CÔNG ĐỨC',
+        dept: roomDept,
+        level: p.level,
+        text: `🚨 [${p.level}] ${p.name} (Phòng ${p.dept}) đang ngồi thiền TRỘM CÔNG ĐỨC ngay trong phòng [${roomDept}]!`,
+        isSystem: true
       });
-    } else if (roomDept === p.dept) {
-      p.merit += 25;
-      syncPlayerMeritToAccount(p);
+    }
+
+    io.emit('players_sync', onlinePlayers);
+  });
+
+  // 6. MỖI LẦN ẤN GÕ MÕ HOẶC LẦN CHUỖI HẠT TRONG GÓC NHÌN THỨ NHẤT
+  socket.on('meditate_click', ({ mode, roomDept }) => {
+    const p = onlinePlayers[socket.id];
+    if (!p) return;
+    p.state = 'meditate';
+
+    const gain = mode === 'beads' ? 3 : 2;
+    p.merit += gain;
+    syncPlayerMeritToAccount(p);
+
+    const actionLabel = mode === 'beads' ? `📿 Lần chuỗi hạt +${gain} 🪷` : `🪵 Cốc! Gõ mõ +${gain} 🪷`;
+
+    // Nếu đang ngồi thiền đúng phòng hoặc ngoài sân
+    if (!roomDept || roomDept === p.dept) {
       io.emit('effect_event', {
         type: 'float_text',
         x: p.x,
         y: p.y,
-        text: `🪷 +25 Công Đức (Chính Phòng ${p.dept})`,
+        text: actionLabel,
         color: '#4ade80'
       });
     } else {
-      // Ngồi thiền ở phòng khác -> Trộm công đức của thành viên phòng đó!
-      p.merit += 25;
-      syncPlayerMeritToAccount(p);
-
-      const victims = [];
+      // Nếu đang ngồi thiền khác phòng -> Hút công đức của thành viên phòng đó!
+      let stolenCount = 0;
       Object.values(onlinePlayers).forEach(other => {
         if (other.id !== p.id && other.dept === roomDept) {
-          other.merit = Math.max(0, other.merit - 15);
+          other.merit = Math.max(0, other.merit - 2);
           syncPlayerMeritToAccount(other);
-          victims.push(other.name);
+          stolenCount++;
           io.emit('effect_event', {
             type: 'float_text',
             x: other.x,
             y: other.y,
-            text: `🚨 -15 Công Đức (Bị ${p.name} ngồi trộm ở phòng!)`,
+            text: `🚨 -2 🪷 (Bị ${p.name} trộm ở phòng!)`,
             color: '#ff4d4d'
           });
         }
@@ -420,27 +429,15 @@ io.on('connection', (socket) => {
         type: 'float_text',
         x: p.x,
         y: p.y,
-        text: `🕵️ +25 Trộm Linh Khí phòng ${roomDept}!`,
+        text: `${actionLabel} (Trộm phòng ${roomDept})`,
         color: '#facc15'
-      });
-
-      pushChat({
-        id: p.id,
-        name: 'BÁO ĐỘNG TRỘM CÔNG ĐỨC',
-        dept: roomDept,
-        level: p.level,
-        text: `🚨 [${p.level}] ${p.name} (Phòng ${p.dept}) đang Tọa Thiền TRỘM CÔNG ĐỨC ngay trong phòng [${roomDept}]! ${
-          victims.length > 0 ? `(${victims.join(', ')} bị -15 🪷)` : '(Mau về phòng đấm kẻ trộm!)'
-        }`,
-        isSystem: true
       });
     }
 
     io.emit('players_sync', onlinePlayers);
-    broadcastAdminData();
   });
 
-  // 6. TƯƠNG TÁC CẬN CHIẾN: ĐẤM (-15 HP, HẾT MÁU TRỪ 50% CÔNG ĐỨC) & HÔN (+10 HP)
+  // 7. TƯƠNG TÁC VÒNG TRÒN 4 HƯỚNG QUANH ĐỐI TƯỢNG: ĐẤM, HÔN, DÍ DEADLINE, QUỲ LẠY
   socket.on('interact_target', ({ targetId, type, myX, myY }) => {
     const attacker = onlinePlayers[socket.id];
     const target = onlinePlayers[targetId];
@@ -457,7 +454,7 @@ io.on('connection', (socket) => {
         type: 'float_text',
         x: attacker.x,
         y: attacker.y,
-        text: '⚠️ Phải đứng gần mới tương tác được!',
+        text: '⚠️ Phải lại gần đối tượng mới tương tác được!',
         color: '#fbbf24'
       });
       return;
@@ -465,7 +462,15 @@ io.on('connection', (socket) => {
 
     if (type === 'punch') {
       attacker.state = 'punch';
+      attacker.bubbleText = `Nếm cú đấm của bần tăng! 👊`;
+      attacker.bubbleTimer = 140;
       target.hp = Math.max(0, target.hp - 15);
+
+      // Báo động nếu nạn nhân đang ở góc nhìn thứ nhất Tọa Thiền
+      io.to(target.id).emit('under_attack_alert', {
+        attackerName: attacker.name,
+        hp: target.hp
+      });
 
       io.emit('effect_event', {
         type: 'punch_hit',
@@ -483,6 +488,7 @@ io.on('connection', (socket) => {
         target.merit = Math.max(0, target.merit - lostMerit);
         attacker.merit += lootMerit;
         target.hp = 100;
+        target.state = 'idle';
 
         syncPlayerMeritToAccount(target);
         syncPlayerMeritToAccount(attacker);
@@ -492,7 +498,7 @@ io.on('connection', (socket) => {
           targetId: target.id,
           x: target.x,
           y: target.y,
-          text: `💀 BỊ ĐẤM GỤC! Mất 50% Công Đức (-${lostMerit} 🪷)!`,
+          text: `💀 HẾT MÁU! Trừ 50% Công Đức (-${lostMerit} 🪷)!`,
           color: '#ff0055'
         });
 
@@ -501,12 +507,14 @@ io.on('connection', (socket) => {
           name: 'LUẬN VÕ ĐƯỜNG',
           dept: target.dept,
           level: attacker.level,
-          text: `💥 [${attacker.level}] ${attacker.name} đã đấm cạn 100 máu của [${target.level}] ${target.name}! ${target.name} bị trừ 1 nửa tổng Công Đức (-${lostMerit} 🪷), ${attacker.name} thu chiến lợi phẩm +${lootMerit} 🪷!`,
+          text: `💥 [${attacker.level}] ${attacker.name} đã đấm cạn 100 máu của [${target.level}] ${target.name}! ${target.name} bị trừ 1 nửa tổng Công Đức (-${lostMerit} 🪷), ${attacker.name} thu được +${lootMerit} 🪷!`,
           isSystem: true
         });
       }
     } else if (type === 'kiss') {
       attacker.state = 'kiss';
+      attacker.bubbleText = `Chụt! Tặng đạo hữu nụ hôn từ bi 😘`;
+      attacker.bubbleTimer = 150;
       target.hp = Math.min(100, target.hp + 10);
       attacker.merit += 5;
       target.merit += 5;
@@ -528,7 +536,65 @@ io.on('connection', (socket) => {
         name: attacker.name,
         dept: attacker.dept,
         level: attacker.level,
-        text: `😘 Đã trao nụ hôn từ bi cho ${target.name} (Hồi +10 HP, +5 Công Đức) 💖`,
+        text: `😘 Vừa hôn thắm thiết đạo hữu ${target.name} (+10 HP, +5 Công Đức) 💖`,
+        isSystem: false
+      });
+    } else if (type === 'deadline') {
+      attacker.state = 'deadline';
+      attacker.bubbleText = `⚡ Gấp lắm rồi! Chốt đơn / Bản vẽ cho tôi ngay!!`;
+      attacker.bubbleTimer = 170;
+      target.bubbleText = `😱 Á á đừng dí deadline bần tăng nữa!!`;
+      target.bubbleTimer = 170;
+
+      const drain = Math.min(10, target.merit);
+      target.merit = Math.max(0, target.merit - drain);
+      attacker.merit += drain;
+      syncPlayerMeritToAccount(attacker);
+      syncPlayerMeritToAccount(target);
+
+      io.emit('effect_event', {
+        type: 'deadline_zap',
+        fromId: attacker.id,
+        toId: target.id,
+        x: target.x,
+        y: target.y,
+        text: `⚡ Bị ${attacker.name} Dí Deadline! (-${drain} 🪷)`,
+        color: '#facc15'
+      });
+
+      pushChat({
+        id: attacker.id,
+        name: attacker.name,
+        dept: attacker.dept,
+        level: attacker.level,
+        text: `⚡ Vừa áp sát DÍ DEADLINE thẳng mặt ${target.name} (Hút +${drain} Công Đức)!`,
+        isSystem: false
+      });
+    } else if (type === 'kowtow') {
+      attacker.state = 'bow';
+      attacker.bubbleText = `🙇 Tiểu tăng xin cúi lạy đại đức ${target.name}!`;
+      attacker.bubbleTimer = 170;
+      attacker.merit += 8;
+      target.merit += 8;
+      syncPlayerMeritToAccount(attacker);
+      syncPlayerMeritToAccount(target);
+
+      io.emit('effect_event', {
+        type: 'kowtow_respect',
+        fromId: attacker.id,
+        toId: target.id,
+        x: target.x,
+        y: target.y,
+        text: `🙇 Khấu Đầu Bái Lạy (+8 Công Đức cả hai!)`,
+        color: '#fde047'
+      });
+
+      pushChat({
+        id: attacker.id,
+        name: attacker.name,
+        dept: attacker.dept,
+        level: attacker.level,
+        text: `🙇 Thành tâm quỳ lạy bái kiến đạo hữu ${target.name} (+8 Công Đức)! 🙏`,
         isSystem: false
       });
     }
@@ -537,7 +603,7 @@ io.on('connection', (socket) => {
     broadcastAdminData();
   });
 
-  // 7. HÀNH LỄ, ĂN PANTRY, THỈNH CHUÔNG
+  // 8. CÁC HÀNH LỄ CHUNG
   socket.on('action', ({ type }) => {
     const p = onlinePlayers[socket.id];
     if (!p) return;
@@ -545,12 +611,18 @@ io.on('connection', (socket) => {
 
     if (type === 'wave') {
       p.merit += 5;
+      p.bubbleText = 'A Di Đà Phật! Chào chư vị đạo hữu 🙏';
+      p.bubbleTimer = 140;
       io.emit('effect_event', { type: 'float_text', x: p.x, y: p.y, text: '😄 Hoan Hỷ +5 Công Đức', color: '#6fcf97' });
     } else if (type === 'deadline') {
-      io.emit('effect_event', { type: 'float_text', x: p.x, y: p.y, text: '⚡ Tịnh Tâm Kháng Deadline!', color: '#ff9b85' });
+      p.bubbleText = '⚡ Đừng dí Deadline bần tăng nữa!!';
+      p.bubbleTimer = 150;
+      io.emit('effect_event', { type: 'float_text', x: p.x, y: p.y, text: '⚡ Kháng Cự Deadline!', color: '#ff9b85' });
     } else if (type === 'knock') {
       p.merit += 10;
-      io.emit('effect_event', { type: 'float_text', x: p.x, y: p.y, text: '🥁 Cốc! Cốc! +10 Công Đức', color: '#4ade80' });
+      p.bubbleText = '🪵 Cốc! Cốc! Tịnh tâm gõ mõ +10 🪷';
+      p.bubbleTimer = 140;
+      io.emit('effect_event', { type: 'float_text', x: p.x, y: p.y, text: '🪵 Cốc! Cốc! +10 Công Đức', color: '#4ade80' });
     } else if (type === 'incense') {
       p.merit += 30;
       templeState.activeIncenseSticks = Math.min(36, templeState.activeIncenseSticks + 3);
@@ -598,7 +670,7 @@ io.on('connection', (socket) => {
     socket.broadcast.emit('player_action', { id: socket.id, type });
   });
 
-  // 8. CHAT KINH VĂN
+  // 9. CHAT
   socket.on('chat', ({ text }) => {
     const p = onlinePlayers[socket.id];
     if (!p || !text || !text.trim()) return;
@@ -619,7 +691,7 @@ io.on('connection', (socket) => {
     io.emit('players_sync', onlinePlayers);
   });
 
-  // 9. HẠ SƠN = OUT NICK
+  // 10. HẠ SƠN = OUT NICK
   socket.on('leave_temple', () => {
     const p = onlinePlayers[socket.id];
     if (!p) return;
@@ -633,7 +705,7 @@ io.on('connection', (socket) => {
       name: 'CỔNG HẠ SƠN',
       dept: 'HR-GA',
       level: oldLevel,
-      text: `🏃 [${oldLevel}] ${oldName} đã bước xuống Cầu Thang Hạ Sơn (Đăng xuất)!`,
+      text: `🏃 [${oldLevel}] ${oldName} đã bước xuống Cầu Thang Hạ Sơn (Out Nick)!`,
       isSystem: true
     });
   });
@@ -648,7 +720,7 @@ io.on('connection', (socket) => {
       io.emit('players_sync', onlinePlayers);
       pushChat({
         id: 'SYSTEM',
-        name: 'SƯƠNG MINH TỔ MÔN',
+        name: 'SƯƠNG MINH TÔ MÔN TỰ',
         dept: 'HR-GA',
         level: oldLevel,
         text: `💨 [${oldLevel}] ${oldName} đã tạm rời Tổ Môn.`,
@@ -660,5 +732,5 @@ io.on('connection', (socket) => {
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-  console.log(`⛩️  SƯƠNG MINH TỔ MÔN đang mở cửa tại: http://localhost:${PORT}`);
+  console.log(`⛩️  SƯƠNG MINH TÔ MÔN TỰ đang mở cửa tại: http://localhost:${PORT}`);
 });
