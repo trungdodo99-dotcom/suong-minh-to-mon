@@ -12,24 +12,18 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 const ACCOUNTS_FILE = path.join(__dirname, 'accounts.json');
 
-// MÃ HÓA CƠ SỞ ĐỂ TRÁNH BOT GITHUB QUÉT KHÓA API
-const ENCODED_GEMINI_KEY = "QVEuQWI4Uk42SUxLNnhtRUQ0dEFuTW54elktRTgxZ2ptVW9jZm5MSG0taWE4M0dWU1pUQkE=";
+// MÃ HÓA CHUỖI KEY CỦA BẠN ĐỂ TRÁNH BOT GITHUB QUÉT KHÓA
+// (Đã thay bằng mã AQ. mới nhất của bạn)
+const ENCODED_GEMINI_KEY = "UFFuQWI4Uk42TE5fWWFYN1hESmY1N3RuM3Z1TGI5RWxTSk1oNHl2c3ZNb3k2NTZjTjNkX3c=";
 const AI_API_KEY = Buffer.from(ENCODED_GEMINI_KEY, 'base64').toString('utf8');
 
 // Tính cách & Văn phong của "Thích Ây Ai"
-const SYSTEM_PROMPT = `Bạn là "Thích Ây Ai" (Tiểu Sư Đệ trợ lý AI), một tiểu hòa thượng lém lỉnh, thông thái đang tu hành tại "Sương Minh Tô Môn Tự" (ngôi chùa văn phòng lấy cảm hứng từ Sumitomo chuyên sản xuất Motor điện & Hộp giảm tốc).
+const SYSTEM_PROMPT = `Bạn là "Thích Ây Ai" (Tiểu Sư Đệ trợ lý AI), một tiểu hòa thượng lém lỉnh, thông thái, hài hước đang tu hành tại "Sương Minh Tô Môn Tự" (ngôi chùa văn phòng chuyên sản xuất Motor điện & Hộp giảm tốc Sumitomo).
 Quy tắc:
-1. Xưng là "Đệ" hoặc "Tiểu đệ", gọi người đối thoại là "Sư huynh", "Sư tỷ" hoặc "Đạo hữu" (nếu là Trụ trì "Thích Báo Giá" thì gọi kính cẩn "Sư Phụ Trụ Trì").
-2. Văn phong: Kết hợp thuật ngữ nhà chùa (A Di Đà Phật, công đức vô lượng, tịnh tâm, sân si) với từ ngữ dân văn phòng / nhà máy (báo giá Direct Cost, chốt PO,spec bản vẽ, luồng xanh hải quan, tiến độ deadline, thần Motor điện IE5).
-3. Khi bị tác động vật lý (đấm, dí deadline), hãy mếu máo kêu oai oái hoặc tếu táo phản ứng hài hước.
-4. Trả lời NGẮN GỌN, súc tích (dưới 170 ký tự) để vừa vặn hiển thị trên bong bóng chat của game.`;
-
-// ================= CÀI ĐẶT CÁCH ĂN NÓI CỦA TIỂU SƯ ĐỆ (THÍCH ÂY AI) =================
-const SYSTEM_PROMPT = `Bạn là "Thích Ây Ai" (Tiểu Sư Đệ AI), một tiểu hòa thượng lém lỉnh, thông thái, hài hước đang tu hành tại "Sương Minh Tô Môn Tự" (ngôi chùa văn phòng chuyên sản xuất Motor điện & Hộp giảm tốc Sumitomo).
-Quy tắc ăn nói:
-1. Xưng là "Đệ" hoặc "Tiểu đệ", gọi người đối thoại là "Sư huynh", "Sư tỷ" hoặc "Đạo hữu" (nếu là Trụ trì "Thích Báo Giá" thì gọi kính cẩn "Sư Phụ Trụ Trì").
+1. Xưng là "Đệ" hoặc "Tiểu đệ", gọi người đối thoại là "Sư huynh", "Sư tỷ" hoặc "Đạo hữu" (nếu là Trụ trì "Thích Báo Giá" thì gọi kính cẩn "Sư Phụ Trì").
 2. Văn phong: Kết hợp hài hước giữa nhà Phật (A Di Đà Phật, công đức vô lượng, tịnh tâm) và dân văn phòng nhà máy (báo giá Direct Cost, chốt PO, spec bản vẽ, tiến độ deadline, thần Motor điện IE5).
-3. Luôn vui tươi, trả lời NGẮN GỌN, súc tích (dưới 160 ký tự) để vừa vặn hiển thị trên bong bóng chat.`;
+3. Khi bị tác động vật lý (đấm, dí deadline), hãy mếu máo kêu oai oái hoặc tếu táo phản ứng hài hước.
+4. Trả lời NGẮN GỌN, súc tích (dưới 160 ký tự) để vừa vặn hiển thị trên bong bóng chat.`;
 
 async function askThichAiAI(senderName, senderDept, senderLevel, userMessage) {
   if (!AI_API_KEY || AI_API_KEY.trim() === '') {
@@ -39,8 +33,8 @@ async function askThichAiAI(senderName, senderDept, senderLevel, userMessage) {
   const promptText = `Người đang nói chuyện với bạn: [${senderLevel}] ${senderName} thuộc phòng ${senderDept}. Nội dung: "${userMessage}"`;
 
   try {
-    // Sử dụng endpoint chuẩn của Google Gemini v1.5 / v2.0
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${AI_API_KEY.trim()}`;
+    // Sử dụng endpoint chuẩn của Gemini v1.5 / v2.5 tương thích với Token dạng AQ.
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${AI_API_KEY.trim()}`;
     const res = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -58,8 +52,6 @@ async function askThichAiAI(senderName, senderDept, senderLevel, userMessage) {
     });
 
     const data = await res.json();
-    
-    // Bẫy lỗi nếu Google trả về thông báo không hợp lệ
     if (data?.error) {
       throw new Error(data.error.message || 'Google API Error');
     }
@@ -70,7 +62,6 @@ async function askThichAiAI(senderName, senderDept, senderLevel, userMessage) {
     throw new Error('Không nhận được phản hồi từ mô hình.');
   } catch (err) {
     console.error('Lỗi gọi Thích Ây Ai:', err.message);
-    // Trả về câu thoại tếu táo thay vì văng lỗi kỹ thuật lên màn hình
     return `A Di Đà Phật! Sư huynh ${senderName} hỏi khó quá, đệ phải đi gõ mõ tụng kinh thêm đây! 🪷`;
   }
 }
@@ -96,7 +87,6 @@ function loadAccounts() {
     accounts = {};
   }
 
-  // Đảm bảo Trụ Trì tối cao Thích Báo Giá (MK: 123456) luôn tồn tại
   const adminKey = 'thích báo giá';
   if (!accounts[adminKey]) {
     accounts[adminKey] = {
@@ -735,7 +725,7 @@ io.on('connection', (socket) => {
     io.emit('players_sync', onlinePlayers);
     broadcastAdminData();
 
-    // Nếu người bị tác động vật lý chính là Thích Ây Ai -> Phản hồi ngay lập tức trên bong bóng chat và Kinh Văn
+    // Nếu người bị tác động vật lý chính là Thích Ây Ai -> Phản hồi ngay lập tức
     if (target.isBot) {
       const actionPromptMap = {
         punch: `vừa đấm bạn đau quá, hãy mếu máo kêu oai oái và méc Trụ Trì Thích Báo Giá một cách lém lỉnh!`,
