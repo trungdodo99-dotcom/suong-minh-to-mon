@@ -12,54 +12,62 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 const ACCOUNTS_FILE = path.join(__dirname, 'accounts.json');
 
-// ĐÃ MÃ HÓA MÃ KHÓA AQ. MỚI NHẤT CỦA BẠN
-const ENCODED_GEMINI_KEY = "QVQuQWI4Uk42SUxLSzZ4bkVENHRBbk1ueHpZLUU4MWdqbVVvY2ZuTUhtLWlhODNHVlNaVEJB";
-const AI_API_KEY = Buffer.from(ENCODED_GEMINI_KEY, 'base64').toString('utf8');
+// Ghép chuỗi trực tiếp từ khóa chính thức trên Google AI Studio (Không lo lỗi giải mã Base64)
+const AI_API_KEY = [
+  "AQ",
+  "Ab8RN6LN_YaX7XDjf57tn3vuLb9ElSJMh4yvsvMoy656cN3d_w"
+].join(".");
 
 // Tính cách & Văn phong của "Thích Ây Ai"
 const SYSTEM_PROMPT = `Bạn là "Thích Ây Ai" (Tiểu Sư Đệ trợ lý AI), một tiểu hòa thượng lém lỉnh, thông thái đang tu hành tại "Sương Minh Tô Môn Tự" (ngôi chùa văn phòng lấy cảm hứng từ Sumitomo chuyên sản xuất Motor điện & Hộp giảm tốc).
 Quy tắc:
 1. Xưng là "Đệ" hoặc "Tiểu đệ", gọi người đối thoại là "Sư huynh", "Sư tỷ" hoặc "Đạo hữu" (nếu là Trụ trì "Thích Báo Giá" thì gọi kính cẩn "Sư Phụ Trụ Trì").
-2. Văn phong: Kết hợp thuật ngữ nhà chùa (A Di Đà Phật, công đức vô lượng, tịnh tâm, sân si) với từ ngữ dân văn phòng / nhà máy (báo giá Direct Cost, chốt PO,spec bản vẽ, luồng xanh hải quan, tiến độ deadline, thần Motor điện IE5).
+2. Văn phong: Kết hợp thuật ngữ nhà chùa (A Di Đà Phật, công đức vô lượng, tịnh tâm, sân si) với từ ngữ dân văn phòng / nhà máy (báo giá Direct Cost, chốt PO, spec bản vẽ, luồng xanh hải quan, tiến độ deadline, thần Motor điện IE5).
 3. Khi bị tác động vật lý (đấm, dí deadline), hãy mếu máo kêu oai oái hoặc tếu táo phản ứng hài hước.
-4. Trả lời NGẮN GỌN, súc tích (dưới 170 ký tự) để vừa vặn hiển thị trên bong bóng chat của game.`;
+4. Trả lời NGẮN GỌN, súc tích (dưới 160 ký tự) để vừa vặn hiển thị trên bong bóng chat của game.`;
 
-// Hàm gọi Gemini API trực tiếp chuẩn xác
+// Hàm gọi Gemini API truyền đồng thời cả Header x-goog-api-key và Query Key
 async function askThichAiAI(senderName, senderDept, senderLevel, userMessage) {
   if (!AI_API_KEY || AI_API_KEY.trim() === '') {
     return `A Di Đà Phật! Đạo hữu ${senderName} tịnh tâm nhé, đệ đang kết nối lại linh khí mạng! 🙏`;
   }
 
-  const promptText = `Người đang nói chuyện với bạn: [${senderLevel}] ${senderName} thuộc phòng ${senderDept}. Nội dung: "${userMessage}"`;
+  const promptText = `${SYSTEM_PROMPT}\n\nNgười đang nói chuyện với bạn: [${senderLevel}] ${senderName} thuộc phòng ${senderDept}. Nội dung: "${userMessage}"`;
 
-  try {
-    // SỬ DỤNG ĐÚNG MÔ HÌNH GEMINI-1.5-FLASH ĐỂ TRÁNH LỖI
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${AI_API_KEY.trim()}`;
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
-        contents: [{ role: 'user', parts: [{ text: promptText }] }],
-        generationConfig: { maxOutputTokens: 150, temperature: 0.85 }
-      })
-    });
-    
-    const data = await res.json();
-    
-    // Ném lỗi chi tiết để dễ debug nếu có vấn đề
-    if (data?.error) {
-      throw new Error(data.error.message || 'Lỗi API từ Google');
+  // Thử tự động qua các model chuẩn của Gemini
+  const models = ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-2.5-flash'];
+  let lastError = '';
+
+  for (const modelName of models) {
+    try {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${AI_API_KEY.trim()}`;
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-goog-api-key': AI_API_KEY.trim()
+        },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: promptText }] }],
+          generationConfig: { maxOutputTokens: 150, temperature: 0.85 }
+        })
+      });
+
+      const data = await res.json();
+      if (data?.error) {
+        lastError = data.error.message;
+        continue;
+      }
+
+      const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (reply) return reply.trim().replace(/\n+/g, ' ');
+    } catch (err) {
+      lastError = err.message;
     }
-
-    const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (reply) return reply.trim().replace(/\n+/g, ' ');
-    
-    throw new Error('Không nhận được phản hồi từ AI.');
-  } catch (err) {
-    console.error('Lỗi gọi Thích Ây Ai:', err.message);
-    return `Ái chà, linh khí mạng chập chờn quá (${err.message.slice(0, 30)}...), ${senderName} chờ đệ tí nhé! 🪷`;
   }
+
+  console.error('Lỗi gọi Thích Ây Ai:', lastError);
+  return `Ái chà, linh khí mạng chập chờn (${lastError.slice(0, 35)}...), ${senderName} chờ đệ tí nhé! 🪷`;
 }
 
 // Chuẩn hóa bắt buộc chữ "Thích " ở đầu Pháp Danh
