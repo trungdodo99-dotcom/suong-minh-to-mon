@@ -43,8 +43,8 @@
     }
     .parchment-plaque {
       background: linear-gradient(180deg, #f6e3b4 0%, #d4a959 100%);
-      border: 3px solid #5a2d0c;
-      box-shadow: inset 0 1px 0 #fff9e6, 0 6px 14px rgba(0,0,0,0.65);
+      border: 2.5px solid #5a2d0c;
+      box-shadow: inset 0 1px 0 #fff9e6, 0 5px 12px rgba(0,0,0,0.65);
       color: #3d1803;
     }
     .wood-panel {
@@ -91,7 +91,6 @@
       line-height: 1.2;
     }
 
-    /* Nút tương tác vòng tròn quanh đối tượng (Radial Wheel) */
     .radial-btn {
       position: absolute;
       width: 54px;
@@ -109,25 +108,8 @@
       pointer-events: auto;
       cursor: pointer;
     }
-    .radial-btn:hover {
-      transform: scale(1.16);
-    }
-    .radial-btn:active {
-      transform: scale(0.92);
-    }
-
-    /* Hiệu ứng gõ mõ góc nhìn thứ nhất */
-    @keyframes mokugyoPulse {
-      0% { transform: scale(1); }
-      40% { transform: scale(0.91) rotate(-2deg); }
-      100% { transform: scale(1) rotate(0deg); }
-    }
-    .mokugyo-hit {
-      animation: mokugyoPulse 0.16s ease-out;
-    }
-    .mallet-swing {
-      transform: rotate(-32deg) translate(-12px, 18px) !important;
-    }
+    .radial-btn:hover { transform: scale(1.16); }
+    .radial-btn:active { transform: scale(0.92); }
 
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
@@ -138,95 +120,92 @@
 </head>
 <body class="relative w-full h-full overflow-hidden">
 
-  <!-- ==================== 1. THANH HEADER CỔ KÍNH ==================== -->
-  <header class="wood-header fixed top-0 left-0 right-0 h-11 md:h-12 z-30 flex items-center justify-between px-2 md:px-3">
-    <div class="flex items-center gap-1 md:gap-1.5">
-      <button onclick="toggleCameraProjection()" class="px-2 py-1 rounded bg-[#3d1e0a] hover:bg-[#593014] border border-[#b07d4f] text-[10px] md:text-xs font-bold text-[#ffdf91] flex items-center gap-1 shadow">
-        <span>📐</span> <span id="viewModeLabel" class="hidden sm:inline">2.5D Chi Tiết</span>
+  <!-- ==================== 1. THANH HEADER TỐI ƯU MOBILE (KHÔNG BAO GIỜ BỊ KHUẤT NÚT QUẢN LÝ ACC) ==================== -->
+  <header class="wood-header fixed top-0 left-0 right-0 h-11 md:h-12 z-30 flex items-center justify-between px-1.5 md:px-3 gap-1">
+    <!-- Cụm nút bên trái siêu gọn trên mobile -->
+    <div class="flex items-center gap-1 shrink-0">
+      <button onclick="toggleCameraProjection()" class="px-1.5 md:px-2 py-1 rounded bg-[#3d1e0a] border border-[#b07d4f] text-[10px] md:text-xs font-bold text-[#ffdf91]">
+        📐<span id="viewModeLabel" class="hidden lg:inline ml-1">2.5D</span>
       </button>
-      <button onclick="toggleNightMode()" class="px-2 py-1 rounded bg-[#3d1e0a] hover:bg-[#593014] border border-[#b07d4f] text-[10px] md:text-xs font-bold text-[#ffd166] shadow">
-        🏮 <span class="hidden xl:inline">Hoa Đăng</span>
+      <button onclick="toggleNightMode()" class="px-1.5 md:px-2 py-1 rounded bg-[#3d1e0a] border border-[#b07d4f] text-[10px] md:text-xs font-bold text-[#ffd166]">
+        🏮
       </button>
-      <button onclick="resetCameraView()" class="px-2 py-1 rounded bg-[#3d1e0a] hover:bg-[#593014] border border-[#b07d4f] text-[10px] md:text-xs text-[#e5c283]">
+      <button onclick="resetCameraView()" class="px-1.5 md:px-2 py-1 rounded bg-[#3d1e0a] border border-[#b07d4f] text-[10px] md:text-xs text-[#e5c283]">
         🎯
       </button>
-      <button id="btnAudio" onclick="toggleAudioMute()" class="px-2 py-1 rounded bg-[#3d1e0a] hover:bg-[#593014] border border-[#b07d4f] text-[10px] md:text-xs text-[#6fcf97] font-bold">
+      <button id="btnAudio" onclick="toggleAudioMute()" class="px-1.5 md:px-2 py-1 rounded bg-[#3d1e0a] border border-[#b07d4f] text-[10px] md:text-xs text-[#6fcf97] font-bold">
         🔊
       </button>
-      <button onclick="toggleFullScreen()" class="px-2 py-1 rounded bg-[#3d1e0a] hover:bg-[#593014] border border-[#b07d4f] text-[10px] md:text-xs font-bold text-[#ffd166]">
-        ⛶ <span class="hidden md:inline">Full</span>
+      <button onclick="toggleFullScreen()" class="px-1.5 md:px-2 py-1 rounded bg-[#3d1e0a] border border-[#b07d4f] text-[10px] md:text-xs font-bold text-[#ffd166]">
+        ⛶
       </button>
-      <button onclick="toggleAllPanelsUI()" class="px-2 py-1 rounded bg-[#3d1e0a] hover:bg-[#593014] border border-[#b07d4f] text-[10px] md:text-xs font-bold text-[#f3e5ab]">
-        👁️ <span class="hidden sm:inline">UI</span>
+      <button onclick="toggleAllPanelsUI()" class="px-1.5 md:px-2 py-1 rounded bg-[#3d1e0a] border border-[#b07d4f] text-[10px] md:text-xs font-bold text-[#f3e5ab]">
+        👁️
       </button>
     </div>
 
-    <!-- Biển hiệu trung tâm SƯƠNG MINH TÔ MÔN TỰ -->
-    <div class="parchment-plaque px-3 md:px-6 py-0.5 md:py-1 rounded-b-xl -mt-1 flex flex-col items-center justify-center shrink-0">
-      <h1 class="text-[11px] sm:text-sm md:text-base font-extrabold tracking-wider uppercase leading-none">
+    <!-- Biển hiệu trung tâm tự co giãn để không đẩy mất nút bên phải trên Mobile -->
+    <div class="parchment-plaque px-2 sm:px-4 md:px-6 py-0.5 md:py-1 rounded-b-xl -mt-1 flex flex-col items-center justify-center min-w-0 max-w-[36vw] sm:max-w-none">
+      <h1 class="text-[10px] sm:text-xs md:text-base font-extrabold tracking-wider uppercase leading-none truncate w-full text-center">
         ⛩️ SƯƠNG MINH TÔ MÔN TỰ
       </h1>
-      <span class="hidden md:inline text-[10px] font-bold text-[#6e2c04] mt-0.5">
-        Click đối tượng để mở Vòng Tương Tác (Đấm / Hôn / Dí Deadline / Quỳ Lạy) • Tọa Thiền góc nhìn thứ nhất
+      <span class="hidden xl:inline text-[10px] font-bold text-[#6e2c04] mt-0.5">
+        Sân Đá Xanh • Tượng Thần Motor Điện (+50 🪷) • Tọa Thiền 3D Góc Nhìn Thứ Nhất
       </span>
     </div>
 
-    <div class="flex items-center gap-1 md:gap-2">
-      <div class="bg-[#2c1608] border border-[#8c5a32] px-2 py-0.5 md:py-1 rounded-full text-[10px] md:text-xs font-extrabold text-[#ff7675] flex items-center gap-1">
+    <!-- Cụm bên phải: Máu, Công Đức & Nút Quản Lý Acc luôn hiển thị 100% trên mọi màn hình -->
+    <div class="flex items-center gap-1 md:gap-1.5 shrink-0">
+      <div class="bg-[#2c1608] border border-[#8c5a32] px-1.5 md:px-2 py-0.5 rounded-full text-[10px] md:text-xs font-extrabold text-[#ff7675] flex items-center gap-0.5">
         <span>❤️</span>
         <span id="headerHpText">100</span>
       </div>
-      <div class="bg-[#2c1608] border border-[#8c5a32] px-2.5 py-0.5 md:py-1 rounded-full text-[10px] md:text-xs font-extrabold text-[#ffd166] flex items-center gap-1">
-        <span>🪷 <span class="hidden sm:inline">Công Đức:</span></span>
+      <div class="bg-[#2c1608] border border-[#8c5a32] px-1.5 md:px-2.5 py-0.5 rounded-full text-[10px] md:text-xs font-extrabold text-[#ffd166] flex items-center gap-0.5">
+        <span>🪷</span>
         <span id="headerMeritText" class="text-[#6fcf97]">1,080</span>
       </div>
-      <button onclick="openAdminModal()" class="relative px-2.5 py-1 rounded bg-[#a33b20] hover:bg-[#c24727] border border-[#f6d58e] text-[10px] md:text-xs font-extrabold text-white shadow flex items-center gap-1">
+      <!-- Nút Quản Lý Acc luôn nằm gọn trong màn hình điện thoại -->
+      <button onclick="openAdminModal()" class="relative px-2 md:px-2.5 py-1 rounded bg-[#b91c1c] hover:bg-[#dc2626] border-2 border-[#fde047] text-[10px] md:text-xs font-extrabold text-white shadow-lg flex items-center gap-1 shrink-0">
         <span>👑</span>
-        <span>Quản Lý Acc</span>
-        <span id="pendingCountBadge" class="hidden px-1.5 py-0.2 rounded-full bg-yellow-400 text-black font-black text-[9px]">0</span>
+        <span class="hidden xs:inline sm:inline">Quản Lý</span>
+        <span>Acc</span>
+        <span id="pendingCountBadge" class="hidden px-1.5 py-0.2 rounded-full bg-yellow-300 text-black font-black text-[9px] animate-bounce">0</span>
       </button>
-      <div class="hidden sm:flex items-center gap-1 bg-[#2b1508] border border-[#a66f3f] px-2.5 py-1 rounded text-[11px] font-bold text-[#6fcf97]">
+      <div class="hidden lg:flex items-center gap-1 bg-[#2b1508] border border-[#a66f3f] px-2 py-1 rounded text-[11px] font-bold text-[#6fcf97]">
         <span>👤</span>
         <span id="headerMyName">Chưa Nhập Tự</span>
       </div>
     </div>
   </header>
 
-  <!-- ==================== 2. MENU VÒNG TRÒN QUANH ĐỐI TƯỢNG (RADIAL TARGET WHEEL) ==================== -->
-  <!-- Tự động bám theo tọa độ màn hình của đối tượng đang được chọn -->
+  <!-- ==================== 2. VÒNG TRÒN TƯƠNG TÁC QUANH ĐỐI TƯỢNG (RADIAL WHEEL) ==================== -->
   <div id="radialTargetMenu" class="hidden fixed z-30 pointer-events-none" style="left: 0px; top: 0px; width: 0px; height: 0px;">
-    <!-- Vòng sáng tâm điểm quanh mục tiêu -->
-    <div class=" -translate-x-1/2 -translate-y-1/2 w-28 h-28 rounded-full border-2 border-dashed border-[#ffd166]/80 bg-black/25 animate-pulse"></div>
+    <div class="-translate-x-1/2 -translate-y-1/2 w-28 h-28 rounded-full border-2 border-dashed border-[#ffd166]/80 bg-black/25 animate-pulse"></div>
 
-    <!-- Nhãn tên & Máu mục tiêu ở chính giữa phía trên -->
     <div class="absolute -top-24 left-1/2 -translate-x-1/2 bg-[#231208]/95 border border-[#ffd166] px-2.5 py-0.5 rounded-full whitespace-nowrap text-[10px] font-extrabold text-[#ffd166] shadow-lg pointer-events-auto flex items-center gap-1.5">
       <span id="radialTargetTitle">Thích Đạo Hữu</span>
       <span id="radialTargetHp" class="text-[#ff7675]">❤️ 100</span>
       <button onclick="closeCombatPopup()" class="ml-1 text-red-300 hover:text-white font-black">✕</button>
     </div>
 
-    <!-- Hướng 12h (Trên): ĐẤM (-15 HP) -->
     <button onclick="triggerCombatAction('punch')" class="radial-btn bg-gradient-to-b from-red-600 to-red-900 border-2 border-red-300" style="left: -27px; top: -82px;">
       <span class="text-base leading-none">👊</span>
       <span class="mt-0.5">Đấm</span>
       <span class="text-[8px] text-red-200">-15 HP</span>
     </button>
 
-    <!-- Hướng 3h (Phải): HÔN (+10 HP) -->
     <button onclick="triggerCombatAction('kiss')" class="radial-btn bg-gradient-to-b from-pink-500 to-pink-800 border-2 border-pink-200" style="left: 34px; top: -27px;">
       <span class="text-base leading-none">😘</span>
       <span class="mt-0.5">Hôn</span>
       <span class="text-[8px] text-pink-200">+10 HP</span>
     </button>
 
-    <!-- Hướng 6h (Dưới): QUỲ LẠY (+8 Công Đức) -->
     <button onclick="triggerCombatAction('kowtow')" class="radial-btn bg-gradient-to-b from-amber-500 to-amber-800 border-2 border-yellow-200" style="left: -27px; top: 28px;">
       <span class="text-base leading-none">🙇</span>
       <span class="mt-0.5">Quỳ Lạy</span>
       <span class="text-[8px] text-yellow-100">+8 🪷</span>
     </button>
 
-    <!-- Hướng 9h (Trái): DÍ DEADLINE (Hút 10 Công Đức) -->
     <button onclick="triggerCombatAction('deadline')" class="radial-btn bg-gradient-to-b from-purple-600 to-indigo-950 border-2 border-purple-300" style="left: -88px; top: -27px;">
       <span class="text-base leading-none">⚡</span>
       <span class="mt-0.5">Deadline</span>
@@ -234,169 +213,102 @@
     </button>
   </div>
 
-  <!-- ==================== 3. GÓC NHÌN THỨ NHẤT KHI TỌA THIỀN (GÕ MÕ & BẤM CHUỖI HẠT) ==================== -->
-  <div id="firstPersonMeditationModal" class="hidden fixed inset-0 z-40 bg-gradient-to-b from-[#1a0d06]/95 via-[#2a1509]/95 to-[#0f0703]/98 flex flex-col items-center justify-between p-3 md:p-6 backdrop-blur-md">
-    <!-- Thanh trạng thái trên cùng của Góc Nhìn Thứ Nhất -->
-    <div class="w-full max-w-2xl wood-panel px-4 py-2.5 flex flex-wrap items-center justify-between gap-2 border-2 border-[#ffd166]">
-      <div>
-        <div class="flex items-center gap-2">
-          <span class="text-sm md:text-base font-extrabold text-[#ffd166]">🧘 NHẬP ĐỊNH GÓC NHÌN THỨ NHẤT</span>
-          <span id="fpRoomBadge" class="px-2 py-0.5 rounded bg-green-800 text-green-200 text-[10px] font-extrabold">Chính Phòng</span>
+  <!-- ==================== 3. GÓC NHÌN THỨ NHẤT 3D KHI TỌA THIỀN (GÕ MÕ 3D & TRÀNG HẠT 3D) ==================== -->
+  <!-- Đã tách riêng hoàn toàn thanh nút Thoát ở trên (z-50) và Canvas 3D ở giữa để không bao giờ bị kẹt nút Thoát -->
+  <div id="firstPersonMeditationModal" class="hidden fixed inset-0 z-50 bg-[#0d0603] flex flex-col justify-between overflow-hidden select-none">
+    <!-- THANH ĐIỀU KHIỂN TRÊN CÙNG (TÁCH BIỆT 100%, BẤM THOÁT LÀ RA NGAY) -->
+    <div onclick="event.stopPropagation()" class="relative z-50 wood-header px-3 py-2 flex items-center justify-between gap-2 border-b-2 border-[#ffd166]">
+      <div class="flex flex-col min-w-0">
+        <div class="flex items-center gap-1.5">
+          <span class="text-xs md:text-base font-extrabold text-[#ffd166] truncate">🧘 NHẬP ĐỊNH 3D (GÓC NHÌN THỨ NHẤT)</span>
+          <span id="fpRoomBadge" class="px-2 py-0.5 rounded bg-green-800 text-green-200 text-[9px] md:text-[10px] font-extrabold shrink-0">Chính Phòng</span>
         </div>
-        <p id="fpStatusDesc" class="text-[11px] text-[#e0c097]">Ấn vào Mõ Gỗ hoặc Dây Chuỗi Hạt bên dưới để tích lũy Công Đức</p>
+        <span id="fpStatusDesc" class="text-[10px] text-[#e0c097] truncate">Chạm vào Mõ Gỗ 3D hoặc Tràng Hạt 3D phía trước để tu luyện</span>
       </div>
 
-      <div class="flex items-center gap-3">
-        <div class="text-right">
-          <div class="text-xs font-extrabold text-[#ffd166]">🪷 Công Đức: <span id="fpMeritCount" class="text-[#6fcf97] text-sm">1,080</span></div>
-          <div class="text-[11px] font-extrabold text-[#ff7675]">❤️ Sinh Lực: <span id="fpHpCount">100</span>/100 HP</div>
+      <div class="flex items-center gap-2 shrink-0">
+        <div class="text-right hidden sm:block">
+          <div class="text-xs font-extrabold text-[#ffd166]">🪷 <span id="fpMeritCount" class="text-[#6fcf97]">1,080</span></div>
+          <div class="text-[10px] font-extrabold text-[#ff7675]">❤️ <span id="fpHpCount">100</span>/100 HP</div>
         </div>
-        <button onclick="exitFirstPersonMeditation()" class="px-3.5 py-2 rounded-lg bg-gradient-to-b from-red-700 to-red-900 hover:from-red-600 hover:to-red-800 border border-red-300 text-xs font-extrabold text-white shadow-lg">
-          🚪 Xuất Định (Về Bản Đồ)
+        <!-- Nút Thoát Thiền cực lớn, tách biệt hoàn toàn với vùng tràng hạt -->
+        <button
+          type="button"
+          onclick="event.stopPropagation(); exitFirstPersonMeditation();"
+          class="px-4 py-2 rounded-xl bg-gradient-to-b from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 border-2 border-yellow-300 text-white font-black text-xs md:text-sm shadow-2xl active:scale-95 cursor-pointer"
+        >
+          🚪 THOÁT THIỀN ✕
         </button>
       </div>
     </div>
 
-    <!-- Cảnh báo đỏ nếu bị người khác đấm lén khi đang thiền -->
-    <div id="fpUnderAttackBanner" class="hidden px-4 py-1.5 rounded-full bg-red-600 border-2 border-yellow-300 text-white font-black text-xs animate-bounce shadow-xl">
-      🚨 CẢNH BÁO: Có kẻ đang đấm lén bạn! Mau Xuất Định phản kích!
+    <!-- Cảnh báo đỏ nếu bị đánh lén -->
+    <div id="fpUnderAttackBanner" onclick="event.stopPropagation(); exitFirstPersonMeditation();" class="hidden relative z-50 mx-auto mt-2 px-4 py-1.5 rounded-full bg-red-600 border-2 border-yellow-300 text-white font-black text-xs animate-bounce shadow-xl cursor-pointer">
+      🚨 CẢNH BÁO: Có kẻ đang đấm bạn! Chạm vào đây để Xuất Định phản kích!
     </div>
 
-    <!-- Nút chuyển đổi 2 chế độ: Chế độ Gõ Mõ & Chế độ Bấm Dây Chuỗi Hạt -->
-    <div class="flex items-center gap-2 bg-[#1c0e06] p-1.5 rounded-xl border-2 border-[#a66f3f] shadow-xl">
-      <button id="btnModeMokugyo" onclick="switchMeditationMode('mokugyo')" class="px-4 py-2 rounded-lg bg-[#c97a1c] text-white font-extrabold text-xs md:text-sm flex items-center gap-2 shadow">
-        <span>🪵</span> <span>Chế Độ 1: Gõ Mõ Tịnh Tâm (+2 🪷/lần)</span>
+    <!-- Thanh chọn 2 chế độ 3D (Tách biệt sự kiện click với Canvas 3D) -->
+    <div onclick="event.stopPropagation()" class="relative z-50 mx-auto my-1.5 flex items-center gap-2 bg-[#1c0e06]/95 p-1.5 rounded-xl border-2 border-[#a66f3f] shadow-xl">
+      <button type="button" id="btnModeMokugyo" onclick="event.stopPropagation(); switchMeditationMode('mokugyo');" class="px-3 md:px-4 py-1.5 rounded-lg bg-[#c97a1c] text-white font-extrabold text-xs md:text-sm flex items-center gap-1.5 shadow">
+        <span>🪵</span> <span>Gõ Mõ 3D (+2 🪷)</span>
       </button>
-      <button id="btnModeBeads" onclick="switchMeditationMode('beads')" class="px-4 py-2 rounded-lg bg-[#2e180b] text-[#e0c097] hover:text-white font-extrabold text-xs md:text-sm flex items-center gap-2">
-        <span>📿</span> <span>Chế Độ 2: Bấm Dây Chuỗi Hạt (+3 🪷/hạt)</span>
+      <button type="button" id="btnModeBeads" onclick="event.stopPropagation(); switchMeditationMode('beads');" class="px-3 md:px-4 py-1.5 rounded-lg bg-[#2e180b] text-[#e0c097] hover:text-white font-extrabold text-xs md:text-sm flex items-center gap-1.5">
+        <span>📿</span> <span>Tràng Hạt 3D (+3 🪷)</span>
       </button>
     </div>
 
-    <!-- KHU VỰC TƯƠNG TÁC GÓC NHÌN THỨ NHẤT -->
-    <div class="relative flex-1 w-full max-w-xl flex flex-col items-center justify-center my-2">
-      <!-- Hiệu ứng chữ nổi +Công Đức ngay giữa tầm mắt -->
+    <!-- VÙNG CANVAS 3D GÓC NHÌN THỨ NHẤT (CHỈ VÙNG NÀY MỚI NHẬN CLICK GÕ MÕ / LẦN HẠT) -->
+    <div class="relative flex-1 w-full flex items-center justify-center overflow-hidden">
+      <canvas id="fp3DCanvas" class="w-full h-full cursor-pointer"></canvas>
       <div id="fpFloatingRewardZone" class="pointer-events-none absolute inset-0 overflow-hidden z-20"></div>
-
-      <!-- CHẾ ĐỘ 1: GÕ MÕ GỖ ĐẦU CÁ CỔ TRUYỀN (KHÔNG PHẢI CÁI TRỐNG) -->
-      <div id="fpMokugyoView" onclick="handleFirstPersonStrike('mokugyo')" class="cursor-pointer flex flex-col items-center justify-center group select-none">
-        <div class="relative flex items-center justify-center">
-          <!-- Vòng hào quang Phật pháp phía sau chiếc Mõ -->
-          <div class="absolute w-64 h-64 md:w-72 md:h-72 rounded-full bg-amber-500/15 border border-amber-400/30 animate-pulse"></div>
-
-          <!-- Chiếc Mõ Gỗ Khắc Vảy Cá (SVG Chi Tiết Cao) -->
-          <div id="fpMokugyoSvgWrap" class="relative z-10 transition-transform">
-            <svg class="w-56 h-48 md:w-64 md:h-56 drop-shadow-[0_18px_28px_rgba(0,0,0,0.9)]" viewBox="0 0 260 220">
-              <defs>
-                <radialGradient id="mokugyoWoodGrad" cx="42%" cy="35%" r="65%">
-                  <stop offset="0%" stop-color="#f59e0b" />
-                  <stop offset="45%" stop-color="#b45309" />
-                  <stop offset="85%" stop-color="#78350f" />
-                  <stop offset="100%" stop-color="#451a03" />
-                </radialGradient>
-                <linearGradient id="cushionRedGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stop-color="#991b1b" />
-                  <stop offset="50%" stop-color="#dc2626" />
-                  <stop offset="100%" stop-color="#7f1d1d" />
-                </linearGradient>
-              </defs>
-
-              <!-- Đế đệm lụa đỏ thêu vàng đặt chiếc Mõ -->
-              <ellipse cx="130" cy="186" rx="95" ry="22" fill="url(#cushionRedGrad)" stroke="#fbbf24" stroke-width="3" />
-              <ellipse cx="130" cy="182" rx="82" ry="15" fill="none" stroke="#fde047" stroke-width="1.5" stroke-dasharray="6,4" />
-
-              <!-- Thân Mõ Gỗ tròn bầu khắc hình cá hóa long -->
-              <path d="M 42 130 C 32 62, 95 28, 145 34 C 198 40, 226 82, 220 132 C 215 168, 175 182, 128 180 C 75 178, 48 162, 42 130 Z"
-                    fill="url(#mokugyoWoodGrad)" stroke="#fde047" stroke-width="3" />
-
-              <!-- Khe rỗng âm thanh miệng Mõ (Đặc trưng của Mõ gỗ chùa) -->
-              <path d="M 48 134 Q 125 148 195 130 Q 150 156 88 152 Z" fill="#1c0a02" stroke="#92400e" stroke-width="2" />
-              <circle cx="192" cy="130" r="11" fill="#1c0a02" stroke="#d97706" stroke-width="2" />
-
-              <!-- Hoa văn vảy cá & Mắt cá khắc trên lưng Mõ -->
-              <circle cx="88" cy="96" r="10" fill="#451a03" stroke="#fcd34d" stroke-width="2.5" />
-              <circle cx="88" cy="96" r="4" fill="#fde047" />
-              <path d="M 122 68 Q 138 58 154 68" fill="none" stroke="#fcd34d" stroke-width="2.5" stroke-linecap="round" />
-              <path d="M 136 84 Q 152 74 168 84" fill="none" stroke="#fcd34d" stroke-width="2.5" stroke-linecap="round" />
-              <path d="M 150 100 Q 166 90 182 100" fill="none" stroke="#fcd34d" stroke-width="2.5" stroke-linecap="round" />
-              <path d="M 118 92 Q 134 82 150 92" fill="none" stroke="#fcd34d" stroke-width="2.5" stroke-linecap="round" />
-            </svg>
-
-            <!-- Dùi Gõ Mõ (Chuyển động gõ xuống mỗi khi click) -->
-            <div id="fpMalletEl" class="absolute -top-6 -right-10 transition-transform duration-100 origin-bottom-right pointer-events-none">
-              <svg class="w-36 h-36" viewBox="0 0 140 140">
-                <!-- Cán dùi gỗ sơn mài -->
-                <line x1="118" y1="115" x2="42" y2="42" stroke="#78350f" stroke-width="11" stroke-linecap="round" />
-                <line x1="118" y1="115" x2="42" y2="42" stroke="#d97706" stroke-width="5" stroke-linecap="round" />
-                <!-- Đầu dùi bọc vải đỏ êm -->
-                <ellipse cx="36" cy="36" rx="18" ry="13" transform="rotate(-45 36 36)" fill="#dc2626" stroke="#fde047" stroke-width="2.5" />
-              </svg>
-            </div>
-          </div>
-        </div>
-
-        <div class="mt-3 px-5 py-2 rounded-full bg-[#3b2010] border-2 border-[#ffd166] text-xs md:text-sm font-extrabold text-[#ffd166] shadow-lg">
-          👆 Chạm vào Mõ Gỗ (hoặc bấm phím Space) để Gõ Mõ (+2 🪷)
-        </div>
-        <div class="text-[11px] text-[#e0c097] mt-1">
-          Đã gõ: <b id="fpKnockSessionCount" class="text-[#6fcf97]">0</b> tiếng mõ trong lần nhập định này
-        </div>
-      </div>
-
-      <!-- CHẾ ĐỘ 2: BẤM DÂY CHUỖI HẠT 108 HẠT BỒ ĐỀ (GÓC NHÌN THỨ NHẤT) -->
-      <div id="fpBeadsView" onclick="handleFirstPersonStrike('beads')" class="hidden cursor-pointer flex flex-col items-center justify-center select-none">
-        <div class="relative w-64 h-64 md:w-72 md:h-72 flex items-center justify-center">
-          <!-- Vòng sáng Bồ Đề -->
-          <div class="absolute inset-2 rounded-full bg-emerald-500/10 border border-emerald-400/30"></div>
-
-          <!-- Canvas vẽ Dây Chuỗi Hạt Bồ Đề xoay tròn theo từng nhịp bấm ngón tay -->
-          <canvas id="fpBeadsCanvas" width="280" height="280" class="relative z-10 drop-shadow-[0_12px_20px_rgba(0,0,0,0.85)]"></canvas>
-        </div>
-
-        <div class="mt-2 px-5 py-2 rounded-full bg-[#1b3b2b] border-2 border-[#6fcf97] text-xs md:text-sm font-extrabold text-[#6fcf97] shadow-lg">
-          👆 Chạm vào Tràng Hạt (hoặc bấm phím Space) để Lần Chuỗi Hạt (+3 🪷)
-        </div>
-        <div class="text-[11px] text-[#e0c097] mt-1">
-          Chuỗi Bồ Đề: Hạt thứ <b id="fpBeadIndexText" class="text-[#ffd166]">1</b> / 108
-        </div>
-      </div>
     </div>
 
-    <!-- Thanh Hồi Máu Tọa Thiền Chậm (5 HP / 1 Phút) ở dưới cùng góc nhìn thứ nhất -->
-    <div class="w-full max-w-xl wood-panel px-4 py-2.5 border border-[#6fcf97]">
-      <div class="flex items-center justify-between text-xs font-extrabold mb-1">
-        <span class="text-[#6fcf97]">💚 Tịnh Dưỡng Hồi Huyết Khi Thiền (5 HP / 1 phút)</span>
-        <span id="fpRegenTimerLabel" class="text-[#ffd166]">+1 HP mỗi 12 giây</span>
+    <!-- THANH DƯỚI CÙNG: HỒI MÁU 5 HP/PHÚT & NÚT THOÁT PHỤ -->
+    <div onclick="event.stopPropagation()" class="relative z-50 wood-header px-3 py-2 border-t-2 border-[#a66f3f] flex items-center justify-between gap-3">
+      <div class="flex-1 max-w-md">
+        <div class="flex items-center justify-between text-[11px] font-extrabold mb-1">
+          <span class="text-[#6fcf97]">💚 Hồi Huyết Khi Thiền (5 HP / 1 phút)</span>
+          <span id="fpCounterSubText" class="text-[#ffd166]">Đã gõ: 0 lần</span>
+        </div>
+        <div class="w-full h-2 bg-[#140a04] rounded-full overflow-hidden border border-[#5e3b1f]">
+          <div id="fpRegenProgressBar" class="h-full bg-gradient-to-r from-emerald-600 to-green-400 transition-all duration-300" style="width: 20%;"></div>
+        </div>
       </div>
-      <div class="w-full h-2.5 bg-[#140a04] rounded-full overflow-hidden border border-[#5e3b1f]">
-        <div id="fpRegenProgressBar" class="h-full bg-gradient-to-r from-emerald-600 to-green-400 transition-all duration-300" style="width: 15%;"></div>
-      </div>
+
+      <button
+        type="button"
+        onclick="event.stopPropagation(); exitFirstPersonMeditation();"
+        class="px-3.5 py-2 rounded-lg bg-[#4a2511] hover:bg-[#633217] border border-[#ffd166] text-[#ffd166] font-extrabold text-xs shrink-0"
+      >
+        ⬅️ Quay Lại Chùa
+      </button>
     </div>
   </div>
 
-  <!-- ==================== 4. CANVAS 2.5D ISOMETRIC ==================== -->
+  <!-- ==================== 4. CANVAS 2.5D BẢN ĐỒ CHÍNH ==================== -->
   <canvas id="templeCanvas"></canvas>
 
   <!-- ==================== 5. BẢNG ĐẠO HỮU HIỆN DIỆN (GÓC PHẢI TRÊN) ==================== -->
-  <aside id="rightPlayersPanel" class="wood-panel fixed top-14 right-2 md:right-3 w-56 md:w-64 z-20 flex flex-col overflow-hidden transition-all duration-150">
+  <aside id="rightPlayersPanel" class="wood-panel fixed top-12 right-2 md:right-3 w-52 md:w-64 z-20 flex flex-col overflow-hidden transition-all duration-150">
     <div onclick="toggleRightPanelCollapse()" class="wood-panel-header px-3 py-1.5 flex items-center justify-between cursor-pointer">
       <span class="text-xs font-extrabold tracking-wide uppercase flex items-center gap-1">
-        🧘 ĐẠO HỮU HIỆN DIỆN
+        🧘 ĐẠO HỮU
       </span>
       <div class="flex items-center gap-1.5">
-        <span class="text-[11px] font-extrabold text-[#6fcf97]">🟢 <span id="onlineCounterText">0</span> Online</span>
+        <span class="text-[11px] font-extrabold text-[#6fcf97]">🟢 <span id="onlineCounterText">0</span></span>
         <span id="rightCollapseIcon" class="text-xs font-black text-[#ffd166] px-1 bg-[#361c0c] rounded">−</span>
       </div>
     </div>
 
-    <div id="rightPanelBody" class="flex flex-col max-h-[38dvh] md:max-h-[48dvh]">
+    <div id="rightPanelBody" class="flex flex-col max-h-[36dvh] md:max-h-[46dvh]">
       <div class="px-2 py-1.5 bg-[#21130a] border-b border-[#5e3b1f] flex flex-wrap gap-1 text-[10px]">
         <button onclick="setDeptFilter('ALL')" class="px-1.5 py-0.5 rounded bg-[#6e421f] text-[#ffd166] font-bold">Tất cả</button>
-        <button onclick="setDeptFilter('PROC')" class="px-1.5 py-0.5 rounded bg-[#36281b] hover:bg-[#523d29] text-[#e0c097]">PROC</button>
-        <button onclick="setDeptFilter('IBD Cost')" class="px-1.5 py-0.5 rounded bg-[#36281b] hover:bg-[#523d29] text-[#e0c097]">IBD Cost</button>
-        <button onclick="setDeptFilter('IBD Sale')" class="px-1.5 py-0.5 rounded bg-[#36281b] hover:bg-[#523d29] text-[#e0c097]">IBD Sale</button>
-        <button onclick="setDeptFilter('Logistic')" class="px-1.5 py-0.5 rounded bg-[#36281b] hover:bg-[#523d29] text-[#e0c097]">Logistic</button>
-        <button onclick="setDeptFilter('HR-GA')" class="px-1.5 py-0.5 rounded bg-[#36281b] hover:bg-[#523d29] text-[#e0c097]">HR-GA</button>
-        <button onclick="setDeptFilter('Tech')" class="px-1.5 py-0.5 rounded bg-[#36281b] hover:bg-[#523d29] text-[#e0c097]">Tech</button>
+        <button onclick="setDeptFilter('PROC')" class="px-1.5 py-0.5 rounded bg-[#36281b] text-[#e0c097]">PROC</button>
+        <button onclick="setDeptFilter('IBD Cost')" class="px-1.5 py-0.5 rounded bg-[#36281b] text-[#e0c097]">IBD Cost</button>
+        <button onclick="setDeptFilter('IBD Sale')" class="px-1.5 py-0.5 rounded bg-[#36281b] text-[#e0c097]">IBD Sale</button>
+        <button onclick="setDeptFilter('Logistic')" class="px-1.5 py-0.5 rounded bg-[#36281b] text-[#e0c097]">Logistic</button>
+        <button onclick="setDeptFilter('HR-GA')" class="px-1.5 py-0.5 rounded bg-[#36281b] text-[#e0c097]">HR-GA</button>
+        <button onclick="setDeptFilter('Tech')" class="px-1.5 py-0.5 rounded bg-[#36281b] text-[#e0c097]">Tech</button>
       </div>
       <div id="onlinePlayersList" class="p-2 overflow-y-auto space-y-1 text-xs flex-1"></div>
     </div>
@@ -405,14 +317,14 @@
   <!-- ==================== 6. BẢNG KINH VĂN & Ô NHẬP CHAT TÍCH HỢP ==================== -->
   <section id="leftChatPanel" class="wood-panel fixed bottom-20 md:bottom-3 left-2 md:left-3 w-72 sm:w-80 md:w-96 z-20 flex flex-col overflow-hidden transition-all duration-150">
     <div onclick="toggleLeftChatCollapse()" class="wood-panel-header px-3 py-1.5 flex items-center justify-between text-xs font-bold cursor-pointer">
-      <span>📜 Kinh Văn & Tâm Sự Tổ Môn</span>
+      <span>📜 Kinh Văn & Tâm Sự</span>
       <div class="flex items-center gap-1.5">
         <span id="activeCharIndicator" class="text-[10px] text-[#6fcf97] truncate max-w-[110px]">...</span>
         <span id="leftCollapseIcon" class="text-xs font-black text-[#ffd166] px-1 bg-[#361c0c] rounded">−</span>
       </div>
     </div>
 
-    <div id="leftChatBody" class="flex flex-col h-36 md:h-48">
+    <div id="leftChatBody" class="flex flex-col h-32 md:h-44">
       <div id="chatLogContainer" class="p-2 overflow-y-auto flex-1 space-y-1.5 text-xs leading-relaxed"></div>
       <div class="p-1.5 bg-[#1e1008] border-t border-[#7c4d28] flex items-center gap-1.5">
         <input
@@ -431,30 +343,29 @@
     </div>
   </section>
 
-  <!-- ==================== 7. THANH 8 PHÍM CHỨC NĂNG DƯỚI CÙNG (ICON MÕ GỖ CHUẨN) ==================== -->
+  <!-- ==================== 7. THANH PHÍM CHỨC NĂNG DƯỚI CÙNG (CÓ NÚT LỄ THẦN MOTOR ĐIỆN) ==================== -->
   <nav id="bottomActionDock" class="fixed bottom-1.5 left-1/2 md:left-auto md:right-3 -translate-x-1/2 md:translate-x-0 z-20 max-w-[98vw] overflow-x-auto no-scrollbar flex items-center gap-1 md:gap-1.5 px-2 py-1.5 rounded-xl bg-[#24150b]/95 border-2 border-[#8c5a32] shadow-2xl">
-    <button onclick="performAction('wave')" class="action-card w-14 md:w-16 h-14 md:h-16 flex flex-col items-center justify-center p-1">
+    <button onclick="performAction('wave')" class="action-card w-13 md:w-15 h-14 md:h-16 flex flex-col items-center justify-center p-1">
       <span class="hotkey-badge">1</span>
       <span class="text-base md:text-xl">😄</span>
-      <span class="text-[9px] md:text-[10px] font-bold text-[#ffebb3] leading-tight">Chào</span>
+      <span class="text-[9px] font-bold text-[#ffebb3] leading-tight">Chào</span>
     </button>
 
-    <button onclick="performAction('deadline')" class="action-card w-14 md:w-16 h-14 md:h-16 flex flex-col items-center justify-center p-1">
+    <button onclick="performAction('deadline')" class="action-card w-13 md:w-15 h-14 md:h-16 flex flex-col items-center justify-center p-1">
       <span class="hotkey-badge">2</span>
       <span class="text-base md:text-xl">⚡</span>
-      <span class="text-[9px] md:text-[10px] font-bold text-[#ff9b85] leading-tight">Deadline</span>
+      <span class="text-[9px] font-bold text-[#ff9b85] leading-tight">Deadline</span>
     </button>
 
-    <button onclick="performAction('meditate')" class="action-card w-15 md:w-17 h-14 md:h-16 flex flex-col items-center justify-center p-1 border-[#ffd166]">
+    <button onclick="performAction('meditate')" class="action-card w-14 md:w-16 h-14 md:h-16 flex flex-col items-center justify-center p-1 border-[#ffd166]">
       <span class="hotkey-badge">3</span>
       <span class="text-base md:text-xl">🧘</span>
-      <span class="text-[9px] md:text-[10px] font-extrabold text-[#ffd166] leading-tight">Tọa Thiền</span>
+      <span class="text-[9px] font-extrabold text-[#ffd166] leading-tight">Thiền 3D</span>
     </button>
 
-    <!-- Nút số 4: Hình chiếc Mõ Gỗ Đầu Cá + Dùi Mõ chuẩn xác (Không phải hình cái trống) -->
-    <button onclick="performAction('knock')" class="action-card w-14 md:w-16 h-14 md:h-16 flex flex-col items-center justify-center p-1">
+    <button onclick="performAction('knock')" class="action-card w-13 md:w-15 h-14 md:h-16 flex flex-col items-center justify-center p-1">
       <span class="hotkey-badge">4</span>
-      <svg class="w-6 h-6 md:w-7 md:h-7" viewBox="0 0 64 64">
+      <svg class="w-5 h-5 md:w-6 md:h-6" viewBox="0 0 64 64">
         <ellipse cx="32" cy="52" rx="22" ry="5" fill="#dc2626" stroke="#fbbf24" stroke-width="1.5"/>
         <path d="M12 36 C10 18, 26 10, 38 12 C50 14, 56 26, 54 38 C52 47, 42 50, 30 50 C18 50, 13 44, 12 36 Z" fill="#d97706" stroke="#fde047" stroke-width="2"/>
         <path d="M14 38 Q32 42 48 36" fill="none" stroke="#1c0a02" stroke-width="3.5" stroke-linecap="round"/>
@@ -462,42 +373,55 @@
         <line x1="56" y1="10" x2="38" y2="24" stroke="#78350f" stroke-width="3.5" stroke-linecap="round"/>
         <circle cx="36" cy="25" r="4" fill="#dc2626" stroke="#fde047" stroke-width="1"/>
       </svg>
-      <span class="text-[9px] md:text-[10px] font-bold text-[#6fcf97] leading-tight">Gõ Mõ</span>
+      <span class="text-[9px] font-bold text-[#6fcf97] leading-tight">Gõ Mõ</span>
     </button>
 
-    <button onclick="performAction('incense')" class="action-card w-15 md:w-17 h-14 md:h-16 flex flex-col items-center justify-center p-1 border-[#ff9b85]">
+    <button onclick="performAction('incense')" class="action-card w-14 md:w-16 h-14 md:h-16 flex flex-col items-center justify-center p-1 border-[#ff9b85]">
       <span class="hotkey-badge">5</span>
       <span class="text-base md:text-xl">🔥</span>
-      <span class="text-[9px] md:text-[10px] font-extrabold text-[#ffd166] leading-tight">Thắp Hương</span>
+      <span class="text-[9px] font-extrabold text-[#ffd166] leading-tight">Đỉnh Hương</span>
     </button>
 
-    <button onclick="performAction('waterfall')" class="action-card w-15 md:w-17 h-14 md:h-16 flex flex-col items-center justify-center p-1">
+    <button onclick="performAction('waterfall')" class="action-card w-14 md:w-16 h-14 md:h-16 flex flex-col items-center justify-center p-1">
       <span class="hotkey-badge">6</span>
-      <span class="text-base md:text-xl">🏞️</span>
-      <span class="text-[9px] md:text-[10px] font-bold text-[#81ecec] leading-tight">Ngắm Thác</span>
+      <span class="text-base md:text-xl">🐟</span>
+      <span class="text-[9px] font-bold text-[#81ecec] leading-tight">Ao Cá Koi</span>
     </button>
 
-    <button onclick="performAction('eat')" class="action-card w-15 md:w-17 h-14 md:h-16 flex flex-col items-center justify-center p-1 border-[#f5b041]">
+    <!-- Nút số 7 mới: Thắp Hương Thần Motor Điện ngoài sân đá xanh -->
+    <button onclick="performAction('motor_god')" class="action-card w-16 md:w-18 h-14 md:h-16 flex flex-col items-center justify-center p-1 border-[#38bdf8] bg-gradient-to-b from-[#1e3a8a] to-[#172554]">
       <span class="hotkey-badge">7</span>
-      <span class="text-base md:text-xl">🍱</span>
-      <span class="text-[9px] md:text-[10px] font-extrabold text-[#fde047] leading-tight">Ăn Pantry</span>
+      <span class="text-base md:text-xl">⚙️</span>
+      <span class="text-[9px] font-extrabold text-[#fde047] leading-tight">Thần Motor</span>
     </button>
 
-    <button onclick="performAction('leave')" class="action-card w-14 md:w-16 h-14 md:h-16 flex flex-col items-center justify-center p-1 bg-red-950/90 border-red-400">
+    <button onclick="performAction('eat')" class="action-card w-14 md:w-16 h-14 md:h-16 flex flex-col items-center justify-center p-1 border-[#f5b041]">
       <span class="hotkey-badge">8</span>
+      <span class="text-base md:text-xl">🍱</span>
+      <span class="text-[9px] font-extrabold text-[#fde047] leading-tight">Ăn Pantry</span>
+    </button>
+
+    <button onclick="performAction('leave')" class="action-card w-13 md:w-15 h-14 md:h-16 flex flex-col items-center justify-center p-1 bg-red-950/90 border-red-400">
+      <span class="hotkey-badge">9</span>
       <span class="text-base md:text-xl">🏃</span>
-      <span class="text-[9px] md:text-[10px] font-extrabold text-[#ffb4a2] leading-tight">Hạ Sơn</span>
+      <span class="text-[9px] font-extrabold text-[#ffb4a2] leading-tight">Hạ Sơn</span>
     </button>
   </nav>
 
   <!-- ==================== 8. CỔNG ĐĂNG NHẬP: SƯƠNG MINH TÔ MÔN TỰ ==================== -->
-  <div id="authModal" class="fixed inset-0 bg-black/85 z-50 flex items-center justify-center p-3">
+  <div id="authModal" class="fixed inset-0 bg-black/85 z-40 flex items-center justify-center p-3">
     <div class="wood-panel w-full max-w-md overflow-hidden border-2 border-[#ffd166]">
-      <div class="wood-panel-header px-5 py-3.5 text-center">
-        <h2 class="text-base md:text-xl font-extrabold uppercase text-[#ffd166] tracking-wider">
-          ⛩️ SƯƠNG MINH TÔ MÔN TỰ
-        </h2>
-        <p class="text-[11px] text-[#e0c097] mt-0.5">Cổng Tam Quan Nhập Tự • Hệ Thống Văn Phòng Thiền Viện</p>
+      <div class="wood-panel-header px-4 py-3 flex items-center justify-between">
+        <div>
+          <h2 class="text-sm md:text-lg font-extrabold uppercase text-[#ffd166] tracking-wider">
+            ⛩️ SƯƠNG MINH TÔ MÔN TỰ
+          </h2>
+          <p class="text-[10px] text-[#e0c097]">Cổng Tam Quan Nhập Tự • Văn Phòng Thiền Viện</p>
+        </div>
+        <!-- Nút mở nhanh Quản Lý Acc ngay trên bảng Đăng Nhập cho điện thoại -->
+        <button onclick="openAdminModal()" class="px-2.5 py-1.5 rounded bg-[#b91c1c] border border-[#fde047] text-[10px] font-extrabold text-white shrink-0 shadow">
+          👑 Quản Lý Acc
+        </button>
       </div>
 
       <div class="grid grid-cols-2 bg-[#1c0f07] border-b border-[#8c5a32] text-xs font-extrabold">
@@ -616,27 +540,27 @@
   </div>
 
   <!-- ==================== 9. MODAL QUẢN LÝ ACC (THÍCH BÁO GIÁ - MK: 123456) ==================== -->
-  <div id="adminModal" class="fixed inset-0 bg-black/80 z-50 hidden items-center justify-center p-3">
-    <div class="wood-panel w-full max-w-3xl max-h-[88dvh] flex flex-col overflow-hidden border-2 border-[#ffd166]">
-      <div class="wood-panel-header px-4 py-3 flex items-center justify-between">
+  <div id="adminModal" class="fixed inset-0 bg-black/85 z-50 hidden items-center justify-center p-2 md:p-4">
+    <div class="wood-panel w-full max-w-3xl max-h-[90dvh] flex flex-col overflow-hidden border-2 border-[#ffd166]">
+      <div class="wood-panel-header px-3 md:px-4 py-2.5 flex items-center justify-between">
         <div>
-          <h2 class="text-sm md:text-base font-extrabold uppercase text-[#ffd166]">
-            👑 SỔ SINH TỬ - QUẢN LÝ & PHÊ DUYỆT ĐẠO HỮU (TRỤ TRÌ: THÍCH BÁO GIÁ)
+          <h2 class="text-xs md:text-base font-extrabold uppercase text-[#ffd166]">
+            👑 SỔ SINH TỬ - QUẢN LÝ ACC (TRỤ TRÌ: THÍCH BÁO GIÁ)
           </h2>
-          <p class="text-[11px] text-[#e0c097]">Phê duyệt đơn Xin Xuất Gia, sắc phong Tầng Tu Vi (ST2 → Manager) và điều chuyển Phòng Ban</p>
+          <p class="text-[10px] text-[#e0c097]">Nhập mật khẩu 123456 để phê duyệt đơn Xin Xuất Gia & sắc phong Tu Vi</p>
         </div>
         <button onclick="closeAdminModal()" class="text-lg text-[#ff9b85] hover:text-white font-bold px-2">✕</button>
       </div>
 
-      <div id="adminPassGate" class="p-3 bg-[#1c0f08] border-b border-[#6e472b] flex flex-wrap items-center justify-between gap-2 text-xs">
-        <span class="text-[#ffd166] font-bold">🔑 Mật lệnh Trụ Trì (Thích Báo Giá):</span>
+      <div id="adminPassGate" class="p-2.5 bg-[#1c0f08] border-b border-[#6e472b] flex flex-wrap items-center justify-between gap-2 text-xs">
+        <span class="text-[#ffd166] font-bold">🔑 Mật khẩu Trụ Trì (Thích Báo Giá):</span>
         <div class="flex items-center gap-2">
-          <input id="adminQuickPass" type="password" placeholder="Nhập mật khẩu Trụ Trì (123456)..." class="bg-[#fdf6e9] text-[#2c1608] font-bold px-2.5 py-1 rounded border border-[#b07d4f]" />
-          <span class="text-[11px] text-[#6fcf97] font-bold" id="adminAuthStatus"></span>
+          <input id="adminQuickPass" type="password" value="123456" placeholder="Nhập 123456..." class="bg-[#fdf6e9] text-[#2c1608] font-extrabold px-2.5 py-1 rounded border border-[#b07d4f] w-36" />
+          <span class="text-[11px] text-[#6fcf97] font-bold" id="adminAuthStatus">✅ Sẵn sàng duyệt</span>
         </div>
       </div>
 
-      <div id="adminAccountsContainer" class="p-3 overflow-y-auto space-y-2 text-xs flex-1"></div>
+      <div id="adminAccountsContainer" class="p-2.5 overflow-y-auto space-y-2 text-xs flex-1"></div>
 
       <div class="p-2.5 bg-[#1a0e07] border-t border-[#6e472b] flex justify-end">
         <button onclick="closeAdminModal()" class="px-5 py-1.5 rounded bg-[#6e421f] hover:bg-[#8a5429] text-xs font-extrabold text-white">
@@ -646,10 +570,10 @@
     </div>
   </div>
 
-  <!-- ==================== 10. SOCKET.IO & ENGINE 2.5D ==================== -->
+  <!-- ==================== 10. SOCKET.IO & ENGINE 2.5D + SÂN ĐÁ XANH + THẦN MOTOR + THIỀN 3D ==================== -->
   <script src="/socket.io/socket.io.js"></script>
   <script>
-    // --- 1. ÂM THANH (TIẾNG MÕ GỖ, TIẾNG LẦN CHUỖI HẠT & TIẾNG CHUÔNG CHÙA) ---
+    // --- 1. ÂM THANH ---
     const AudioCtx = window.AudioContext || window.webkitAudioContext;
     let audioCtx = null;
     let soundMuted = false;
@@ -664,7 +588,6 @@
       document.getElementById('btnAudio').textContent = soundMuted ? '🔇' : '🔊';
     }
 
-    // Tiếng Mõ Gỗ trầm ấm chuẩn (Cốc!)
     function playMokugyoSound(pitch = 1.0) {
       if (soundMuted) return;
       try {
@@ -674,17 +597,16 @@
         const gain = audioCtx.createGain();
         osc.type = 'triangle';
         osc.frequency.setValueAtTime(720 * pitch, now);
-        osc.frequency.exponentialRampToValueAtTime(280 * pitch, now + 0.075);
-        gain.gain.setValueAtTime(0.36, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.085);
+        osc.frequency.exponentialRampToValueAtTime(270 * pitch, now + 0.08);
+        gain.gain.setValueAtTime(0.38, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
         osc.connect(gain);
         gain.connect(audioCtx.destination);
         osc.start(now);
-        osc.stop(now + 0.09);
+        osc.stop(now + 0.095);
       } catch (e) {}
     }
 
-    // Tiếng hạt gỗ Bồ Đề va vào nhau khi lần chuỗi hạt (Tách!)
     function playBeadClickSound() {
       if (soundMuted) return;
       try {
@@ -693,14 +615,14 @@
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(1150, now);
-        osc.frequency.exponentialRampToValueAtTime(420, now + 0.035);
-        gain.gain.setValueAtTime(0.25, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+        osc.frequency.setValueAtTime(1120, now);
+        osc.frequency.exponentialRampToValueAtTime(390, now + 0.04);
+        gain.gain.setValueAtTime(0.28, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.045);
         osc.connect(gain);
         gain.connect(audioCtx.destination);
         osc.start(now);
-        osc.stop(now + 0.045);
+        osc.stop(now + 0.05);
       } catch (e) {}
     }
 
@@ -715,24 +637,50 @@
           osc.type = 'sine';
           osc.frequency.setValueAtTime(freq, now);
           gain.gain.setValueAtTime(0.3 / (idx + 1), now);
-          gain.gain.exponentialRampToValueAtTime(0.0001, now + 2.6 - idx * 0.45);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 2.5 - idx * 0.4);
           osc.connect(gain);
           gain.connect(audioCtx.destination);
           osc.start(now);
-          osc.stop(now + 2.7);
+          osc.stop(now + 2.6);
         });
       } catch (e) {}
     }
 
-    // --- 2. BẢN ĐỒ SƯƠNG MINH TÔ MÔN TỰ ---
+    // --- 2. BẢN ĐỒ MỞ RỘNG (26 x 25) CÓ SÂN NGOÀI LÁT ĐÁ XANH, AO CÁ KOI LỚN & TƯỢNG THẦN MOTOR ĐIỆN ---
     const MAP_W = 26;
-    const MAP_H = 18;
+    const MAP_H = 25; // Mở rộng từ 18 -> 25 để làm Sân Ngoài Lát Đá Xanh (rows 17..24)
     const ISO_TILE_W = 60;
     const ISO_TILE_H = 30;
 
     const INCENSE_ALTAR = { x: 9.2, y: 9.6, standX: 9.2, standY: 10.45 };
     const WATERFALL_ZONE = { x: 0.6, y: 0.5, w: 5.8, h: 3.6, viewX: 3.8, viewY: 4.15 };
     const BODHI_BELL_ZONE = { x: 17.0, y: 0.6, w: 1.8, h: 3.2, bellX: 17.6, bellY: 2.3, standX: 17.6, standY: 3.6 };
+
+    // Cổng Ra Sân Ngoài & 2 Linh Vật Đá Hài Hước Đứng Hai Bên
+    const COURTYARD_GATE = {
+      x: 10.5,
+      y: 16.3,
+      leftBeast: { x: 8.6, y: 16.7, standX: 8.6, standY: 17.6 },
+      rightBeast: { x: 12.4, y: 16.7, standX: 12.4, standY: 17.6 }
+    };
+
+    // Ao Cá Koi Sân Ngoài Siêu Chi Tiết
+    const OUTER_KOI_POND = {
+      x: 1.2,
+      y: 17.4,
+      w: 7.4,
+      h: 6.4,
+      standX: 5.0,
+      standY: 17.2
+    };
+
+    // Đài Thờ Bức Tượng Thần Motor Điện Giữa Sân Đá Xanh
+    const MOTOR_STATUE_ALTAR = {
+      x: 13.5,
+      y: 20.4,
+      standX: 13.5,
+      standY: 22.1
+    };
 
     const ZONES = {
       DIRECTOR: {
@@ -833,7 +781,7 @@
         shortName: 'Hạ Sơn',
         doorTitle: '🪜 CỔNG HẠ SƠN (Out Nick)',
         subLabel: '(Bước Xuống Để Đăng Xuất)',
-        rx: 19.4, ry: 11.2, rw: 5.4, rh: 5.4,
+        rx: 19.4, ry: 11.2, rw: 5.4, rh: 4.6,
         doorX: 22.1, doorY: 11.2, doorSide: 'north',
         approachX: 22.1, approachY: 10.2,
         exitX: 22.1, exitY: 13.8,
@@ -841,9 +789,11 @@
       }
     };
 
-    // --- 3. BIẾN TRẠNG THÁI & GÓC NHÌN THỨ NHẤT ---
+    // --- 3. STATE & CAMERA ---
     const canvas = document.getElementById('templeCanvas');
     const ctx = canvas.getContext('2d');
+    const fp3DCanvas = document.getElementById('fp3DCanvas');
+    const fpCtx = fp3DCanvas.getContext('2d');
     const socket = typeof io !== 'undefined' ? io() : null;
 
     let isTopDown2D = false;
@@ -864,16 +814,20 @@
     let selectedCombatTargetId = null;
     let pendingProximityTask = null;
 
-    // Trạng thái Góc Nhìn Thứ Nhất Khi Tọa Thiền
+    // Biến 3D First-Person Meditation (Gõ Mõ 3D & Tràng Hạt 3D)
     let isFirstPersonMeditating = false;
     let fpCurrentMode = 'mokugyo'; // 'mokugyo' | 'beads'
     let fpCurrentRoomDept = null;
     let fpKnockCount = 0;
     let fpBeadIndex = 1;
-    let fpBeadRotationOffset = 0;
+    let fpMalletAnim = 0;       // Tiến trình vung dùi 3D từ phía người chơi
+    let fpMokugyoScaleAnim = 0; // Độ nảy 3D của Mõ khi bị gõ
+    let fpBeadPullAnim = 0;     // Độ trượt 3D của hạt về phía người chơi
+    let fpShockwaves3D = [];    // Sóng âm 3D trên bàn thờ
     let fpRegenStartTick = 0;
 
     let activeIncenseSticks = 9;
+    let motorIncenseSticks = 6;
     let simTick = 0;
 
     let smokeParticles = [];
@@ -884,7 +838,7 @@
     let goldenMotes = [];
     let heartParticles = [];
 
-    for (let i = 0; i < 95; i++) {
+    for (let i = 0; i < 85; i++) {
       waterfallParticles.push({
         streamIdx: i % 3,
         progress: Math.random(),
@@ -894,16 +848,36 @@
       });
     }
 
-    const koiFishList = [
-      { angle: 0.2, speed: 0.022, rx: 1.35, ry: 0.68, cx: 3.5, cy: 2.6, color: '#ff4d4d', spot: '#ffffff' },
-      { angle: 1.6, speed: 0.018, rx: 1.6, ry: 0.75, cx: 3.4, cy: 2.55, color: '#fbbf24', spot: '#dc2626' },
-      { angle: 2.9, speed: 0.025, rx: 1.05, ry: 0.52, cx: 3.7, cy: 2.7, color: '#f97316', spot: '#ffffff' },
-      { angle: 4.1, speed: 0.017, rx: 1.4, ry: 0.62, cx: 3.3, cy: 2.5, color: '#ffffff', spot: '#ef4444' },
-      { angle: 5.2, speed: 0.021, rx: 1.2, ry: 0.58, cx: 3.8, cy: 2.48, color: '#f59e0b', spot: '#111827' },
-      { angle: 0.9, speed: 0.020, rx: 0.85, ry: 0.45, cx: 2.9, cy: 2.75, color: '#fde047', spot: '#dc2626' }
+    // Hồ cá Koi nhỏ góc thác nước
+    const innerKoiList = [
+      { angle: 0.2, speed: 0.022, rx: 1.3, ry: 0.65, cx: 3.5, cy: 2.6, color: '#ff4d4d', spot: '#ffffff' },
+      { angle: 2.1, speed: 0.019, rx: 1.5, ry: 0.7, cx: 3.4, cy: 2.55, color: '#fbbf24', spot: '#dc2626' },
+      { angle: 4.2, speed: 0.021, rx: 1.1, ry: 0.52, cx: 3.7, cy: 2.7, color: '#ffffff', spot: '#ef4444' }
     ];
 
-    for (let i = 0; i < 40; i++) {
+    // 10 Chú Cá Koi Sân Ngoài Siêu Chi Tiết (Có vây ngực, râu cá, uốn lượn)
+    const outerKoiList = [
+      { angle: 0.0, speed: 0.016, rx: 2.3, ry: 1.7, cx: 4.9, cy: 20.6, bodyCol: '#ffffff', patCol: '#ef4444', pat2: null, size: 1.15 },
+      { angle: 0.9, speed: 0.019, rx: 1.8, ry: 1.3, cx: 4.6, cy: 20.4, bodyCol: '#fbbf24', patCol: '#f59e0b', pat2: '#ffffff', size: 1.05 },
+      { angle: 1.8, speed: 0.014, rx: 2.6, ry: 2.0, cx: 5.0, cy: 20.7, bodyCol: '#ffffff', patCol: '#dc2626', pat2: '#111827', size: 1.25 },
+      { angle: 2.7, speed: 0.021, rx: 1.5, ry: 1.1, cx: 4.4, cy: 20.2, bodyCol: '#f97316', patCol: '#ffffff', pat2: '#111827', size: 0.95 },
+      { angle: 3.5, speed: 0.017, rx: 2.1, ry: 1.6, cx: 5.2, cy: 20.8, bodyCol: '#fde047', patCol: '#ea580c', pat2: null, size: 1.1 },
+      { angle: 4.3, speed: 0.015, rx: 2.4, ry: 1.8, cx: 4.8, cy: 20.5, bodyCol: '#e0f2fe', patCol: '#ef4444', pat2: '#1e293b', size: 1.2 },
+      { angle: 5.1, speed: 0.020, rx: 1.3, ry: 1.0, cx: 5.3, cy: 20.3, bodyCol: '#ef4444', patCol: '#ffffff', pat2: null, size: 0.9 },
+      { angle: 5.8, speed: 0.018, rx: 1.9, ry: 1.4, cx: 4.7, cy: 20.9, bodyCol: '#ffffff', patCol: '#f59e0b', pat2: '#dc2626', size: 1.08 }
+    ];
+
+    // Cây cối xanh mát trên Sân Ngoài Lát Đá Xanh
+    const COURTYARD_TREES = [
+      { x: 1.1, y: 17.1, type: 'willow', scale: 1.15 },
+      { x: 8.6, y: 23.2, type: 'pine', scale: 1.1 },
+      { x: 18.2, y: 17.5, type: 'bodhi', scale: 1.25 },
+      { x: 23.8, y: 17.8, type: 'pine', scale: 1.1 },
+      { x: 18.5, y: 23.4, type: 'pine', scale: 1.05 },
+      { x: 23.6, y: 23.2, type: 'bodhi', scale: 1.2 }
+    ];
+
+    for (let i = 0; i < 45; i++) {
       goldenMotes.push({
         gx: Math.random() * MAP_W,
         gy: Math.random() * MAP_H,
@@ -916,26 +890,30 @@
     function resizeCanvas() {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
+      if (fp3DCanvas) {
+        fp3DCanvas.width = window.innerWidth;
+        fp3DCanvas.height = Math.max(300, window.innerHeight - 150);
+      }
       if (camOffsetX === 0 && camOffsetY === 0) resetCameraView();
     }
     window.addEventListener('resize', resizeCanvas);
 
     function resetCameraView() {
       if (!isTopDown2D) {
-        camZoom = Math.min(window.innerWidth / 1560, window.innerHeight / 900);
-        camZoom = Math.max(0.52, Math.min(1.15, camZoom));
-        camOffsetX = window.innerWidth * 0.43;
-        camOffsetY = window.innerHeight * 0.1;
+        camZoom = Math.min(window.innerWidth / 1620, window.innerHeight / 980);
+        camZoom = Math.max(0.48, Math.min(1.1, camZoom));
+        camOffsetX = window.innerWidth * 0.47;
+        camOffsetY = window.innerHeight * 0.06;
       } else {
-        camZoom = Math.min((window.innerWidth - 40) / (MAP_W * 40), (window.innerHeight - 130) / (MAP_H * 40));
-        camOffsetX = (window.innerWidth - MAP_W * 40 * camZoom) * 0.5;
-        camOffsetY = 60;
+        camZoom = Math.min((window.innerWidth - 40) / (MAP_W * 36), (window.innerHeight - 130) / (MAP_H * 36));
+        camOffsetX = (window.innerWidth - MAP_W * 36 * camZoom) * 0.5;
+        camOffsetY = 54;
       }
     }
 
     function worldToScreen(gx, gy, gz = 0) {
       if (isTopDown2D) {
-        const cell = 40 * camZoom;
+        const cell = 36 * camZoom;
         return { x: camOffsetX + gx * cell, y: camOffsetY + gy * cell };
       }
       const tw = ISO_TILE_W * camZoom;
@@ -948,7 +926,7 @@
 
     function screenToWorld(sx, sy) {
       if (isTopDown2D) {
-        const cell = 40 * camZoom;
+        const cell = 36 * camZoom;
         return { x: (sx - camOffsetX) / cell, y: (sy - camOffsetY) / cell };
       }
       const tw = ISO_TILE_W * camZoom;
@@ -961,7 +939,7 @@
       };
     }
 
-    // --- 4. GÓC NHÌN THỨ NHẤT KHI TỌA THIỀN (GÕ MÕ & BẤM CHUỖI HẠT) ---
+    // --- 4. GÓC NHÌN THỨ NHẤT 3D (GÕ MÕ 3D TỪ PHÍA MÌNH & LẦN TRÀNG HẠT 3D TỪ PHÍA MÌNH) ---
     function openFirstPersonMeditation() {
       const me = players[myId];
       if (!me) return;
@@ -973,22 +951,23 @@
       isFirstPersonMeditating = true;
       fpRegenStartTick = simTick;
 
+      resizeCanvas();
       document.getElementById('fpUnderAttackBanner').classList.add('hidden');
       const badgeEl = document.getElementById('fpRoomBadge');
       const descEl = document.getElementById('fpStatusDesc');
 
       if (!fpCurrentRoomDept) {
-        badgeEl.textContent = '🏞️ Thiền Giữa Sân Chùa';
-        badgeEl.className = 'px-2 py-0.5 rounded bg-blue-800 text-blue-100 text-[10px] font-extrabold';
-        descEl.textContent = 'Đang hấp thụ linh khí đất trời giữa sân Sương Minh Tô Môn Tự.';
+        badgeEl.textContent = '🏞️ Thiền Sân Chùa';
+        badgeEl.className = 'px-2 py-0.5 rounded bg-blue-800 text-blue-100 text-[9px] md:text-[10px] font-extrabold shrink-0';
+        descEl.textContent = 'Hấp thụ linh khí đất trời Sương Minh Tô Môn Tự.';
       } else if (fpCurrentRoomDept === me.dept) {
         badgeEl.textContent = `✅ Chính Phòng (${me.dept})`;
-        badgeEl.className = 'px-2 py-0.5 rounded bg-green-800 text-green-200 text-[10px] font-extrabold';
-        descEl.textContent = `Bạn đang tọa thiền đúng phòng [${me.dept}], mỗi lần ấn tăng Công Đức chính đạo!`;
+        badgeEl.className = 'px-2 py-0.5 rounded bg-green-800 text-green-200 text-[9px] md:text-[10px] font-extrabold shrink-0';
+        descEl.textContent = `Tọa thiền đúng phòng [${me.dept}], mỗi lần ấn thưởng Công Đức chính đạo!`;
       } else {
-        badgeEl.textContent = `🕵️ Đang Trộm Phòng [${fpCurrentRoomDept}]!`;
-        badgeEl.className = 'px-2 py-0.5 rounded bg-amber-600 text-black text-[10px] font-extrabold animate-pulse';
-        descEl.textContent = `Cảnh báo: Bạn đang ngồi thiền khác phòng! Mỗi lần ấn sẽ hút Công Đức của thành viên phòng [${fpCurrentRoomDept}]!`;
+        badgeEl.textContent = `🕵️ Trộm Phòng [${fpCurrentRoomDept}]!`;
+        badgeEl.className = 'px-2 py-0.5 rounded bg-amber-500 text-black text-[9px] md:text-[10px] font-extrabold animate-pulse shrink-0';
+        descEl.textContent = `Bạn đang ngồi khác phòng! Mỗi lần ấn hút Công Đức của phòng [${fpCurrentRoomDept}]!`;
       }
 
       document.getElementById('fpMeritCount').textContent = (me.merit || 0).toLocaleString();
@@ -996,7 +975,6 @@
       document.getElementById('firstPersonMeditationModal').classList.remove('hidden');
 
       playTempleBellSound();
-      drawFirstPersonBeadsCanvas();
 
       if (socket) {
         socket.emit('meditate_start', { roomDept: fpCurrentRoomDept, x: me.x, y: me.y });
@@ -1016,138 +994,420 @@
     function switchMeditationMode(mode) {
       fpCurrentMode = mode;
       const isMokugyo = mode === 'mokugyo';
-      document.getElementById('fpMokugyoView').classList.toggle('hidden', !isMokugyo);
-      document.getElementById('fpBeadsView').classList.toggle('hidden', isMokugyo);
-
       document.getElementById('btnModeMokugyo').className = isMokugyo
-        ? 'px-4 py-2 rounded-lg bg-[#c97a1c] text-white font-extrabold text-xs md:text-sm flex items-center gap-2 shadow'
-        : 'px-4 py-2 rounded-lg bg-[#2e180b] text-[#e0c097] hover:text-white font-extrabold text-xs md:text-sm flex items-center gap-2';
+        ? 'px-3 md:px-4 py-1.5 rounded-lg bg-[#c97a1c] text-white font-extrabold text-xs md:text-sm flex items-center gap-1.5 shadow'
+        : 'px-3 md:px-4 py-1.5 rounded-lg bg-[#2e180b] text-[#e0c097] hover:text-white font-extrabold text-xs md:text-sm flex items-center gap-1.5';
 
       document.getElementById('btnModeBeads').className = !isMokugyo
-        ? 'px-4 py-2 rounded-lg bg-[#2e7d32] text-white font-extrabold text-xs md:text-sm flex items-center gap-2 shadow'
-        : 'px-4 py-2 rounded-lg bg-[#2e180b] text-[#e0c097] hover:text-white font-extrabold text-xs md:text-sm flex items-center gap-2';
+        ? 'px-3 md:px-4 py-1.5 rounded-lg bg-[#2e7d32] text-white font-extrabold text-xs md:text-sm flex items-center gap-1.5 shadow'
+        : 'px-3 md:px-4 py-1.5 rounded-lg bg-[#2e180b] text-[#e0c097] hover:text-white font-extrabold text-xs md:text-sm flex items-center gap-1.5';
 
-      if (!isMokugyo) drawFirstPersonBeadsCanvas();
+      updateFpSubCounterText();
     }
 
-    function handleFirstPersonStrike(mode) {
-      if (!isFirstPersonMeditating) return;
+    function updateFpSubCounterText() {
+      const subEl = document.getElementById('fpCounterSubText');
+      if (!subEl) return;
+      if (fpCurrentMode === 'mokugyo') {
+        subEl.textContent = `🪵 Đã gõ: ${fpKnockCount} tiếng mõ`;
+      } else {
+        subEl.textContent = `📿 Tràng hạt: Hạt thứ ${fpBeadIndex} / 108`;
+      }
+    }
 
+    // Chỉ vùng Canvas 3D ở giữa mới kích hoạt Gõ Mõ / Kéo Hạt
+    fp3DCanvas.addEventListener('pointerdown', (e) => {
+      e.stopPropagation();
+      if (!isFirstPersonMeditating) return;
+      triggerFirstPerson3DAction();
+    });
+
+    function triggerFirstPerson3DAction() {
+      if (!isFirstPersonMeditating) return;
       const rewardZone = document.getElementById('fpFloatingRewardZone');
       const floatEl = document.createElement('div');
-      const rx = 42 + (Math.random() - 0.5) * 24;
+      const rx = 44 + (Math.random() - 0.5) * 20;
 
-      if (mode === 'mokugyo') {
+      if (fpCurrentMode === 'mokugyo') {
         playMokugyoSound(0.95 + Math.random() * 0.12);
         fpKnockCount++;
-        document.getElementById('fpKnockSessionCount').textContent = fpKnockCount;
+        fpMalletAnim = 1.0;       // Kích hoạt cú vung dùi 3D từ phía người chơi về trước
+        fpMokugyoScaleAnim = 1.0; // Độ nảy 3D của chiếc Mõ
+        fpShockwaves3D.push({ r: 20, alpha: 1.0 });
 
-        const wrap = document.getElementById('fpMokugyoSvgWrap');
-        const mallet = document.getElementById('fpMalletEl');
-        wrap.classList.remove('mokugyo-hit');
-        void wrap.offsetWidth;
-        wrap.classList.add('mokugyo-hit');
-        mallet.classList.add('mallet-swing');
-        setTimeout(() => mallet.classList.remove('mallet-swing'), 110);
-
-        floatEl.className = 'absolute text-base md:text-xl font-black text-[#fde047] drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)] transition-all duration-700';
+        floatEl.className = 'absolute text-base md:text-xl font-black text-[#fde047] drop-shadow-[0_3px_8px_rgba(0,0,0,0.95)] transition-all duration-700';
         floatEl.style.left = `${rx}%`;
-        floatEl.style.top = '48%';
+        floatEl.style.top = '42%';
         floatEl.textContent = fpCurrentRoomDept && fpCurrentRoomDept !== players[myId]?.dept
-          ? '🪵 Cốc! +2 🪷 (Hút Linh Khí!)'
-          : '🪵 Cốc! +2 Công Đức 🪷';
+          ? '🪵 CỐC! +2 🪷 (Hút Linh Khí!)'
+          : '🪵 CỐC! +2 Công Đức 🪷';
       } else {
         playBeadClickSound();
         fpBeadIndex = (fpBeadIndex % 108) + 1;
-        fpBeadRotationOffset += (Math.PI * 2) / 18;
-        document.getElementById('fpBeadIndexText').textContent = fpBeadIndex;
-        drawFirstPersonBeadsCanvas();
+        fpBeadPullAnim = 1.0; // Kéo 1 hạt từ phía xa trượt về phía lòng bàn tay người chơi
+        fpShockwaves3D.push({ r: 15, alpha: 0.85 });
 
-        floatEl.className = 'absolute text-base md:text-xl font-black text-[#6fcf97] drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)] transition-all duration-700';
+        floatEl.className = 'absolute text-base md:text-xl font-black text-[#6fcf97] drop-shadow-[0_3px_8px_rgba(0,0,0,0.95)] transition-all duration-700';
         floatEl.style.left = `${rx}%`;
-        floatEl.style.top = '48%';
-        floatEl.textContent = `📿 Nam Mô! +3 Công Đức (Hạt ${fpBeadIndex}/108)`;
+        floatEl.style.top = '42%';
+        floatEl.textContent = `📿 Tách! +3 Công Đức (Hạt ${fpBeadIndex}/108)`;
       }
 
+      updateFpSubCounterText();
       rewardZone.appendChild(floatEl);
       requestAnimationFrame(() => {
-        floatEl.style.transform = 'translateY(-95px) scale(1.1)';
+        floatEl.style.transform = 'translateY(-90px) scale(1.12)';
         floatEl.style.opacity = '0';
       });
-      setTimeout(() => floatEl.remove(), 700);
+      setTimeout(() => floatEl.remove(), 680);
 
       if (socket) {
-        socket.emit('meditate_click', { mode, roomDept: fpCurrentRoomDept });
+        socket.emit('meditate_click', { mode: fpCurrentMode, roomDept: fpCurrentRoomDept });
       }
     }
 
-    // Vẽ Tràng Hạt 108 Hạt Bồ Đề ở góc nhìn thứ nhất
-    function drawFirstPersonBeadsCanvas() {
-      const bCanvas = document.getElementById('fpBeadsCanvas');
-      if (!bCanvas) return;
-      const bCtx = bCanvas.getContext('2d');
-      bCtx.clearRect(0, 0, bCanvas.width, bCanvas.height);
+    // HÀM RENDER 3D GÓC NHÌN THỨ NHẤT (POV TỪ PHÍA NGƯỜI CHƠI)
+    function renderFirstPerson3DScene() {
+      if (!isFirstPersonMeditating || !fp3DCanvas) return;
+      const w = fp3DCanvas.width;
+      const h = fp3DCanvas.height;
+      const cx = w / 2;
+      const cy = h * 0.52;
 
-      const cx = 140;
-      const cy = 140;
-      const radius = 92;
-      const numVisibleBeads = 18;
+      fpCtx.clearRect(0, 0, w, h);
 
-      // Dây chuỗi đỏ nối các hạt
-      bCtx.strokeStyle = '#dc2626';
-      bCtx.lineWidth = 5;
-      bCtx.beginPath();
-      bCtx.arc(cx, cy, radius, 0, Math.PI * 2);
-      bCtx.stroke();
+      // 1. Nền Chánh Điện 3D có chiều sâu & Mặt bàn thờ gỗ sơn mài theo phối cảnh
+      const bgGrad = fpCtx.createRadialGradient(cx, cy - 60, 20, cx, cy, Math.max(w, h) * 0.75);
+      bgGrad.addColorStop(0, '#422006');
+      bgGrad.addColorStop(0.55, '#1e0d05');
+      bgGrad.addColorStop(1, '#090402');
+      fpCtx.fillStyle = bgGrad;
+      fpCtx.fillRect(0, 0, w, h);
 
-      // Tua rua đỏ dưới đáy chuỗi hạt (Mẫu châu)
-      bCtx.strokeStyle = '#ef4444';
-      bCtx.lineWidth = 4;
-      bCtx.beginPath();
-      bCtx.moveTo(cx, cy + radius);
-      bCtx.lineTo(cx - 10, cy + radius + 34);
-      bCtx.moveTo(cx, cy + radius);
-      bCtx.lineTo(cx + 10, cy + radius + 34);
-      bCtx.moveTo(cx, cy + radius);
-      bCtx.lineTo(cx, cy + radius + 38);
-      bCtx.stroke();
+      // Mặt bàn gỗ 3D (Hình thang phối cảnh từ tầm mắt người ngồi thiền)
+      const horizonY = h * 0.34;
+      const tableGrad = fpCtx.createLinearGradient(0, horizonY, 0, h);
+      tableGrad.addColorStop(0, '#3b1908');
+      tableGrad.addColorStop(0.5, '#5c280e');
+      tableGrad.addColorStop(1, '#260e03');
+      fpCtx.fillStyle = tableGrad;
+      fpCtx.beginPath();
+      fpCtx.moveTo(cx - w * 0.28, horizonY);
+      fpCtx.lineTo(cx + w * 0.28, horizonY);
+      fpCtx.lineTo(w * 1.15, h);
+      fpCtx.lineTo(-w * 0.15, h);
+      fpCtx.closePath();
+      fpCtx.fill();
 
-      // Vẽ 18 hạt gỗ Bồ Đề xoay tròn theo từng lần bấm
-      for (let i = 0; i < numVisibleBeads; i++) {
-        const ang = (i * Math.PI * 2) / numVisibleBeads + fpBeadRotationOffset;
-        const bx = cx + Math.cos(ang) * radius;
-        const by = cy + Math.sin(ang) * radius;
+      // Viền chỉ vàng trên mặt bàn thờ 3D
+      fpCtx.strokeStyle = 'rgba(251, 191, 36, 0.35)';
+      fpCtx.lineWidth = 2;
+      fpCtx.beginPath();
+      fpCtx.moveTo(cx - w * 0.28, horizonY);
+      fpCtx.lineTo(cx + w * 0.28, horizonY);
+      fpCtx.stroke();
 
-        const isMotherBead = i === 0;
-        const bRadius = isMotherBead ? 17 : 13.5;
-
-        const grad = bCtx.createRadialGradient(bx - 4, by - 4, 2, bx, by, bRadius);
-        if (isMotherBead) {
-          grad.addColorStop(0, '#fef08a');
-          grad.addColorStop(0.55, '#f59e0b');
-          grad.addColorStop(1, '#78350f');
-        } else {
-          grad.addColorStop(0, '#d97706');
-          grad.addColorStop(0.65, '#78350f');
-          grad.addColorStop(1, '#3b1806');
-        }
-
-        bCtx.fillStyle = grad;
-        bCtx.beginPath();
-        bCtx.arc(bx, by, bRadius, 0, Math.PI * 2);
-        bCtx.fill();
-
-        bCtx.strokeStyle = isMotherBead ? '#fde047' : '#b45309';
-        bCtx.lineWidth = 1.5;
-        bCtx.stroke();
+      // Lư hương đồng mờ ảo phía xa trước mặt
+      const urnY = horizonY - 12;
+      fpCtx.fillStyle = '#b45309';
+      fpCtx.beginPath();
+      fpCtx.ellipse(cx, urnY, 34, 14, 0, 0, Math.PI * 2);
+      fpCtx.fill();
+      // Khói trầm bay lên từ lư hương phía xa
+      for (let s = 0; s < 4; s++) {
+        const sy = urnY - 18 - ((simTick * 0.8 + s * 22) % 75);
+        const sx = cx + Math.sin(simTick * 0.04 + s) * 14;
+        const alpha = Math.max(0, 0.45 - (urnY - sy) / 160);
+        fpCtx.fillStyle = `rgba(253, 230, 138, ${alpha})`;
+        fpCtx.beginPath();
+        fpCtx.arc(sx, sy, 8 + (urnY - sy) * 0.12, 0, Math.PI * 2);
+        fpCtx.fill();
       }
 
-      // Chữ Phật (佛) vàng ở tâm chuỗi hạt
-      bCtx.fillStyle = 'rgba(251, 191, 36, 0.9)';
-      bCtx.font = '800 42px serif';
-      bCtx.textAlign = 'center';
-      bCtx.textBaseline = 'middle';
-      bCtx.fillText('佛', cx, cy);
+      // Sóng âm 3D lan tỏa trên mặt phẳng bàn
+      fpShockwaves3D.forEach(sw => {
+        sw.r += 9;
+        sw.alpha -= 0.04;
+        if (sw.alpha > 0) {
+          fpCtx.strokeStyle = `rgba(253, 224, 71, ${sw.alpha})`;
+          fpCtx.lineWidth = 3;
+          fpCtx.beginPath();
+          fpCtx.ellipse(cx, cy + 25, sw.r * 1.5, sw.r * 0.65, 0, 0, Math.PI * 2);
+          fpCtx.stroke();
+        }
+      });
+      fpShockwaves3D = fpShockwaves3D.filter(sw => sw.alpha > 0);
+
+      const sc = Math.min(w / 460, h / 420);
+
+      if (fpCurrentMode === 'mokugyo') {
+        // ==================== CHẾ ĐỘ 1: GÕ MÕ 3D TỪ PHÍA NGƯỜI CHƠI ====================
+        if (fpMalletAnim > 0) fpMalletAnim = Math.max(0, fpMalletAnim - 0.12);
+        if (fpMokugyoScaleAnim > 0) fpMokugyoScaleAnim = Math.max(0, fpMokugyoScaleAnim - 0.1);
+
+        const hitCompress = Math.sin(fpMokugyoScaleAnim * Math.PI) * 0.08;
+        const mx = cx;
+        const my = cy + 28 * sc;
+
+        fpCtx.save();
+        fpCtx.translate(mx, my);
+        fpCtx.scale(sc * (1 + hitCompress), sc * (1 - hitCompress * 0.8));
+
+        // 1. Bóng đổ 3D dưới đáy đệm
+        fpCtx.fillStyle = 'rgba(0,0,0,0.65)';
+        fpCtx.beginPath();
+        fpCtx.ellipse(0, 82, 135, 42, 0, 0, Math.PI * 2);
+        fpCtx.fill();
+
+        // 2. Đệm lụa đỏ thêu hoa sen 3D có độ dày
+        const cushGrad = fpCtx.createLinearGradient(-120, 45, 120, 85);
+        cushGrad.addColorStop(0, '#7f1d1d');
+        cushGrad.addColorStop(0.5, '#dc2626');
+        cushGrad.addColorStop(1, '#450a0a');
+        fpCtx.fillStyle = cushGrad;
+        fpCtx.beginPath();
+        fpCtx.ellipse(0, 68, 122, 36, 0, 0, Math.PI * 2);
+        fpCtx.fill();
+        fpCtx.strokeStyle = '#fbbf24';
+        fpCtx.lineWidth = 3;
+        fpCtx.stroke();
+
+        // Mặt trên đệm lụa
+        fpCtx.fillStyle = '#991b1b';
+        fpCtx.beginPath();
+        fpCtx.ellipse(0, 56, 110, 30, 0, 0, Math.PI * 2);
+        fpCtx.fill();
+        fpCtx.strokeStyle = '#fde047';
+        fpCtx.lineWidth = 1.5;
+        fpCtx.setLineDash([8, 5]);
+        fpCtx.stroke();
+        fpCtx.setLineDash([]);
+
+        // 3. Khối cầu 3D của Chiếc Mõ Gỗ Đầu Cá (Shading 3D đa điểm sáng)
+        const wood3DGrad = fpCtx.createRadialGradient(-32, -38, 14, 0, 0, 125);
+        wood3DGrad.addColorStop(0, '#fde047');   // Điểm bắt sáng 3D trên đỉnh lưng mõ
+        wood3DGrad.addColorStop(0.22, '#f59e0b');
+        wood3DGrad.addColorStop(0.62, '#b45309');
+        wood3DGrad.addColorStop(0.88, '#78350f');
+        wood3DGrad.addColorStop(1, '#2e1003');   // Vùng tối đáy 3D
+
+        fpCtx.fillStyle = wood3DGrad;
+        fpCtx.beginPath();
+        fpCtx.moveTo(-98, 22);
+        fpCtx.bezierCurveTo(-112, -55, -45, -96, 12, -92);
+        fpCtx.bezierCurveTo(78, -88, 114, -40, 102, 26);
+        fpCtx.bezierCurveTo(92, 62, 48, 70, -4, 68);
+        fpCtx.bezierCurveTo(-58, 66, -90, 54, -98, 22);
+        fpCtx.closePath();
+        fpCtx.fill();
+
+        fpCtx.strokeStyle = '#fef08a';
+        fpCtx.lineWidth = 2.2;
+        fpCtx.stroke();
+
+        // 4. Hốc miệng Mõ khoét sâu 3D hướng về phía người chơi
+        const mouthGrad = fpCtx.createLinearGradient(0, 12, 0, 48);
+        mouthGrad.addColorStop(0, '#090301');
+        mouthGrad.addColorStop(1, '#3b1505');
+        fpCtx.fillStyle = mouthGrad;
+        fpCtx.beginPath();
+        fpCtx.moveTo(-86, 24);
+        fpCtx.quadraticCurveTo(0, 44, 82, 20);
+        fpCtx.quadraticCurveTo(35, 52, -45, 46);
+        fpCtx.closePath();
+        fpCtx.fill();
+
+        // Lỗ thoát âm tròn hai bên mép mõ
+        fpCtx.fillStyle = '#090301';
+        fpCtx.beginPath();
+        fpCtx.arc(78, 20, 12, 0, Math.PI * 2);
+        fpCtx.arc(-78, 22, 10, 0, Math.PI * 2);
+        fpCtx.fill();
+
+        // 5. Vân vảy cá 3D chạm nổi trên đỉnh Mõ
+        fpCtx.strokeStyle = 'rgba(254, 240, 138, 0.75)';
+        fpCtx.lineWidth = 3;
+        for (let row = 0; row < 3; row++) {
+          for (let col = -1; col <= 1; col++) {
+            const vx = col * 26 + (row % 2) * 12;
+            const vy = -55 + row * 18;
+            fpCtx.beginPath();
+            fpCtx.arc(vx, vy, 12, Math.PI * 1.1, Math.PI * 1.9);
+            fpCtx.stroke();
+          }
+        }
+        fpCtx.restore();
+
+        // 6. TAY PHẢI NGƯỜI CHƠI CẦM DÙI GÕ TỪ PHÍA MÌNH VUNG VỀ PHÍA TRƯỚC (POV 3D)
+        // Khi fpMalletAnim = 0: Dùi nằm gần góc phải dưới (gần mắt người chơi, kích thước lớn)
+        // Khi fpMalletAnim -> 1: Dùi lao vút về phía trước đập thẳng vào đỉnh Mõ (thu nhỏ theo luật xa gần 3D)
+        const swingT = Math.sin(fpMalletAnim * Math.PI);
+        const startX = cx + 145 * sc;
+        const startY = h - 25 * sc;
+        const hitX = cx + 18 * sc;
+        const hitY = cy - 10 * sc;
+
+        const curTipX = startX + (hitX - startX) * swingT;
+        const curTipY = startY + (hitY - startY) * swingT;
+        const handX = cx + 190 * sc - swingT * 28 * sc;
+        const handY = h + 30 * sc - swingT * 18 * sc;
+        const perspectiveScale = (1.28 - swingT * 0.35) * sc;
+
+        fpCtx.save();
+        // Cánh tay áo cà sa của người chơi từ góc dưới phải đưa lên
+        fpCtx.strokeStyle = '#78350f';
+        fpCtx.lineWidth = 22 * perspectiveScale;
+        fpCtx.lineCap = 'round';
+        fpCtx.beginPath();
+        fpCtx.moveTo(handX, handY);
+        fpCtx.lineTo(curTipX, curTipY);
+        fpCtx.stroke();
+
+        fpCtx.strokeStyle = '#d97706';
+        fpCtx.lineWidth = 10 * perspectiveScale;
+        fpCtx.beginPath();
+        fpCtx.moveTo(handX, handY);
+        fpCtx.lineTo(curTipX, curTipY);
+        fpCtx.stroke();
+
+        // Đầu dùi gỗ bọc lụa đỏ 3D
+        const headGrad = fpCtx.createRadialGradient(
+          curTipX - 6 * perspectiveScale,
+          curTipY - 6 * perspectiveScale,
+          3,
+          curTipX,
+          curTipY,
+          28 * perspectiveScale
+        );
+        headGrad.addColorStop(0, '#fca5a5');
+        headGrad.addColorStop(0.4, '#dc2626');
+        headGrad.addColorStop(1, '#7f1d1d');
+        fpCtx.fillStyle = headGrad;
+        fpCtx.beginPath();
+        fpCtx.arc(curTipX, curTipY, 24 * perspectiveScale, 0, Math.PI * 2);
+        fpCtx.fill();
+        fpCtx.strokeStyle = '#fde047';
+        fpCtx.lineWidth = 2.5 * perspectiveScale;
+        fpCtx.stroke();
+
+        // Tay áo Cà Sa và bàn tay người chơi ở góc phải dưới
+        fpCtx.fillStyle = '#ea580c';
+        fpCtx.beginPath();
+        fpCtx.arc(handX - 15 * sc, handY - 10 * sc, 48 * sc, 0, Math.PI * 2);
+        fpCtx.fill();
+        fpCtx.restore();
+
+        // Hướng dẫn nổi dưới đáy Canvas
+        fpCtx.fillStyle = '#fde047';
+        fpCtx.font = `800 ${Math.max(12, Math.round(14 * sc))}px 'Be Vietnam Pro', sans-serif`;
+        fpCtx.textAlign = 'center';
+        fpCtx.fillText('👆 Chạm vào Mõ 3D (hoặc phím Space) để vung dùi gõ từ phía bạn (+2 🪷)', cx, h - 14);
+
+      } else {
+        // ==================== CHẾ ĐỘ 2: LẦN TRÀNG HẠT 3D TỪ PHÍA NGƯỜI CHƠI ====================
+        // Vòng tràng hạt nằm trên mặt phẳng nghiêng 3D hướng từ xa về прямо lòng bàn tay người chơi ở góc dưới
+        if (fpBeadPullAnim > 0) {
+          fpBeadPullAnim = Math.max(0, fpBeadPullAnim - 0.08);
+        }
+
+        const totalBeadsInView = 20;
+        const stepAngle = (Math.PI * 2) / totalBeadsInView;
+        // Khi ấn, các hạt dịch chuyển 1 nấc về phía người chơi (góc Math.PI / 2 là sát người chơi nhất)
+        const pullOffset = (1 - fpBeadPullAnim) * stepAngle;
+
+        const rx3D = 155 * sc;
+        const ry3D = 88 * sc; // Độ nghiêng phối cảnh 3D
+        const ringCenterY = cy + 10 * sc;
+
+        // Vẽ dây lụa đỏ luồn qua tâm chuỗi hạt trong không gian 3D
+        fpCtx.strokeStyle = '#dc2626';
+        fpCtx.lineWidth = 6 * sc;
+        fpCtx.beginPath();
+        fpCtx.ellipse(cx, ringCenterY, rx3D, ry3D, 0, 0, Math.PI * 2);
+        fpCtx.stroke();
+
+        // Tính tọa độ 3D của từng hạt và sắp xếp từ Xa (z nhỏ) tới Gần người chơi (z lớn)
+        const beads3D = [];
+        for (let i = 0; i < totalBeadsInView; i++) {
+          const ang = i * stepAngle + pullOffset + Math.PI / 2;
+          // sin(ang) = 1 là ngay sát tay người chơi ở dưới cùng; sin(ang) = -1 là ở xa phía trước
+          const depthZ = Math.sin(ang); // -1 (xa) -> +1 (sát người chơi)
+          const persp = 0.62 + (depthZ + 1) * 0.34; // Hạt gần người chơi to gấp đôi hạt ở xa!
+          const bx = cx + Math.cos(ang) * rx3D * (0.85 + depthZ * 0.15);
+          const by = ringCenterY + depthZ * ry3D;
+          const beadNum = ((fpBeadIndex + i) % 108) + 1;
+          const isGuruBead = beadNum === 108 || i === 0;
+          beads3D.push({ bx, by, depthZ, persp, isGuruBead });
+        }
+
+        // Sắp xếp vẽ hạt ở xa trước, hạt sát mắt người chơi vẽ sau cùng
+        beads3D.sort((a, b) => a.depthZ - b.depthZ);
+
+        beads3D.forEach(b => {
+          const r = (b.isGuruBead ? 23 : 19) * sc * b.persp;
+
+          // Bóng đổ của từng hạt xuống mặt bàn thờ
+          fpCtx.fillStyle = 'rgba(0,0,0,0.45)';
+          fpCtx.beginPath();
+          fpCtx.ellipse(b.bx, b.by + r * 0.85, r * 0.9, r * 0.4, 0, 0, Math.PI * 2);
+          fpCtx.fill();
+
+          // Khối cầu 3D của hạt gỗ Bồ Đề
+          const bGrad = fpCtx.createRadialGradient(b.bx - r * 0.35, b.by - r * 0.35, r * 0.1, b.bx, b.by, r);
+          if (b.isGuruBead) {
+            bGrad.addColorStop(0, '#fef9c3');
+            bGrad.addColorStop(0.45, '#f59e0b');
+            bGrad.addColorStop(0.85, '#9a3412');
+            bGrad.addColorStop(1, '#451a03');
+          } else {
+            bGrad.addColorStop(0, '#f59e0b');
+            bGrad.addColorStop(0.5, '#92400e');
+            bGrad.addColorStop(0.85, '#451a03');
+            bGrad.addColorStop(1, '#1c0a02');
+          }
+
+          fpCtx.fillStyle = bGrad;
+          fpCtx.beginPath();
+          fpCtx.arc(b.bx, b.by, r, 0, Math.PI * 2);
+          fpCtx.fill();
+
+          // Vân mắt hạt Bồ Đề 3D
+          fpCtx.strokeStyle = b.isGuruBead ? '#fde047' : 'rgba(251, 191, 36, 0.45)';
+          fpCtx.lineWidth = 1.5 * b.persp;
+          fpCtx.stroke();
+        });
+
+        // Vẽ Hai Bàn Tay Người Chơi Ở Góc Dưới Đang Lần Hạt Về Phía Mình (POV)
+        const thumbPullY = Math.sin(fpBeadPullAnim * Math.PI) * 18 * sc;
+        fpCtx.save();
+        // Tay áo cà sa trái & phải ở tiền cảnh sát người chơi
+        fpCtx.fillStyle = '#c2410c';
+        fpCtx.beginPath();
+        fpCtx.ellipse(cx - 85 * sc, h + 10 * sc, 75 * sc, 55 * sc, -0.3, 0, Math.PI * 2);
+        fpCtx.ellipse(cx + 85 * sc, h + 10 * sc, 75 * sc, 55 * sc, 0.3, 0, Math.PI * 2);
+        fpCtx.fill();
+
+        // Hai ngón tay cái của người chơi đặt lên hạt gần nhất và kéo về phía mình
+        fpCtx.fillStyle = '#fed7aa';
+        fpCtx.strokeStyle = '#78350f';
+        fpCtx.lineWidth = 2 * sc;
+        // Ngón cái trái
+        fpCtx.beginPath();
+        fpCtx.ellipse(cx - 26 * sc, ringCenterY + ry3D + 12 * sc + thumbPullY, 24 * sc, 13 * sc, -0.35, 0, Math.PI * 2);
+        fpCtx.fill();
+        fpCtx.stroke();
+        // Ngón cái phải (co lại kéo hạt)
+        fpCtx.beginPath();
+        fpCtx.ellipse(cx + 22 * sc, ringCenterY + ry3D + 8 * sc + thumbPullY, 25 * sc, 14 * sc, 0.4, 0, Math.PI * 2);
+        fpCtx.fill();
+        fpCtx.stroke();
+        fpCtx.restore();
+
+        fpCtx.fillStyle = '#6fcf97';
+        fpCtx.font = `800 ${Math.max(12, Math.round(14 * sc))}px 'Be Vietnam Pro', sans-serif`;
+        fpCtx.textAlign = 'center';
+        fpCtx.fillText('👆 Chạm vào Tràng Hạt 3D để ngón tay kéo hạt về phía bạn (+3 🪷)', cx, h - 14);
+      }
     }
 
     // --- 5. GIAO DIỆN MOBILE & BÀN PHÍM ---
@@ -1191,7 +1451,7 @@
     chatInputEl.addEventListener('focus', () => {
       const panel = document.getElementById('leftChatPanel');
       panel.style.bottom = 'auto';
-      panel.style.top = '50px';
+      panel.style.top = '48px';
       scrollToNewestChat();
     });
     chatInputEl.addEventListener('blur', () => {
@@ -1262,7 +1522,7 @@
             showAuthAlert(`✅ ${res.msg}`, true);
             document.getElementById('loginUsername').value = res.name;
             document.getElementById('loginPassword').value = password;
-            setTimeout(() => switchAuthTab('login'), 1800);
+            setTimeout(() => switchAuthTab('login'), 1500);
           }
         });
       }
@@ -1304,10 +1564,6 @@
     function openAdminModal() {
       document.getElementById('adminModal').classList.remove('hidden');
       document.getElementById('adminModal').classList.add('flex');
-      if (myAccount && myAccount.isAdmin) {
-        document.getElementById('adminQuickPass').value = '123456';
-        document.getElementById('adminAuthStatus').textContent = '✅ Đã xác thực Trụ Trì Thích Báo Giá';
-      }
       renderAdminAccountsUI();
     }
 
@@ -1348,9 +1604,9 @@
             <div class="flex items-center gap-2">
               <span class="font-extrabold text-sm text-[#ffd166]">${acc.name}</span>
               <span class="px-2 py-0.5 rounded text-[10px] font-extrabold ${
-                isPending ? 'bg-yellow-500 text-black' : 'bg-green-800 text-green-200'
+                isPending ? 'bg-yellow-400 text-black' : 'bg-green-800 text-green-200'
               }">
-                ${isPending ? '⏳ Chờ Phê Duyệt' : '✅ Đã Duyệt'}
+                ${isPending ? '⏳ Chờ Duyệt' : '✅ Đã Duyệt'}
               </span>
               ${acc.isAdmin ? '<span class="px-1.5 py-0.5 rounded bg-red-700 text-white text-[9px] font-black">TRỤ TRÌ</span>' : ''}
             </div>
@@ -1408,7 +1664,7 @@
       });
     }
 
-    // --- 7. DI CHUYỂN THÔNG MINH QUA CỬA PHÒNG ---
+    // --- 7. THUẬT TOÁN TÌM ĐƯỜNG QUA CỬA PHÒNG & CỔNG SÂN NGOÀI ---
     function getContainingZone(gx, gy) {
       for (const z of Object.values(ZONES)) {
         if (gx >= z.rx && gx <= z.rx + z.rw && gy >= z.ry && gy <= z.ry + z.rh) return z;
@@ -1424,20 +1680,44 @@
       const startZone = getContainingZone(startX, startY);
       const endZone = getContainingZone(clampedX, clampedY);
 
+      // 1. Nếu đang ở trong phòng thì đi qua cửa phòng ra hành lang trước
       if (startZone && (!endZone || startZone.id !== endZone.id)) {
         wp.push({ x: startZone.doorX, y: startZone.doorY });
         wp.push({ x: startZone.approachX, y: startZone.approachY });
       }
 
-      const currentlyRightWing = startX > 18.2;
-      const targetRightWing = clampedX > 18.2;
-      if (currentlyRightWing !== targetRightWing) {
+      // 2. Nếu đi từ Nội Tự (y < 16.3) ra Sân Ngoài Lát Đá Xanh (y >= 16.3) hoặc ngược lại -> Đi qua Cổng Linh Vật
+      const startInOuter = startY >= 16.3;
+      const endInOuter = clampedY >= 16.3;
+
+      if (startInOuter !== endInOuter) {
+        if (!startInOuter) {
+          // Từ trong chùa đi ra sân ngoài: Ra đại lộ -> Rẽ xuống khe cổng giữa phòng Tech & IBD Cost -> Qua Cổng Linh Vật
+          wp.push({ x: 6.2, y: 10.2 });
+          wp.push({ x: 6.2, y: 15.9 });
+          wp.push({ x: COURTYARD_GATE.x, y: 15.9 });
+          wp.push({ x: COURTYARD_GATE.x, y: 17.2 });
+        } else {
+          // Từ sân ngoài bước vào trong chùa
+          wp.push({ x: COURTYARD_GATE.x, y: 17.2 });
+          wp.push({ x: COURTYARD_GATE.x, y: 15.9 });
+          wp.push({ x: 6.2, y: 15.9 });
+          wp.push({ x: 6.2, y: 10.2 });
+        }
+      }
+
+      // 3. Nếu đi qua Cổng Nguyệt Môn sang Pantry / Cầu Thang
+      const curXAfterGate = startInOuter !== endInOuter ? 6.2 : startX;
+      const currentlyRightWing = curXAfterGate > 18.2 && !endInOuter;
+      const targetRightWing = clampedX > 18.2 && !endInOuter;
+      if (currentlyRightWing !== targetRightWing && !endInOuter) {
         const gateLeft = { x: 17.6, y: 9.7 };
         const gateRight = { x: 18.8, y: 9.7 };
         if (!currentlyRightWing) wp.push(gateLeft, gateRight);
         else wp.push(gateRight, gateLeft);
       }
 
+      // 4. Nếu đích đến nằm trong phòng ban -> Đi qua cửa phòng đó
       if (endZone && (!startZone || startZone.id !== endZone.id)) {
         wp.push({ x: endZone.approachX, y: endZone.approachY });
         wp.push({ x: endZone.doorX, y: endZone.doorY });
@@ -1470,7 +1750,7 @@
       }
     }
 
-    // --- 8. HÀNH LỄ & TƯƠNG TÁC VÒNG TRÒN 4 HƯỚNG QUANH MỤC TIÊU ---
+    // --- 8. HÀNH LỄ, THẮP HƯƠNG THẦN MOTOR & VÒNG TRÒN TƯƠNG TÁC ---
     function performAction(type) {
       const me = players[myId];
       if (!me) return;
@@ -1488,10 +1768,18 @@
         return;
       }
 
+      if (type === 'motor_god') {
+        moveMyCharacter(MOTOR_STATUE_ALTAR.standX + (Math.random() - 0.5) * 0.8, MOTOR_STATUE_ALTAR.standY, 'do_motor_god');
+        me.bubbleText = 'Ra Sân Đá Xanh thắp hương Thần Motor Điện! ⚙️🔥';
+        me.bubbleTimer = 180;
+        playTempleBellSound();
+        return;
+      }
+
       if (type === 'waterfall') {
-        moveMyCharacter(WATERFALL_ZONE.viewX + (Math.random() - 0.5) * 0.8, WATERFALL_ZONE.viewY, 'do_waterfall');
-        me.bubbleText = 'Ra Cầu Gỗ ngắm Thác Nước & Cá Koi! 🏞️';
-        me.bubbleTimer = 150;
+        moveMyCharacter(OUTER_KOI_POND.standX + (Math.random() - 0.5) * 0.8, OUTER_KOI_POND.standY, 'do_waterfall');
+        me.bubbleText = 'Ra Sân Ngoài ngắm Ao Cá Koi siêu to! 🐟';
+        me.bubbleTimer = 160;
         playMokugyoSound(1.2);
         return;
       }
@@ -1574,7 +1862,6 @@
           myY: me.y
         });
       } else {
-        // Nếu đang ở xa thì tự động chạy tới sát đối phương rồi mới thực hiện Đấm / Hôn / Dí Deadline / Quỳ Lạy
         pendingProximityTask = { targetId: target.id, type };
         moveMyCharacter(target.x + (me.x < target.x ? -0.65 : 0.65), target.y);
         const labelMap = {
@@ -1672,6 +1959,7 @@
       socket.on('init_state', ({ templeState, players: srvPlayers, accountsList: srvAccs }) => {
         myId = socket.id;
         activeIncenseSticks = templeState.activeIncenseSticks || 9;
+        motorIncenseSticks = templeState.motorIncenseSticks || 6;
         accountsList = srvAccs || [];
         players = {};
         Object.values(srvPlayers || {}).forEach(p => {
@@ -1716,7 +2004,7 @@
       socket.on('under_attack_alert', ({ attackerName, hp }) => {
         if (isFirstPersonMeditating) {
           const banner = document.getElementById('fpUnderAttackBanner');
-          banner.textContent = `🚨 CẢNH BÁO: ${attackerName} đang đấm bạn (Còn ${hp} HP)! Mau Xuất Định phản kích!`;
+          banner.textContent = `🚨 CẢNH BÁO: ${attackerName} đang đấm bạn (Còn ${hp} HP)! Chạm vào đây để Xuất Định phản kích!`;
           banner.classList.remove('hidden');
         }
       });
@@ -1760,6 +2048,10 @@
           activeIncenseSticks = ev.sticks || activeIncenseSticks;
           playTempleBellSound();
           bellShockwaves.push({ gx: INCENSE_ALTAR.x, gy: INCENSE_ALTAR.y, radius: 5, maxRadius: 230 });
+        } else if (ev.type === 'motor_blessing') {
+          motorIncenseSticks = ev.motorSticks || motorIncenseSticks;
+          playTempleBellSound();
+          bellShockwaves.push({ gx: MOTOR_STATUE_ALTAR.x, gy: MOTOR_STATUE_ALTAR.y, radius: 6, maxRadius: 320 });
         } else if (ev.type === 'bell_ring') {
           playTempleBellSound();
           bellShockwaves.push({ gx: BODHI_BELL_ZONE.bellX, gy: BODHI_BELL_ZONE.bellY, radius: 5, maxRadius: 380 });
@@ -1855,7 +2147,7 @@
           e.touches[0].clientX - e.touches[1].clientX,
           e.touches[0].clientY - e.touches[1].clientY
         );
-        camZoom = Math.max(0.45, Math.min(1.6, pinchZoom0 * (d / pinchDist0)));
+        camZoom = Math.max(0.42, Math.min(1.6, pinchZoom0 * (d / pinchDist0)));
       } else if (e.touches.length === 1) {
         onPointerMove(e.touches[0].clientX, e.touches[0].clientY);
       }
@@ -1869,7 +2161,7 @@
 
     canvas.addEventListener('wheel', e => {
       e.preventDefault();
-      camZoom = Math.max(0.48, Math.min(1.65, camZoom * (e.deltaY < 0 ? 1.08 : 0.92)));
+      camZoom = Math.max(0.42, Math.min(1.65, camZoom * (e.deltaY < 0 ? 1.08 : 0.92)));
     }, { passive: false });
 
     function handleCanvasTap(sx, sy) {
@@ -1890,34 +2182,62 @@
       closeCombatPopup();
       const worldPos = screenToWorld(sx, sy);
 
+      // 2. Click vào Bức Tượng Thần Motor Điện ngoài Sân Đá Xanh
+      if (Math.hypot(worldPos.x - MOTOR_STATUE_ALTAR.x, worldPos.y - MOTOR_STATUE_ALTAR.y) < 2.2) {
+        performAction('motor_god');
+        return;
+      }
+
+      // 3. Click vào 2 Con Linh Vật Đá Hài Hước ở cửa ra sân ngoài
+      if (Math.hypot(worldPos.x - COURTYARD_GATE.leftBeast.x, worldPos.y - COURTYARD_GATE.leftBeast.y) < 1.3) {
+        moveMyCharacter(COURTYARD_GATE.leftBeast.standX, COURTYARD_GATE.leftBeast.standY, 'do_pet_beast');
+        spawnFloatingText(COURTYARD_GATE.leftBeast.x, COURTYARD_GATE.leftBeast.y, '😎 Nghê KPI: Chốt đơn chưa đại ca?!', '#fde047');
+        return;
+      }
+      if (Math.hypot(worldPos.x - COURTYARD_GATE.rightBeast.x, worldPos.y - COURTYARD_GATE.rightBeast.y) < 1.3) {
+        moveMyCharacter(COURTYARD_GATE.rightBeast.standX, COURTYARD_GATE.rightBeast.standY, 'do_pet_beast');
+        spawnFloatingText(COURTYARD_GATE.rightBeast.x, COURTYARD_GATE.rightBeast.y, '🤪 Nghê Trà Sữa: Làm ly full topping đê!', '#f472b6');
+        return;
+      }
+
+      // 4. Click vào Ao Cá Koi Sân Ngoài hoặc Hồ Thác Nước
+      if (
+        (worldPos.x >= OUTER_KOI_POND.x && worldPos.x <= OUTER_KOI_POND.x + OUTER_KOI_POND.w &&
+         worldPos.y >= OUTER_KOI_POND.y && worldPos.y <= OUTER_KOI_POND.y + OUTER_KOI_POND.h) ||
+        (worldPos.x >= 0.5 && worldPos.x <= 6.4 && worldPos.y >= 0.5 && worldPos.y <= 4.1)
+      ) {
+        performAction('waterfall');
+        return;
+      }
+
+      // 5. Click vào Đỉnh Hương Trung Tâm
       if (Math.hypot(worldPos.x - INCENSE_ALTAR.x, worldPos.y - INCENSE_ALTAR.y) < 1.35) {
         performAction('incense');
         return;
       }
 
-      if (worldPos.x >= 0.5 && worldPos.x <= 6.4 && worldPos.y >= 0.5 && worldPos.y <= 4.1) {
-        performAction('waterfall');
-        return;
-      }
-
+      // 6. Click vào Lầu Chuông Đại Hồng Chung
       if (worldPos.x >= 16.7 && worldPos.x <= 18.8 && worldPos.y >= 0.5 && worldPos.y <= 3.9) {
         moveMyCharacter(BODHI_BELL_ZONE.standX, BODHI_BELL_ZONE.standY, 'do_bell');
         spawnFloatingText(worldPos.x, worldPos.y, '🔔 Thỉnh Đại Hồng Chung', '#ffd166');
         return;
       }
 
+      // 7. Click vào Pantry
       const pt = ZONES.PANTRY;
       if (worldPos.x >= pt.rx && worldPos.x <= pt.rx + pt.rw && worldPos.y >= pt.ry && worldPos.y <= pt.ry + pt.rh) {
         performAction('eat');
         return;
       }
 
+      // 8. Click vào Cầu Thang Hạ Sơn -> Out Nick
       const st = ZONES.STAIRS;
       if (worldPos.x >= st.rx && worldPos.x <= st.rx + st.rw && worldPos.y >= st.ry && worldPos.y <= st.ry + st.rh) {
         performAction('leave');
         return;
       }
 
+      // 9. Click sàn di chuyển
       if (worldPos.x >= 0.6 && worldPos.x <= MAP_W - 0.6 && worldPos.y >= 0.8 && worldPos.y <= MAP_H - 0.6) {
         moveMyCharacter(worldPos.x, worldPos.y);
         spawnFloatingText(worldPos.x, worldPos.y, '📍 Đi tới đây', '#ffeaa7');
@@ -1927,10 +2247,13 @@
     window.addEventListener('keydown', (e) => {
       if (document.activeElement && ['INPUT', 'SELECT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
 
-      // Nếu đang ở Góc Nhìn Thứ Nhất Tọa Thiền, bấm phím Space để Gõ Mõ / Lần Chuỗi Hạt
-      if (isFirstPersonMeditating && e.code === 'Space') {
-        e.preventDefault();
-        handleFirstPersonStrike(fpCurrentMode);
+      if (isFirstPersonMeditating) {
+        if (e.code === 'Space') {
+          e.preventDefault();
+          triggerFirstPerson3DAction();
+        } else if (e.code === 'Escape') {
+          exitFirstPersonMeditation();
+        }
         return;
       }
 
@@ -1940,8 +2263,9 @@
       else if (e.key === '4') performAction('knock');
       else if (e.key === '5') performAction('incense');
       else if (e.key === '6') performAction('waterfall');
-      else if (e.key === '7') performAction('eat');
-      else if (e.key === '8') performAction('leave');
+      else if (e.key === '7') performAction('motor_god');
+      else if (e.key === '8') performAction('eat');
+      else if (e.key === '9') performAction('leave');
     });
 
     function toggleNightMode() {
@@ -1950,7 +2274,7 @@
 
     function toggleCameraProjection() {
       isTopDown2D = !isTopDown2D;
-      document.getElementById('viewModeLabel').textContent = isTopDown2D ? 'Sơ Đồ 2D' : '2.5D Chi Tiết';
+      document.getElementById('viewModeLabel').textContent = isTopDown2D ? '2D' : '2.5D';
       resetCameraView();
     }
 
@@ -1958,11 +2282,11 @@
     function updateSimulation() {
       simTick++;
 
-      // Cập nhật thanh tiến trình hồi máu 5 HP / 1 phút (1 HP mỗi 12 giây = 720 ticks)
       if (isFirstPersonMeditating) {
         const cycleProgress = ((simTick - fpRegenStartTick) % 720) / 720;
         const barEl = document.getElementById('fpRegenProgressBar');
         if (barEl) barEl.style.width = `${Math.min(100, Math.round(cycleProgress * 100))}%`;
+        renderFirstPerson3DScene();
       }
 
       waterfallParticles.forEach(wp => {
@@ -1981,13 +2305,25 @@
         }
       });
 
-      waterRipples.forEach(wr => { wr.r += 0.38; });
+      if (simTick % 18 === 0) {
+        waterRipples.push({
+          gx: OUTER_KOI_POND.x + 1.2 + Math.random() * (OUTER_KOI_POND.w - 2.4),
+          gy: OUTER_KOI_POND.y + 1.2 + Math.random() * (OUTER_KOI_POND.h - 2.4),
+          r: 2,
+          maxR: 18 + Math.random() * 12
+        });
+      }
+
+      waterRipples.forEach(wr => { wr.r += 0.35; });
       waterRipples = waterRipples.filter(wr => wr.r < wr.maxR);
-      koiFishList.forEach(koi => { koi.angle += koi.speed; });
+
+      innerKoiList.forEach(koi => { koi.angle += koi.speed; });
+      outerKoiList.forEach(koi => { koi.angle += koi.speed; });
 
       if (simTick % 5 === 0) {
         [
           { x: INCENSE_ALTAR.x, y: INCENSE_ALTAR.y, z: 26, gold: true },
+          { x: MOTOR_STATUE_ALTAR.x, y: MOTOR_STATUE_ALTAR.y + 1.1, z: 22, gold: true },
           { x: 9.6, y: 2.0, z: 24, gold: false },
           { x: 14.0, y: 2.0, z: 24, gold: false }
         ].forEach(burner => {
@@ -2037,9 +2373,9 @@
           const dy = ty - c.y;
           const dist = Math.hypot(dx, dy);
 
-          if (dist > 0.065) {
-            c.x += (dx / dist) * 0.072;
-            c.y += (dy / dist) * 0.072;
+          if (dist > 0.07) {
+            c.x += (dx / dist) * 0.078;
+            c.y += (dy / dist) * 0.078;
             c.state = 'walk';
           } else {
             c.x = tx;
@@ -2051,6 +2387,12 @@
                 if (c.afterWalkAction === 'do_incense') {
                   c.afterWalkAction = null;
                   socket.emit('action', { type: 'incense' });
+                } else if (c.afterWalkAction === 'do_motor_god') {
+                  c.afterWalkAction = null;
+                  socket.emit('action', { type: 'motor_god' });
+                } else if (c.afterWalkAction === 'do_pet_beast') {
+                  c.afterWalkAction = null;
+                  socket.emit('action', { type: 'pet_beast' });
                 } else if (c.afterWalkAction === 'do_waterfall') {
                   c.afterWalkAction = null;
                   socket.emit('action', { type: 'waterfall' });
@@ -2100,7 +2442,7 @@
       }
     }
 
-    // --- 13. CÁC HÀM VẼ 2.5D ---
+    // --- 13. CÁC HÀM VẼ KIẾN TRÚC 2.5D, AO CÁ KOI CHI TIẾT, 2 LINH VẬT HÀI HƯỚC & TƯỢNG THẦN MOTOR ĐIỆN ---
     function drawIsoBlock(gx, gy, w, d, h, topCol, leftCol, rightCol, strokeCol = null) {
       if (isTopDown2D) {
         const p1 = worldToScreen(gx, gy);
@@ -2324,45 +2666,111 @@
       drawDoorwayArchWithPlaque(doorX, doorY, doorTitle, subLabel, badgeColor, zone.id === 'DIRECTOR');
     }
 
+    // Hàm vẽ 1 chú Cá Koi Chi Tiết Cao (Có vây ngực xòe, râu cá, đốm hoa văn Kohaku/Showa và đuôi lượn)
+    function drawDetailedKoiFish(fx, fy, dirAngle, bodyCol, patCol, pat2, sizeScale, phase) {
+      const fp = worldToScreen(fx, fy, 2);
+      const sc = camZoom * (sizeScale || 1.0);
+      const wag = Math.sin(simTick * 0.32 + phase) * 3.2 * sc;
+
+      ctx.save();
+      ctx.translate(fp.x, fp.y);
+      ctx.rotate(dirAngle);
+
+   // Vây ngực 2 bên xòe trắng mềm mại
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.82)';
+      const finFlap = Math.sin(simTick * 0.25 + phase) * 0.18;
+      ctx.beginPath();
+      ctx.ellipse(1.5 * sc, -4.5 * sc, 4.2 * sc, 2.1 * sc, -0.5 + finFlap, 0, Math.PI * 2);
+      ctx.ellipse(1.5 * sc, 4.5 * sc, 4.2 * sc, 2.1 * sc, 0.5 - finFlap, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Bóng cá dưới đáy nước
+      ctx.fillStyle = 'rgba(0, 20, 40, 0.35)';
+      ctx.beginPath();
+      ctx.ellipse(-1 * sc, 3 * sc, 8.5 * sc, 3.6 * sc, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Thân cá Koi thon gọn hình giọt nước
+      ctx.fillStyle = bodyCol;
+      ctx.beginPath();
+      ctx.moveTo(9.5 * sc, 0);
+      ctx.bezierCurveTo(6 * sc, -5.2 * sc, -3 * sc, -4.5 * sc, -8.5 * sc, 0);
+      ctx.bezierCurveTo(-3 * sc, 4.5 * sc, 6 * sc, 5.2 * sc, 9.5 * sc, 0);
+      ctx.closePath();
+      ctx.fill();
+
+      // Đốm hoa văn Kohaku / Sanke trên lưng cá
+      if (patCol) {
+        ctx.fillStyle = patCol;
+        ctx.beginPath();
+        ctx.ellipse(2.2 * sc, -0.6 * sc, 3.6 * sc, 2.6 * sc, 0.15, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(-3.2 * sc, 0.8 * sc, 2.3 * sc, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      if (pat2) {
+        ctx.fillStyle = pat2;
+        ctx.beginPath();
+        ctx.arc(-0.5 * sc, 1.2 * sc, 1.7 * sc, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Đuôi cá Koi chẻ đôi uốn lượn mềm mại
+      ctx.fillStyle = bodyCol;
+      ctx.beginPath();
+      ctx.moveTo(-7.5 * sc, 0);
+      ctx.quadraticCurveTo(-11 * sc, -2 * sc + wag * 0.5, -14.5 * sc, -4.5 * sc + wag);
+      ctx.quadraticCurveTo(-12 * sc, wag * 0.6, -14.5 * sc, 4.5 * sc + wag);
+      ctx.quadraticCurveTo(-11 * sc, 2 * sc + wag * 0.5, -7.5 * sc, 0);
+      ctx.closePath();
+      ctx.fill();
+
+      // Vây lưng
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.75)';
+      ctx.lineWidth = 1.4 * sc;
+      ctx.beginPath();
+      ctx.moveTo(2 * sc, 0);
+      ctx.quadraticCurveTo(-2 * sc, wag * 0.25, -5.5 * sc, 0);
+      ctx.stroke();
+
+      // Hai mắt cá & Râu cá Koi
+      ctx.fillStyle = '#0f172a';
+      ctx.beginPath();
+      ctx.arc(6.8 * sc, -2.1 * sc, 1.1 * sc, 0, Math.PI * 2);
+      ctx.arc(6.8 * sc, 2.1 * sc, 1.1 * sc, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.strokeStyle = bodyCol;
+      ctx.lineWidth = 0.9 * sc;
+      ctx.beginPath();
+      ctx.moveTo(8.8 * sc, -1.2 * sc);
+      ctx.quadraticCurveTo(11 * sc, -3 * sc, 10.5 * sc, -4.2 * sc);
+      ctx.moveTo(8.8 * sc, 1.2 * sc);
+      ctx.quadraticCurveTo(11 * sc, 3 * sc, 10.5 * sc, 4.2 * sc);
+      ctx.stroke();
+
+      ctx.restore();
+    }
+
+    // Hồ Thác Nước góc Tây Bắc
     function drawWaterfallAndKoiPond() {
       const wz = WATERFALL_ZONE;
 
       drawIsoBlock(wz.x, wz.y, wz.w, wz.h, 3.5, '#0d9488', '#0f766e', '#115e59', '#5eead4');
       drawOrnateFloor(wz.x + 0.25, wz.y + 0.25, wz.w - 0.5, wz.h - 0.5, '#0284c7', '#38bdf8');
 
-      koiFishList.forEach(koi => {
+      innerKoiList.forEach((koi, idx) => {
         const fx = koi.cx + Math.cos(koi.angle) * koi.rx;
         const fy = koi.cy + Math.sin(koi.angle) * koi.ry;
-        const fp = worldToScreen(fx, fy, 2);
         const dirAngle = Math.atan2(Math.cos(koi.angle) * koi.ry, -Math.sin(koi.angle) * koi.rx);
-
-        ctx.save();
-        ctx.translate(fp.x, fp.y);
-        ctx.rotate(dirAngle);
-        ctx.fillStyle = koi.color;
-        ctx.beginPath();
-        ctx.ellipse(0, 0, 7 * camZoom, 3.2 * camZoom, 0, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.fillStyle = koi.spot;
-        ctx.beginPath();
-        ctx.arc(1.5 * camZoom, 0, 2.1 * camZoom, 0, Math.PI * 2);
-        ctx.fill();
-        const tailWag = Math.sin(simTick * 0.32 + koi.angle) * 2.5 * camZoom;
-        ctx.fillStyle = koi.color;
-        ctx.beginPath();
-        ctx.moveTo(-6.5 * camZoom, 0);
-        ctx.lineTo(-11 * camZoom, -3.2 * camZoom + tailWag);
-        ctx.lineTo(-11 * camZoom, 3.2 * camZoom + tailWag);
-        ctx.closePath();
-        ctx.fill();
-        ctx.restore();
+        drawDetailedKoiFish(fx, fy, dirAngle, koi.color, koi.spot, null, 0.95, idx);
       });
 
       [
         { x: 2.2, y: 3.1, hasFlower: true },
         { x: 4.7, y: 2.9, hasFlower: true },
-        { x: 5.2, y: 1.9, hasFlower: false },
-        { x: 2.8, y: 3.55, hasFlower: true }
+        { x: 5.2, y: 1.9, hasFlower: false }
       ].forEach(lotus => {
         const lp = worldToScreen(lotus.x, lotus.y, 2.5);
         ctx.fillStyle = '#15803d';
@@ -2382,19 +2790,7 @@
         }
       });
 
-      waterRipples.forEach(wr => {
-        const rp = worldToScreen(wr.gx, wr.gy, 2.5);
-        const alpha = Math.max(0, 1 - wr.r / wr.maxR);
-        ctx.strokeStyle = `rgba(224, 242, 254, ${alpha * 0.8})`;
-        ctx.lineWidth = 1.4 * camZoom;
-        ctx.beginPath();
-        ctx.ellipse(rp.x, rp.y, wr.r * camZoom, wr.r * 0.5 * camZoom, 0, 0, Math.PI * 2);
-        ctx.stroke();
-      });
-
       drawIsoBlock(5.15, 2.4, 1.05, 1.5, 6.5, '#dc2626', '#991b1b', '#7f1d1d', '#fbbf24');
-      drawIsoBlock(5.9, 0.7, 0.4, 0.4, 18, '#94a3b8', '#64748b', '#475569', '#fde047');
-
       drawIsoBlock(0.7, 0.6, 5.0, 1.25, 44, '#64748b', '#475569', '#334155', '#94a3b8');
       drawIsoBlock(1.0, 0.8, 4.2, 1.05, 30, '#475569', '#334155', '#1e293b', '#64748b');
       drawIsoBlock(1.3, 1.1, 3.4, 0.85, 16, '#334155', '#1e293b', '#0f172a', '#475569');
@@ -2428,19 +2824,439 @@
           ctx.arc(p.x, p.y, wp.size * camZoom, 0, Math.PI * 2);
           ctx.fill();
         });
+      }
+    }
 
-        const pinePos = worldToScreen(1.2, 0.9, 46);
-        ctx.fillStyle = '#451a03';
-        ctx.fillRect(pinePos.x - 3 * camZoom, pinePos.y - 12 * camZoom, 6 * camZoom, 14 * camZoom);
+    // --- VẼ 2 CON LINH VẬT ĐÁ HÀI HƯỚC ĐỨNG HAI BÊN CỬA RA SÂN NGOÀI ---
+    function drawFunnyGuardianBeast(gx, gy, isLeftBeast) {
+      // Bệ đá xanh chạm khắc
+      drawIsoBlock(gx - 0.55, gy - 0.55, 1.1, 1.1, 9, '#64748b', '#475569', '#334155', '#fde047');
+
+      if (isTopDown2D) return;
+      const wobble = Math.sin(simTick * 0.08 + (isLeftBeast ? 0 : Math.PI)) * 2.5 * camZoom;
+      const p = worldToScreen(gx, gy, 10);
+      const sc = camZoom;
+
+      ctx.save();
+      ctx.translate(p.x, p.y);
+
+      // Thân Nghê Đá tròn ủm bụng phệ hài hước
+      const bodyGrad = ctx.createRadialGradient(-4 * sc, -12 * sc, 2 * sc, 0, -10 * sc, 20 * sc);
+      bodyGrad.addColorStop(0, '#e2e8f0');
+      bodyGrad.addColorStop(0.6, '#94a3b8');
+      bodyGrad.addColorStop(1, '#475569');
+
+      ctx.fillStyle = bodyGrad;
+      ctx.strokeStyle = '#334155';
+      ctx.lineWidth = 1.6 * sc;
+      ctx.beginPath();
+      ctx.ellipse(0, -11 * sc, 14 * sc, 13 * sc, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // Cái rốn tròn xoe trên bụng phệ
+      ctx.fillStyle = '#475569';
+      ctx.beginPath();
+      ctx.arc(0, -8 * sc, 2.2 * sc, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Đầu Linh Vật lắc lư qua lại
+      ctx.save();
+      ctx.translate(wobble * 0.6, -26 * sc);
+
+      // Bờm xoăn vàng rực quanh đầu
+      ctx.fillStyle = '#fbbf24';
+      for (let i = 0; i < 8; i++) {
+        const a = (i * Math.PI) / 4;
+        ctx.beginPath();
+        ctx.arc(Math.cos(a) * 12 * sc, Math.sin(a) * 10 * sc, 5 * sc, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Mặt đá tròn quay
+      ctx.fillStyle = '#cbd5e1';
+      ctx.strokeStyle = '#1e293b';
+      ctx.lineWidth = 1.5 * sc;
+      ctx.beginPath();
+      ctx.arc(0, 0, 12 * sc, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      if (isLeftBeast) {
+        // LINH VẬT TRÁI: "Nghê Đá Săn KPI" đeo kính râm đen ngầu lòi + Cười nhe răng vàng
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(-10 * sc, -5 * sc, 8.5 * sc, 5.5 * sc);
+        ctx.fillRect(1.5 * sc, -5 * sc, 8.5 * sc, 5.5 * sc);
+        ctx.strokeStyle = '#fde047';
+        ctx.lineWidth = 1.5 * sc;
+        ctx.strokeRect(-10 * sc, -5 * sc, 8.5 * sc, 5.5 * sc);
+        ctx.strokeRect(1.5 * sc, -5 * sc, 8.5 * sc, 5.5 * sc);
+        ctx.beginPath();
+        ctx.moveTo(-1.5 * sc, -2.5 * sc);
+        ctx.lineTo(1.5 * sc, -2.5 * sc);
+        ctx.stroke();
+
+        // Nụ cười ngoác tận mang tai + Răng khểnh vàng
+        ctx.fillStyle = '#7f1d1d';
+        ctx.beginPath();
+        ctx.arc(0, 3 * sc, 7 * sc, 0, Math.PI);
+        ctx.fill();
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(-5 * sc, 3 * sc, 3 * sc, 3 * sc);
+        ctx.fillRect(-1 * sc, 3 * sc, 3 * sc, 3 * sc);
+        ctx.fillStyle = '#facc15'; // Răng vàng
+        ctx.fillRect(2.5 * sc, 3 * sc, 3 * sc, 3.5 * sc);
+      } else {
+        // LINH VẬT PHẢI: "Nghê Đá Trà Sữa" mắt lác xoay vòng + Thè lưỡi hồng dài ngoẵng
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(-4.8 * sc, -2.5 * sc, 4.2 * sc, 0, Math.PI * 2);
+        ctx.arc(4.8 * sc, -2.5 * sc, 4.2 * sc, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // Con ngươi mắt lác nhìn chéo vào nhau
+        ctx.fillStyle = '#0f172a';
+        ctx.beginPath();
+        ctx.arc(-3.2 * sc, -2.5 * sc, 2 * sc, 0, Math.PI * 2);
+        ctx.arc(3.2 * sc, -2.5 * sc, 2 * sc, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Miệng cười + Lưỡi hồng thè dài đung đưa
+        ctx.fillStyle = '#fb7185';
+        ctx.strokeStyle = '#be123c';
+        ctx.lineWidth = 1 * sc;
+        ctx.beginPath();
+        ctx.roundRect(-3.5 * sc, 3.5 * sc, 7 * sc, 9 * sc + Math.abs(wobble) * 0.5, 3.5 * sc);
+        ctx.fill();
+        ctx.stroke();
+      }
+      ctx.restore();
+
+      // Biển tên hài hước trên đầu mỗi con linh vật
+      ctx.font = `800 ${Math.max(8, Math.round(9 * sc))}px 'Be Vietnam Pro', sans-serif`;
+      ctx.textAlign = 'center';
+      const tag = isLeftBeast ? '😎 Nghê Săn KPI' : '🤪 Nghê Trà Sữa';
+      ctx.strokeStyle = '#000';
+      ctx.lineWidth = 2.5 * sc;
+      ctx.strokeText(tag, 0, -45 * sc);
+      ctx.fillStyle = isLeftBeast ? '#fde047' : '#f472b6';
+      ctx.fillText(tag, 0, -45 * sc);
+
+      ctx.restore();
+    }
+
+    // --- VẼ AO CÁ KOI LỚN NGOÀI SÂN ĐÁ XANH ---
+    function drawOuterCourtyardKoiPond() {
+      const kp = OUTER_KOI_POND;
+
+      // Viền đá xanh cổ kính bao quanh Ao Cá
+      drawIsoBlock(kp.x, kp.y, kp.w, kp.h, 3.2, '#475569', '#334155', '#1e293b', '#94a3b8');
+      drawOrnateFloor(kp.x + 0.25, kp.y + 0.25, kp.w - 0.5, kp.h - 0.5, '#0369a1', '#38bdf8');
+
+      // Lòng hồ sâu xanh ngọc bích
+      drawOrnateFloor(kp.x + 0.6, kp.y + 0.6, kp.w - 1.2, kp.h - 1.2, '#075985', '#0284c7');
+
+      // Đàn 8 chú Cá Koi lớn đủ màu bơi lượn mượt mà
+      outerKoiList.forEach((koi, idx) => {
+        const fx = koi.cx + Math.cos(koi.angle) * koi.rx;
+        const fy = koi.cy + Math.sin(koi.angle) * koi.ry;
+        const dirAngle = Math.atan2(Math.cos(koi.angle) * koi.ry, -Math.sin(koi.angle) * koi.rx);
+        drawDetailedKoiFish(fx, fy, dirAngle, koi.bodyCol, koi.patCol, koi.pat2, koi.size, idx * 1.3);
+      });
+
+      // Cụm Hoa Sen Hồng & Lá Sen Tròn trong Ao Cá Sân Ngoài
+      [
+        { x: kp.x + 1.4, y: kp.y + 1.5, flower: true },
+        { x: kp.x + 5.8, y: kp.y + 1.6, flower: true },
+        { x: kp.x + 1.8, y: kp.y + 4.9, flower: true },
+        { x: kp.x + 5.6, y: kp.y + 4.8, flower: false },
+        { x: kp.x + 3.6, y: kp.y + 5.2, flower: true }
+      ].forEach(lt => {
+        const lp = worldToScreen(lt.x, lt.y, 2.2);
         ctx.fillStyle = '#15803d';
         ctx.beginPath();
-        ctx.arc(pinePos.x, pinePos.y - 16 * camZoom, 14 * camZoom, 0, Math.PI * 2);
+        ctx.ellipse(lp.x, lp.y, 9.5 * camZoom, 5.2 * camZoom, 0, 0, Math.PI * 1.88);
+        ctx.fill();
+        if (lt.flower) {
+          ctx.fillStyle = '#f472b6';
+          ctx.beginPath();
+          ctx.arc(lp.x, lp.y - 3 * camZoom, 5.2 * camZoom, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = '#fef08a';
+          ctx.beginPath();
+          ctx.arc(lp.x, lp.y - 3 * camZoom, 2.2 * camZoom, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      });
+
+      // Hòn Non Bộ Giữa Hồ + Thạch Đăng (Đèn Đá)
+      drawIsoBlock(kp.x + 3.2, kp.y + 2.7, 1.1, 1.0, 18, '#64748b', '#475569', '#1e293b', '#cbd5e1');
+      drawIsoBlock(kp.x + 3.45, kp.y + 2.9, 0.6, 0.6, 26, '#94a3b8', '#64748b', '#334155', '#fde047');
+
+      const pondLbl = worldToScreen(kp.x + kp.w / 2, kp.y + 0.3, isTopDown2D ? 0 : 12);
+      ctx.save();
+      ctx.font = `800 ${Math.max(9, Math.round(10.5 * camZoom))}px 'Be Vietnam Pro', sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.strokeStyle = '#000';
+      ctx.lineWidth = 3 * camZoom;
+      ctx.strokeText('🐟 AO CÁ KOI LINH SƠN (Click để ngắm cá +15 🪷)', pondLbl.x, pondLbl.y);
+      ctx.fillStyle = '#7dd3fc';
+      ctx.fillText('🐟 AO CÁ KOI LINH SƠN (Click để ngắm cá +15 🪷)', pondLbl.x, pondLbl.y);
+      ctx.restore();
+    }
+
+    // --- VẼ BỨC TƯỢNG THẦN MOTOR ĐIỆN UY NGHIÊM NGOÀI SÂN ĐÁ XANH ---
+    function drawElectricMotorGodStatue() {
+      const ma = MOTOR_STATUE_ALTAR;
+
+      // 1. Thảm Đá Hoa Cương & Bệ Đá Tam Cấp đặt Tượng Thần Motor Điện
+      drawOrnateFloor(ma.x - 2.3, ma.y - 1.7, 4.6, 3.6, '#1e293b', '#38bdf8');
+      drawIsoBlock(ma.x - 1.8, ma.y - 1.2, 3.6, 2.4, 7, '#475569', '#334155', '#1e293b', '#94a3b8');
+      drawIsoBlock(ma.x - 1.3, ma.y - 0.8, 2.6, 1.6, 15, '#b45309', '#78350f', '#451a03', '#fde047');
+
+      if (!isTopDown2D) {
+        const centerP = worldToScreen(ma.x, ma.y - 0.1, 28);
+        const sc = camZoom;
+
+        // 2. Vòng Hào Quang Từ Trường Điện Từ Xoay Phía Sau Tượng Motor
+        ctx.save();
+        ctx.translate(centerP.x, centerP.y - 14 * sc);
+        const haloGrad = ctx.createRadialGradient(0, 0, 8 * sc, 0, 0, 44 * sc);
+        haloGrad.addColorStop(0, 'rgba(254, 240, 138, 0.9)');
+        haloGrad.addColorStop(0.5, 'rgba(56, 189, 248, 0.55)');
+        haloGrad.addColorStop(1, 'rgba(14, 165, 233, 0)');
+        ctx.fillStyle = haloGrad;
+        ctx.beginPath();
+        ctx.arc(0, 0, 44 * sc, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Bánh răng kim loại hào quang xoay tròn
+        ctx.rotate(simTick * 0.03);
+        ctx.strokeStyle = '#fde047';
+        ctx.lineWidth = 2.2 * sc;
+        ctx.beginPath();
+        ctx.arc(0, 0, 32 * sc, 0, Math.PI * 2);
+        ctx.stroke();
+        for (let g = 0; g < 12; g++) {
+          const ga = (g * Math.PI) / 6;
+          ctx.beginPath();
+          ctx.moveTo(Math.cos(ga) * 26 * sc, Math.sin(ga) * 26 * sc);
+          ctx.lineTo(Math.cos(ga) * 36 * sc, Math.sin(ga) * 36 * sc);
+          ctx.stroke();
+        }
+        ctx.restore();
+
+        // 3. Thân Tượng Motor Điện Công Nghiệp Sumitomo (Vỏ Gang Xanh Lam Ánh Kim + Cánh Tản Nhiệt)
+        ctx.save();
+        ctx.translate(centerP.x, centerP.y - 12 * sc);
+
+        // Chân đế bắt ốc của Motor
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(-24 * sc, 12 * sc, 48 * sc, 6 * sc);
+
+        // Khối Stator hình trụ nằm ngang có khía lá tản nhiệt
+        const statorGrad = ctx.createLinearGradient(-26 * sc, -18 * sc, -26 * sc, 14 * sc);
+        statorGrad.addColorStop(0, '#38bdf8');
+        statorGrad.addColorStop(0.35, '#0284c7');
+        statorGrad.addColorStop(0.8, '#1e3a8a');
+        statorGrad.addColorStop(1, '#0f172a');
+
+        ctx.fillStyle = statorGrad;
+        ctx.strokeStyle = '#fde047';
+        ctx.lineWidth = 2 * sc;
+        ctx.beginPath();
+        ctx.roundRect(-26 * sc, -16 * sc, 46 * sc, 30 * sc, 6 * sc);
+        ctx.fill();
+        ctx.stroke();
+
+        // Các rãnh cánh tản nhiệt chạy dọc thân Motor
+        ctx.strokeStyle = '#bae6fd';
+        ctx.lineWidth = 1.6 * sc;
+        for (let f = -10; f <= 10; f += 5) {
+          ctx.beginPath();
+          ctx.moveTo(-22 * sc, f * sc);
+          ctx.lineTo(16 * sc, f * sc);
+          ctx.stroke();
+        }
+
+        // Hộp đấu điện (Terminal Box) trên đỉnh Motor khắc chữ IE5 / SHIV
+        ctx.fillStyle = '#d97706';
+        ctx.strokeStyle = '#fef08a';
+        ctx.lineWidth = 1.5 * sc;
+        ctx.beginPath();
+        ctx.roundRect(-12 * sc, -27 * sc, 20 * sc, 11 * sc, 2 * sc);
+        ctx.fill();
+        ctx.stroke();
+
+        // Tia sét điện năng lượng trên hộp cực
+        ctx.fillStyle = '#fef08a';
+        ctx.font = `900 ${Math.round(9 * sc)}px sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.fillText('⚡IE5', -2 * sc, -19 * sc);
+
+        // Đầu hộp giảm tốc / Mặt bích trước + Trục Rotor Vàng Ròng đang quay tít
+        ctx.fillStyle = '#334155';
+        ctx.beginPath();
+        ctx.roundRect(19 * sc, -12 * sc, 10 * sc, 22 * sc, 3 * sc);
+        ctx.fill();
+        ctx.stroke();
+
+        // Trục cốt Motor bằng Vàng Ròng + Then hoa xoay
+        const shaftSpin = Math.sin(simTick * 0.4) * 3 * sc;
+        ctx.fillStyle = '#facc15';
+        ctx.strokeStyle = '#78350f';
+        ctx.fillRect(29 * sc, -5 * sc, 15 * sc, 10 * sc);
+        ctx.strokeRect(29 * sc, -5 * sc, 15 * sc, 10 * sc);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(31 * sc, -1 * sc + shaftSpin * 0.3, 11 * sc, 2.5 * sc);
+
+        ctx.restore();
+
+        // 4. Lư Hương Thờ Thần Motor Điện phía trước
+        const urnP = worldToScreen(ma.x, ma.y + 1.15, 16);
+        ctx.fillStyle = '#d97706';
+        ctx.strokeStyle = '#fef08a';
+        ctx.lineWidth = 1.5 * sc;
+        ctx.beginPath();
+        ctx.ellipse(urnP.x, urnP.y, 13 * sc, 8 * sc, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // Các nén nhang đang cháy trước Tượng Thần Motor
+        const mSticks = Math.min(12, motorIncenseSticks);
+        for (let s = 0; s < mSticks; s++) {
+          const sp = (s - (mSticks - 1) / 2) * 2.1 * sc;
+          ctx.strokeStyle = '#dc2626';
+          ctx.lineWidth = 1.3 * sc;
+          ctx.beginPath();
+          ctx.moveTo(urnP.x + sp * 0.5, urnP.y - 5 * sc);
+          ctx.lineTo(urnP.x + sp, urnP.y - 17 * sc);
+          ctx.stroke();
+          ctx.fillStyle = '#38bdf8'; // Đốm lửa nhang linh khí điện xanh vàng
+          ctx.beginPath();
+          ctx.arc(urnP.x + sp, urnP.y - 17 * sc, 2.2 * sc, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      // Biển hiệu Bức Tượng Thần Motor Điện
+      const lbl = worldToScreen(ma.x, ma.y - 0.2, isTopDown2D ? 0 : 62);
+      ctx.save();
+      ctx.font = `800 ${Math.max(9, Math.round(11 * camZoom))}px 'Be Vietnam Pro', sans-serif`;
+      ctx.textAlign = 'center';
+      const text = '⚙️ THẦN MOTOR ĐIỆN ĐẠI VƯƠNG (Click Thắp Hương +50 🪷)';
+      const tw = ctx.measureText(text).width + 18 * camZoom;
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.94)';
+      ctx.beginPath();
+      ctx.roundRect(lbl.x - tw / 2, lbl.y - 12 * camZoom, tw, 22 * camZoom, 6 * camZoom);
+      ctx.fill();
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 2 * camZoom;
+      ctx.stroke();
+      ctx.fillStyle = '#fde047';
+      ctx.fillText(text, lbl.x, lbl.y + 3 * camZoom);
+      ctx.restore();
+    }
+
+    // --- VẼ CÂY CỐI XANH MÁT NGOÀI SÂN ĐÁ XANH ---
+    function drawCourtyardTree(tree) {
+      if (isTopDown2D) {
+        const p = worldToScreen(tree.x, tree.y);
+        ctx.fillStyle = '#15803d';
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 14 * camZoom, 0, Math.PI * 2);
+        ctx.fill();
+        return;
+      }
+
+      const sc = camZoom * (tree.scale || 1.0);
+      // Bồn cây đá xanh
+      drawIsoBlock(tree.x - 0.45, tree.y - 0.45, 0.9, 0.9, 5, '#475569', '#334155', '#1e293b', '#94a3b8');
+      const baseP = worldToScreen(tree.x, tree.y, 5);
+
+      ctx.save();
+      ctx.translate(baseP.x, baseP.y);
+
+      // Thân cây gỗ cổ thụ
+      ctx.fillStyle = '#5c2c16';
+      ctx.fillRect(-4.5 * sc, -28 * sc, 9 * sc, 28 * sc);
+
+      if (tree.type === 'willow') {
+        // Cây Liễu rủ bên bờ Ao Cá Koi
+        ctx.fillStyle = '#15803d';
+        ctx.beginPath();
+        ctx.arc(0, -32 * sc, 18 * sc, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#4ade80';
+        ctx.lineWidth = 1.6 * sc;
+        const sway = Math.sin(simTick * 0.04) * 4 * sc;
+        for (let b = -14; b <= 14; b += 4) {
+          ctx.beginPath();
+          ctx.moveTo(b * sc, -30 * sc);
+          ctx.quadraticCurveTo(b * sc + sway, -15 * sc, b * sc + sway * 1.4, -2 * sc);
+          ctx.stroke();
+        }
+      } else if (tree.type === 'bodhi') {
+        // Cây Bồ Đề Tán Vàng Xanh
+        ctx.fillStyle = '#166534';
+        ctx.beginPath();
+        ctx.arc(0, -34 * sc, 20 * sc, 0, Math.PI * 2);
         ctx.fill();
         ctx.fillStyle = '#22c55e';
         ctx.beginPath();
-        ctx.arc(pinePos.x + 6 * camZoom, pinePos.y - 20 * camZoom, 10 * camZoom, 0, Math.PI * 2);
+        ctx.arc(-8 * sc, -38 * sc, 13 * sc, 0, Math.PI * 2);
+        ctx.arc(8 * sc, -36 * sc, 13 * sc, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#facc15';
+        ctx.beginPath();
+        ctx.arc(0, -44 * sc, 10 * sc, 0, Math.PI * 2);
+        ctx.fill();
+      } else {
+        // Tùng La Hán bonsai sân chùa
+        ctx.fillStyle = '#065f46';
+        ctx.beginPath();
+        ctx.ellipse(0, -28 * sc, 18 * sc, 9 * sc, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#059669';
+        ctx.beginPath();
+        ctx.ellipse(-7 * sc, -36 * sc, 13 * sc, 7 * sc, 0, 0, Math.PI * 2);
+        ctx.ellipse(8 * sc, -34 * sc, 12 * sc, 6.5 * sc, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#10b981';
+        ctx.beginPath();
+        ctx.ellipse(0, -43 * sc, 11 * sc, 6 * sc, 0, 0, Math.PI * 2);
         ctx.fill();
       }
+
+      ctx.restore();
+    }
+
+    // --- VẼ TỔNG THỂ SÂN NGOÀI LÁT ĐÁ XANH, TƯỜNG BAO & CỔNG LINH VẬT ---
+    function drawOuterBlueStoneCourtyard() {
+      // Tường ngăn giữa Nội Tự và Sân Ngoài Đá Xanh (Chừa cổng chính ở x = 8.4 .. 12.6)
+      drawIsoBlock(0.6, 16.1, 7.6, 0.28, 22, '#94a3b8', '#64748b', '#475569', '#334155');
+      drawIsoBlock(12.8, 16.1, 12.2, 0.28, 22, '#94a3b8', '#64748b', '#475569', '#334155');
+
+      // Cổng Tam Quan Ra Sân Ngoài Lát Đá Xanh
+      drawDoorwayArchWithPlaque(
+        COURTYARD_GATE.x,
+        COURTYARD_GATE.y,
+        '⛩️ CỔNG SÂN ĐÁ XANH - ĐIỆN THẦN MOTOR',
+        '(Ao Cá Koi & Tượng Thần Motor)',
+        '#38bdf8',
+        true
+      );
+
+      // 2 Con Linh Vật Đá Hài Hước đứng hai bên cửa ra sân
+      drawFunnyGuardianBeast(COURTYARD_GATE.leftBeast.x, COURTYARD_GATE.leftBeast.y, true);
+      drawFunnyGuardianBeast(COURTYARD_GATE.rightBeast.x, COURTYARD_GATE.rightBeast.y, false);
+
+      // Ao Cá Koi Lớn ở nửa bên trái Sân Đá Xanh
+      drawOuterCourtyardKoiPond();
+
+      // Đài Thờ Tượng Thần Motor Điện ở trung tâm Sân Đá Xanh
+      drawElectricMotorGodStatue();
     }
 
     function drawBodhiTreeAndBellTower() {
@@ -2497,20 +3313,6 @@
         ctx.beginPath();
         ctx.arc(statuePos.x, haloCenterY, haloR, 0, Math.PI * 2);
         ctx.fill();
-
-        ctx.save();
-        ctx.translate(statuePos.x, haloCenterY);
-        ctx.rotate(simTick * 0.008);
-        ctx.strokeStyle = 'rgba(254, 240, 138, 0.55)';
-        ctx.lineWidth = 1.5 * camZoom;
-        for (let r = 0; r < 12; r++) {
-          const ang = (r * Math.PI) / 6;
-          ctx.beginPath();
-          ctx.moveTo(Math.cos(ang) * 14 * camZoom, Math.sin(ang) * 14 * camZoom);
-          ctx.lineTo(Math.cos(ang) * 33 * camZoom, Math.sin(ang) * 33 * camZoom);
-          ctx.stroke();
-        }
-        ctx.restore();
 
         ctx.fillStyle = '#b45309';
         ctx.beginPath();
@@ -2593,7 +3395,7 @@
 
     function drawRightWingRooms() {
       drawIsoBlock(18.1, 0.5, 0.3, 8.1, 34, '#d4b483', '#8c6239', '#5e3f22', '#3d2610');
-      drawIsoBlock(18.1, 10.9, 0.3, 6.2, 34, '#d4b483', '#8c6239', '#5e3f22', '#3d2610');
+      drawIsoBlock(18.1, 10.9, 0.3, 5.0, 34, '#d4b483', '#8c6239', '#5e3f22', '#3d2610');
       drawDoorwayArchWithPlaque(18.25, 9.7, '🌙 NGUYỆT MÔN', '', '#f59e0b', false);
 
       drawEnclosedRoom(ZONES.PANTRY);
@@ -2646,17 +3448,17 @@
 
       drawEnclosedRoom(ZONES.STAIRS);
       const st = ZONES.STAIRS;
-      const stepCount = 7;
-      const stepH = (st.rh - 1.2) / stepCount;
+      const stepCount = 6;
+      const stepH = (st.rh - 1.0) / stepCount;
       for (let s = 0; s < stepCount; s++) {
-        const sy = st.ry + 0.7 + s * stepH;
+        const sy = st.ry + 0.6 + s * stepH;
         const shade = Math.max(25, 155 - s * 18);
         const col = `rgb(${shade}, ${Math.round(shade * 0.78)}, ${Math.round(shade * 0.55)})`;
         drawIsoBlock(st.rx + 0.6, sy, st.rw - 1.2, stepH - 0.06, Math.max(1, (stepCount - s) * 2.2), col, '#271c15', '#1a120d');
       }
     }
 
-    // --- 14. VẼ CÁNH THIÊN THẦN & NHÂN VẬT ---
+    // --- 14. VẼ CÁNH THIÊN THẦN & NHÂN VẬT THEO TU VI ---
     function drawMultiLayerWings(cx, cy, scale, isManager) {
       const flap = Math.sin(simTick * (isManager ? 0.2 : 0.24)) * 0.36;
       const layers = isManager ? 4 : 3;
@@ -2779,7 +3581,6 @@
       ctx.lineWidth = 2 * scale;
       ctx.stroke();
 
-      // Vẽ chiếc Mõ Gỗ nhỏ màu cam vàng trước mặt khi Gõ Mõ hoặc Tọa Thiền
       if (c.state === 'knock' || isMeditating) {
         const mx = pos.x + 12 * scale;
         const my = pos.y - 8 * scale;
@@ -2877,6 +3678,7 @@
     function renderScene() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+      // 1. Nền gạch Nội Tự (y < 16) & Sân Ngoài Lát Đá Xanh Cổ Kính (y >= 16)
       for (let gx = 0; gx < MAP_W; gx++) {
         for (let gy = 0; gy < MAP_H; gy++) {
           const p1 = worldToScreen(gx, gy);
@@ -2885,18 +3687,27 @@
           const p4 = worldToScreen(gx, gy + 1);
 
           const isEven = (gx + gy) % 2 === 0;
-          const isCentralAvenue = gy >= 9 && gy <= 10 && gx < 18;
-          let tileCol = isEven ? '#8c562f' : '#804d28';
+          let tileCol;
 
-          if (isCentralAvenue) tileCol = isEven ? '#57534e' : '#44403c';
-          else if (gx >= 18) tileCol = isEven ? '#784725' : '#6e3f20';
+          if (gy >= 16) {
+            // Sân Ngoài Lát Đá Xanh Thanh Hóa
+            const isPath = gx >= 9 && gx <= 12;
+            tileCol = isPath
+              ? (isEven ? '#475569' : '#334155')
+              : (isEven ? '#334155' : '#1e293b');
+          } else {
+            const isCentralAvenue = gy >= 9 && gy <= 10 && gx < 18;
+            tileCol = isEven ? '#8c562f' : '#804d28';
+            if (isCentralAvenue) tileCol = isEven ? '#57534e' : '#44403c';
+            else if (gx >= 18) tileCol = isEven ? '#784725' : '#6e3f20';
+          }
 
           ctx.fillStyle = tileCol;
           ctx.beginPath();
           ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.lineTo(p3.x, p3.y); ctx.lineTo(p4.x, p4.y);
           ctx.closePath(); ctx.fill();
 
-          ctx.strokeStyle = 'rgba(40, 20, 8, 0.35)';
+          ctx.strokeStyle = gy >= 16 ? 'rgba(148, 163, 184, 0.22)' : 'rgba(40, 20, 8, 0.35)';
           ctx.lineWidth = 0.8;
           ctx.stroke();
         }
@@ -2907,6 +3718,7 @@
         drawIsoBlock(0, 0, 0.3, MAP_H, 48, '#e6ccb2', '#b08968', '#7f5539', '#4a2c11');
       }
 
+      // 2. Nội Tự: Hồ Thác Nước, Chánh Điện, Lầu Chuông, 6 Phòng Ban, Đỉnh Hương, Pantry, Hạ Sơn
       drawWaterfallAndKoiPond();
       drawDetailedBuddhaAndChanhDien();
       drawBodhiTreeAndBellTower();
@@ -2923,6 +3735,20 @@
 
       drawRightWingRooms();
 
+      // 3. Sân Ngoài Lát Đá Xanh: Cổng Tam Quan, 2 Linh Vật Đá Hài Hước, Ao Cá Koi Lớn & Tượng Thần Motor Điện
+      drawOuterBlueStoneCourtyard();
+
+      // Sóng nước ở cả 2 hồ
+      waterRipples.forEach(wr => {
+        const rp = worldToScreen(wr.gx, wr.gy, 2.5);
+        const alpha = Math.max(0, 1 - wr.r / wr.maxR);
+        ctx.strokeStyle = `rgba(224, 242, 254, ${alpha * 0.8})`;
+        ctx.lineWidth = 1.4 * camZoom;
+        ctx.beginPath();
+        ctx.ellipse(rp.x, rp.y, wr.r * camZoom, wr.r * 0.5 * camZoom, 0, 0, Math.PI * 2);
+        ctx.stroke();
+      });
+
       bellShockwaves.forEach(bw => {
         const center = worldToScreen(bw.gx, bw.gy, 15);
         ctx.strokeStyle = `rgba(255, 215, 0, ${1 - bw.radius / bw.maxRadius})`;
@@ -2932,8 +3758,16 @@
         ctx.stroke();
       });
 
-      const sortedChars = Object.values(players).sort((a, b) => (a.x + a.y) - (b.x + b.y));
-      sortedChars.forEach(ch => drawCharacterSprite(ch));
+      // 4. Sắp xếp chiều sâu (Z-order) giữa Nhân vật và Cây cối sân ngoài
+      const renderables = [];
+      Object.values(players).forEach(ch => {
+        renderables.push({ depth: ch.x + ch.y, draw: () => drawCharacterSprite(ch) });
+      });
+      COURTYARD_TREES.forEach(tr => {
+        renderables.push({ depth: tr.x + tr.y, draw: () => drawCourtyardTree(tr) });
+      });
+      renderables.sort((a, b) => a.depth - b.depth);
+      renderables.forEach(item => item.draw());
 
       if (!isTopDown2D) {
         smokeParticles.forEach(sp => {
@@ -2982,7 +3816,6 @@
     function initApp() {
       resizeCanvas();
       applyPanelCollapseStates();
-      drawFirstPersonBeadsCanvas();
 
       function animateLoop() {
         updateSimulation();
@@ -2996,3 +3829,4 @@
   </script>
 </body>
 </html>
+        
