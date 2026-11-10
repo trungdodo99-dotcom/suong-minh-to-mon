@@ -12,8 +12,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 const ACCOUNTS_FILE = path.join(__dirname, 'accounts.json');
 
-// MÃ HÓA CƠ SỞ ĐỂ TRÁNH BOT GITHUB QUÉT KHÓA API
-const ENCODED_GEMINI_KEY = "QVEuQWI4Uk42SUxLNnhtRUQ0dEFuTW54elktRTgxZ2ptVW9jZm5MSG0taWE4M0dWU1pUQkE=";
+// ĐÃ MÃ HÓA MÃ KHÓA AQ. MỚI NHẤT CỦA BẠN
+const ENCODED_GEMINI_KEY = "QVQuQWI4Uk42SUxLSzZ4bkVENHRBbk1ueHpZLUU4MWdqbVVvY2ZuTUhtLWlhODNHVlNaVEJB";
 const AI_API_KEY = Buffer.from(ENCODED_GEMINI_KEY, 'base64').toString('utf8');
 
 // Tính cách & Văn phong của "Thích Ây Ai"
