@@ -16,12 +16,8 @@ function normalizeMonkName(rawName) {
   let clean = (rawName || '').trim().replace(/\s+/g, ' ');
   if (!clean) return 'Thích Vô Danh';
   const lower = clean.toLowerCase();
-  if (lower.startsWith('thích ')) {
-    return 'Thích ' + clean.slice(6).trim();
-  }
-  if (lower.startsWith('thich ')) {
-    return 'Thích ' + clean.slice(6).trim();
-  }
+  if (lower.startsWith('thích ')) return 'Thích ' + clean.slice(6).trim();
+  if (lower.startsWith('thich ')) return 'Thích ' + clean.slice(6).trim();
   return 'Thích ' + clean;
 }
 
@@ -68,6 +64,7 @@ loadAccounts();
 
 const templeState = {
   activeIncenseSticks: 9,
+  motorIncenseSticks: 6,
   chatHistory: []
 };
 
@@ -105,7 +102,7 @@ function syncPlayerMeritToAccount(p) {
   }
 }
 
-// VÒNG LẶP HỒI MÁU KHI TỌA THIỀN: 5 HP / 1 PHÚT (Cứ 12 giây hồi +1 HP = 5 HP/phút)
+// Hồi máu chậm khi Tọa Thiền: 5 HP / 1 phút (Cứ 12 giây hồi +1 HP)
 setInterval(() => {
   let anyChanged = false;
   Object.values(onlinePlayers).forEach(p => {
@@ -127,7 +124,7 @@ io.on('connection', (socket) => {
     accountsList: getPublicAccountsList()
   });
 
-  // 1. ĐĂNG KÝ XUẤT GIA (Bắt buộc chữ Thích + Chờ Thích Báo Giá duyệt)
+  // 1. ĐĂNG KÝ XUẤT GIA
   socket.on('register_account', (data, callback) => {
     const rawName = (data.name || '').trim();
     const password = (data.password || '').trim();
@@ -145,7 +142,7 @@ io.on('connection', (socket) => {
     if (accounts[key]) {
       return callback({
         ok: false,
-        msg: `Pháp danh "${formattedName}" đã tồn tại! Vui lòng chuyển sang tab Đăng Nhập hoặc chọn tên khác.`
+        msg: `Pháp danh "${formattedName}" đã tồn tại! Vui lòng chuyển sang tab Đăng Nhập.`
       });
     }
 
@@ -176,11 +173,11 @@ io.on('connection', (socket) => {
     return callback({
       ok: true,
       name: formattedName,
-      msg: `Đã gửi đơn Xin Xuất Gia cho pháp danh "${formattedName}"! Vui lòng chờ tài khoản Quản Lý (Thích Báo Giá) phê duyệt.`
+      msg: `Đã gửi đơn Xin Xuất Gia cho "${formattedName}"! Chờ Trụ Trì (Thích Báo Giá) phê duyệt.`
     });
   });
 
-  // 2. ĐĂNG NHẬP VÀO CHÙA
+  // 2. ĐĂNG NHẬP
   socket.on('login_account', (data, callback) => {
     let rawName = (data.name || '').trim();
     const password = (data.password || '').trim();
@@ -260,12 +257,12 @@ io.on('connection', (socket) => {
     });
   });
 
-  // 3. QUẢN LÝ ACC (THÍCH BÁO GIÁ)
+  // 3. QUẢN LÝ ACC (THÍCH BÁO GIÁ - MK: 123456)
   socket.on('admin_action', (payload, callback) => {
     const me = onlinePlayers[socket.id];
     const isMasterAuth = payload && payload.adminPass === '123456';
     if ((!me || !me.isAdmin) && !isMasterAuth) {
-      if (callback) callback({ ok: false, msg: 'Chỉ Trụ Trì Thích Báo Giá mới có quyền thực hiện!' });
+      if (callback) callback({ ok: false, msg: 'Vui lòng nhập đúng mật khẩu Trụ Trì (123456) ở ô phía trên!' });
       return;
     }
 
@@ -359,7 +356,7 @@ io.on('connection', (socket) => {
     if (state) p.state = state;
   });
 
-  // 5. BẮT ĐẦU TỌA THIỀN (Mở góc nhìn thứ nhất + Kiểm tra phòng)
+  // 5. BẮT ĐẦU TỌA THIỀN 3D
   socket.on('meditate_start', ({ roomDept, x, y }) => {
     const p = onlinePlayers[socket.id];
     if (!p) return;
@@ -369,7 +366,7 @@ io.on('connection', (socket) => {
     p.destY = y;
     p.state = 'meditate';
     p.meditateRoomDept = roomDept || null;
-    p.bubbleText = '🧘 Đang nhập định tu luyện...';
+    p.bubbleText = '🧘 Đang nhập định 3D...';
     p.bubbleTimer = 300;
 
     if (roomDept && roomDept !== p.dept) {
@@ -386,7 +383,7 @@ io.on('connection', (socket) => {
     io.emit('players_sync', onlinePlayers);
   });
 
-  // 6. MỖI LẦN ẤN GÕ MÕ HOẶC LẦN CHUỖI HẠT TRONG GÓC NHÌN THỨ NHẤT
+  // 6. GÕ MÕ 3D / LẦN CHUỖI HẠT 3D TRONG LÚC THIỀN
   socket.on('meditate_click', ({ mode, roomDept }) => {
     const p = onlinePlayers[socket.id];
     if (!p) return;
@@ -396,9 +393,8 @@ io.on('connection', (socket) => {
     p.merit += gain;
     syncPlayerMeritToAccount(p);
 
-    const actionLabel = mode === 'beads' ? `📿 Lần chuỗi hạt +${gain} 🪷` : `🪵 Cốc! Gõ mõ +${gain} 🪷`;
+    const actionLabel = mode === 'beads' ? `📿 Lần hạt Bồ Đề +${gain} 🪷` : `🪵 Cốc! Gõ mõ +${gain} 🪷`;
 
-    // Nếu đang ngồi thiền đúng phòng hoặc ngoài sân
     if (!roomDept || roomDept === p.dept) {
       io.emit('effect_event', {
         type: 'float_text',
@@ -408,13 +404,10 @@ io.on('connection', (socket) => {
         color: '#4ade80'
       });
     } else {
-      // Nếu đang ngồi thiền khác phòng -> Hút công đức của thành viên phòng đó!
-      let stolenCount = 0;
       Object.values(onlinePlayers).forEach(other => {
         if (other.id !== p.id && other.dept === roomDept) {
           other.merit = Math.max(0, other.merit - 2);
           syncPlayerMeritToAccount(other);
-          stolenCount++;
           io.emit('effect_event', {
             type: 'float_text',
             x: other.x,
@@ -437,7 +430,7 @@ io.on('connection', (socket) => {
     io.emit('players_sync', onlinePlayers);
   });
 
-  // 7. TƯƠNG TÁC VÒNG TRÒN 4 HƯỚNG QUANH ĐỐI TƯỢNG: ĐẤM, HÔN, DÍ DEADLINE, QUỲ LẠY
+  // 7. VÒNG TƯƠNG TÁC 4 HƯỚNG: ĐẤM, HÔN, DÍ DEADLINE, QUỲ LẠY
   socket.on('interact_target', ({ targetId, type, myX, myY }) => {
     const attacker = onlinePlayers[socket.id];
     const target = onlinePlayers[targetId];
@@ -466,7 +459,6 @@ io.on('connection', (socket) => {
       attacker.bubbleTimer = 140;
       target.hp = Math.max(0, target.hp - 15);
 
-      // Báo động nếu nạn nhân đang ở góc nhìn thứ nhất Tọa Thiền
       io.to(target.id).emit('under_attack_alert', {
         attackerName: attacker.name,
         hp: target.hp
@@ -507,7 +499,7 @@ io.on('connection', (socket) => {
           name: 'LUẬN VÕ ĐƯỜNG',
           dept: target.dept,
           level: attacker.level,
-          text: `💥 [${attacker.level}] ${attacker.name} đã đấm cạn 100 máu của [${target.level}] ${target.name}! ${target.name} bị trừ 1 nửa tổng Công Đức (-${lostMerit} 🪷), ${attacker.name} thu được +${lootMerit} 🪷!`,
+          text: `💥 [${attacker.level}] ${attacker.name} đã đấm cạn 100 máu của [${target.level}] ${target.name}! ${target.name} mất 50% Công Đức (-${lostMerit} 🪷), ${attacker.name} thu được +${lootMerit} 🪷!`,
           isSystem: true
         });
       }
@@ -541,7 +533,7 @@ io.on('connection', (socket) => {
       });
     } else if (type === 'deadline') {
       attacker.state = 'deadline';
-      attacker.bubbleText = `⚡ Gấp lắm rồi! Chốt đơn / Bản vẽ cho tôi ngay!!`;
+      attacker.bubbleText = `⚡ Gấp lắm rồi! Xử lý đơn hàng / bản vẽ ngay!!`;
       attacker.bubbleTimer = 170;
       target.bubbleText = `😱 Á á đừng dí deadline bần tăng nữa!!`;
       target.bubbleTimer = 170;
@@ -572,7 +564,7 @@ io.on('connection', (socket) => {
       });
     } else if (type === 'kowtow') {
       attacker.state = 'bow';
-      attacker.bubbleText = `🙇 Tiểu tăng xin cúi lạy đại đức ${target.name}!`;
+      attacker.bubbleText = `🙇 Tiểu tăng xin khấu đầu bái lạy đại đức ${target.name}!`;
       attacker.bubbleTimer = 170;
       attacker.merit += 8;
       target.merit += 8;
@@ -603,7 +595,7 @@ io.on('connection', (socket) => {
     broadcastAdminData();
   });
 
-  // 8. CÁC HÀNH LỄ CHUNG
+  // 8. HÀNH LỄ & THẮP HƯƠNG THẦN MOTOR ĐIỆN NGOÀI SÂN
   socket.on('action', ({ type }) => {
     const p = onlinePlayers[socket.id];
     if (!p) return;
@@ -615,7 +607,7 @@ io.on('connection', (socket) => {
       p.bubbleTimer = 140;
       io.emit('effect_event', { type: 'float_text', x: p.x, y: p.y, text: '😄 Hoan Hỷ +5 Công Đức', color: '#6fcf97' });
     } else if (type === 'deadline') {
-      p.bubbleText = '⚡ Đừng dí Deadline bần tăng nữa!!';
+      p.bubbleText = '⚡ Tâm bất biến giữa dòng đời Deadline!';
       p.bubbleTimer = 150;
       io.emit('effect_event', { type: 'float_text', x: p.x, y: p.y, text: '⚡ Kháng Cự Deadline!', color: '#ff9b85' });
     } else if (type === 'knock') {
@@ -634,6 +626,36 @@ io.on('connection', (socket) => {
         text: '🔥 Dâng 3 Nén Nhang +30 Công Đức!',
         color: '#facc15'
       });
+    } else if (type === 'motor_god') {
+      p.merit += 35;
+      p.state = 'bow';
+      templeState.motorIncenseSticks = Math.min(36, (templeState.motorIncenseSticks || 6) + 3);
+      const motorPrayers = [
+        '⚡ Nam mô Thần Motor Điện IE3/IE5 độ trì báo giá chuẩn, khách chốt PO ầm ầm!',
+        '⚙️ Khấn Thần Motor: Cầu cho cuộn dây đồng không nóng, nam châm đủ kho, lead time thần tốc!',
+        '🔥 Dâng hương Thần Motor Sương Minh: Cầu đơn hàng về như nước, không bị khách ép giá!'
+      ];
+      const prayText = motorPrayers[Math.floor(Math.random() * motorPrayers.length)];
+      p.bubbleText = '⚡ Thành tâm khấn Thần Motor Điện! 🙏';
+      p.bubbleTimer = 180;
+
+      io.emit('effect_event', {
+        type: 'motor_blessing',
+        x: p.x,
+        y: p.y,
+        motorSticks: templeState.motorIncenseSticks,
+        text: '⚡ Thần Motor Độ Trì +35 Công Đức!',
+        color: '#38bdf8'
+      });
+
+      pushChat({
+        id: p.id,
+        name: p.name,
+        dept: p.dept,
+        level: p.level,
+        text: `${prayText} (+35 🪷)`,
+        isSystem: true
+      });
     } else if (type === 'eat') {
       p.merit += 15;
       p.hp = Math.min(100, p.hp + 20);
@@ -650,7 +672,7 @@ io.on('connection', (socket) => {
         type: 'float_text',
         x: p.x,
         y: p.y,
-        text: '🐟 Ngắm Hồ Cá Koi +15 Công Đức!',
+        text: '🐟 Ngắm Ao Cá Koi +15 Công Đức!',
         color: '#38bdf8'
       });
     } else if (type === 'bell') {
