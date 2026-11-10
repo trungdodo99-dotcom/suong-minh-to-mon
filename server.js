@@ -11,18 +11,105 @@ const io = new Server(server, { cors: { origin: "*" } });
 app.use(express.static(path.join(__dirname, 'public')));
 
 const ACCOUNTS_FILE = path.join(__dirname, 'accounts.json');
+const CONFIG_FILE = path.join(__dirname, 'ai_config.json');
+
+// ================= CẤU HÌNH AI API CHO TIỂU SƯ ĐỆ =================
+// Bạn có thể dán trực tiếp API Key vào giữa 2 dấu nháy dưới đây,
+// HOẶC vào game dùng acc "Thích Báo Giá" gõ chat: /key MÃ_API_CỦA_BẠN
+let AI_API_KEY = process.env.GEMINI_API_KEY || process.env.OPENAI_API_KEY || '';
+let OPENAI_BASE_URL = process.env.OPENAI_BASE_URL || 'https://api.openai.com/v1';
+
+try {
+  if (fs.existsSync(CONFIG_FILE)) {
+    const savedCfg = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
+    if (savedCfg.apiKey) AI_API_KEY = savedCfg.apiKey;
+    if (savedCfg.baseUrl) OPENAI_BASE_URL = savedCfg.baseUrl;
+  }
+} catch (e) {}
+
+function saveAiConfig() {
+  try {
+    fs.writeFileSync(CONFIG_FILE, JSON.stringify({ apiKey: AI_API_KEY, baseUrl: OPENAI_BASE_URL }, null, 2), 'utf8');
+  } catch (e) {}
+}
+
+// Tính cách & Kiến thức của Tiểu Sư Đệ trong Sương Minh Tô Môn Tự
+const SYSTEM_PROMPT = `Bạn là "Thích Tiểu Đệ" (Tiểu Sư Đệ), một tiểu hòa thượng AI thông thái, lém lỉnh, hài hước đang tu hành và làm trợ lý tại "Sương Minh Tô Môn Tự" (ngôi chùa văn phòng lấy cảm hứng từ công ty Sumitomo chuyên sản xuất Motor điện & Hộp giảm tốc).
+Quy tắc trả lời:
+1. Xưng là "Tiểu đệ" hoặc "Đệ", gọi người hỏi là "Sư huynh", "Sư tỷ" hoặc "Đạo hữu" (nếu là Trụ trì "Thích Báo Giá" thì gọi kính cẩn là "Sư Phụ Trụ Trì Thích Báo Giá").
+2. Phong cách nói chuyện: Pha trộn hài hước giữa thuật ngữ Phật giáo (A Di Đà Phật, công đức vô lượng, tịnh tâm, sân si, độ kiếp) và thuật ngữ văn phòng nhà máy (Báo giá Direct Cost, chốt PO, khách đổi Spec bản vẽ, xin luồng xanh Hải quan, ép giá NCC, KPI, thần Motor điện IE5).
+3. Bạn biết rõ 6 phòng ban trong chùa: PROC (Mua hàng), IBD Cost (Báo giá), IBD Sale (Đơn hàng), Logistic (Xuất nhập khẩu), HR-GA (Nhân sự), Tech (Thiết kế).
+4. QUAN TRỌNG: Trả lời NGẮN GỌN, súc tích, tối đa 2-3 câu (dưới 180 ký tự) để vừa khít bong bóng chat trên đầu nhân vật.`;
+
+// Hàm gọi AI tự động nhận diện Gemini API hoặc OpenAI/Codex API
+async function askTieuSuDeAI(senderName, senderDept, senderLevel, userMessage) {
+  // Nếu chưa gắn API Key -> Dùng trí tuệ tự động dự phòng
+  if (!AI_API_KEY || AI_API_KEY.trim() === '') {
+    const fallbacks = [
+      `A Di Đà Phật! ${senderName} (${senderDept}) hỏi chí phải! Mau ra sân đá xanh thắp hương Thần Motor Điện để được +50 Công Đức độ trì nhé! ⚙️🙏`,
+      `Bẩm ${senderName} [${senderLevel}], tiểu đệ bấm độn thấy hôm nay phòng ${senderDept} vượng khí ngập tràn, báo giá đâu trúng đó! 🪷`,
+      `Huynh/Tỷ ${senderName} đừng sân si vì Deadline nữa, vào góc nhìn 3D gõ mõ vài tiếng cho tâm bất biến giữa dòng đời vạn biến! 🪵`,
+      `Bẩm đạo hữu, Trụ trì Thích Báo Giá chưa truyền Pháp Lực (API Key) cho đệ. Hãy bảo Trụ trì gõ lệnh "/key MÃ_API" vào khung chat nhé! ✨`
+    ];
+    return fallbacks[Math.floor(Math.random() * fallbacks.length)];
+  }
+
+  const promptText = `Người đang nói chuyện với bạn là: [${senderLevel}] ${senderName} thuộc phòng ${senderDept}. Nội dung họ nói/hỏi: "${userMessage}"`;
+
+  try {
+    // TH1: Nếu là Google Gemini API Key (Bắt đầu bằng "AIza")
+    if (AI_API_KEY.startsWith('AIza')) {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${AI_API_KEY.trim()}`;
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
+          contents: [{ role: 'user', parts: [{ text: promptText }] }],
+          generationConfig: { maxOutputTokens: 160, temperature: 0.85 }
+        })
+      });
+      const data = await res.json();
+      const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (reply) return reply.trim().replace(/\n+/g, ' ');
+      throw new Error(data?.error?.message || 'Gemini API Error');
+    }
+
+    // TH2: Nếu là OpenAI / Codex / Custom API Key (Bắt đầu bằng "sk-" hoặc khác)
+    const url = `${OPENAI_BASE_URL.replace(/\/$/, '')}/chat/completions`;
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${AI_API_KEY.trim()}`
+      },
+      body: JSON.stringify({
+        model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
+        messages: [
+          { role: 'system', content: SYSTEM_PROMPT },
+          { role: 'user', content: promptText }
+        ],
+        max_tokens: 160,
+        temperature: 0.85
+      })
+    });
+    const data = await res.json();
+    const reply = data?.choices?.[0]?.message?.content;
+    if (reply) return reply.trim().replace(/\n+/g, ' ');
+    throw new Error(data?.error?.message || 'OpenAI API Error');
+  } catch (err) {
+    console.error('Lỗi gọi AI Tiểu Sư Đệ:', err.message);
+    return `A Di Đà Phật! Linh khí mạng đang nhiễu loạn (${err.message.slice(0, 45)}...), ${senderName} đợi tiểu đệ tịnh tâm chút nhé! 🙏`;
+  }
+}
 
 // Chuẩn hóa bắt buộc chữ "Thích " ở đầu Pháp Danh
 function normalizeMonkName(rawName) {
   let clean = (rawName || '').trim().replace(/\s+/g, ' ');
   if (!clean) return 'Thích Vô Danh';
   const lower = clean.toLowerCase();
-  if (lower.startsWith('thích ')) {
-    return 'Thích ' + clean.slice(6).trim();
-  }
-  if (lower.startsWith('thich ')) {
-    return 'Thích ' + clean.slice(6).trim();
-  }
+  if (lower.startsWith('thích ')) return 'Thích ' + clean.slice(6).trim();
+  if (lower.startsWith('thich ')) return 'Thích ' + clean.slice(6).trim();
   return 'Thích ' + clean;
 }
 
@@ -37,7 +124,6 @@ function loadAccounts() {
     accounts = {};
   }
 
-  // Luôn đảm bảo tài khoản Trụ Trì tối cao: Thích Báo Giá (MK: 123456) tồn tại
   const adminKey = 'thích báo giá';
   if (!accounts[adminKey]) {
     accounts[adminKey] = {
@@ -74,8 +160,63 @@ const templeState = {
   chatHistory: []
 };
 
-// Danh sách các đạo hữu đang thực sự Online trong chùa
-const onlinePlayers = {};
+// ================= KHỞI TẠO NPC BOT: THÍCH TIỂU ĐỆ (AI) =================
+const BOT_ID = 'BOT_TIEU_SU_DE';
+const onlinePlayers = {
+  [BOT_ID]: {
+    id: BOT_ID,
+    usernameKey: 'bot_tieu_su_de',
+    name: 'Thích Tiểu Đệ (AI)',
+    dept: 'IBD Cost',
+    level: 'AM', // Cấp AM để có đôi cánh băng lam vẫy đẹp mắt
+    gender: 'M',
+    isAdmin: false,
+    isBot: true,
+    hp: 100,
+    maxHp: 100,
+    merit: 8888,
+    x: 10.6,
+    y: 10.2,
+    destX: 10.6,
+    destY: 10.2,
+    state: 'idle',
+    bubbleText: 'Gõ "@đệ câu hỏi" để hỏi Tiểu Sư Đệ AI nhé! 🤖🙏',
+    bubbleTimer: 999999
+  }
+};
+
+// Cho Tiểu Sư Đệ tự động đi tuần tra quanh chùa mỗi 18 giây
+const BOT_PATROL_POINTS = [
+  { x: 10.6, y: 10.2, msg: 'Đạo hữu cần hỏi gì cứ gõ "@đệ ..." vào khung chat nhé! 🤖🙏' },
+  { x: 13.5, y: 21.8, msg: 'Tiểu đệ ra Sân Đá Xanh lau dọn Tượng Thần Motor Điện đây! ⚙️✨' },
+  { x: 5.2, y: 17.2, msg: 'Cá Koi ngoài sân bơi đẹp quá chư vị sư huynh ơi! 🐟' },
+  { x: 21.6, y: 5.2, msg: 'Tiểu đệ ghé Pantry kiểm tra tủ lạnh xem còn đồ ăn không 🍱' },
+  { x: 11.7, y: 4.4, msg: 'A Di Đà Phật! Chúc 6 phòng ban hôm nay KPI viên mãn! 🪷' }
+];
+let patrolIdx = 0;
+
+setInterval(() => {
+  const bot = onlinePlayers[BOT_ID];
+  if (!bot) return;
+  patrolIdx = (patrolIdx + 1) % BOT_PATROL_POINTS.length;
+  const pt = BOT_PATROL_POINTS[patrolIdx];
+  bot.x = bot.destX;
+  bot.y = bot.destY;
+  bot.destX = pt.x;
+  bot.destY = pt.y;
+  bot.state = 'walk';
+  bot.bubbleText = pt.msg;
+  bot.bubbleTimer = 350;
+
+  io.emit('player_moved', {
+    id: BOT_ID,
+    x: bot.x,
+    y: bot.y,
+    destX: bot.destX,
+    destY: bot.destY,
+    state: 'walk'
+  });
+}, 18000);
 
 function getPublicAccountsList() {
   return Object.values(accounts).map(acc => ({
@@ -103,17 +244,36 @@ function pushChat(item) {
 }
 
 function syncPlayerMeritToAccount(p) {
-  if (p && p.usernameKey && accounts[p.usernameKey]) {
+  if (p && !p.isBot && p.usernameKey && accounts[p.usernameKey]) {
     accounts[p.usernameKey].merit = p.merit;
     saveAccounts();
   }
 }
 
-// VÒNG LẶP HỒI MÁU KHI TỌA THIỀN: 5 HP / 1 PHÚT (Cứ 12 giây hồi +1 HP = 5 HP/phút)
+// Kiểm tra xem tin nhắn có đang gọi Tiểu Sư Đệ không
+function isCallingTieuSuDe(text) {
+  const t = text.toLowerCase().trim();
+  return (
+    t.startsWith('@') ||
+    t.startsWith('?') ||
+    t.includes('sư đệ') ||
+    t.includes('su de') ||
+    t.includes('tiểu đệ') ||
+    t.includes('tieu de') ||
+    t.includes('đệ ơi') ||
+    t.includes('de oi') ||
+    t.includes('bot')
+  );
+}
+
+// VÒNG LẶP HỒI MÁU KHI TỌA THIỀN: 5 HP / 1 PHÚT (1 HP mỗi 12 giây)
 setInterval(() => {
   let anyChanged = false;
   Object.values(onlinePlayers).forEach(p => {
-    if (p.state === 'meditate' && p.hp < p.maxHp) {
+    if (p.isBot && p.hp < 100) {
+      p.hp = Math.min(100, p.hp + 10);
+      anyChanged = true;
+    } else if (p.state === 'meditate' && p.hp < p.maxHp) {
       p.hp = Math.min(p.maxHp, p.hp + 1);
       anyChanged = true;
       io.to(p.id).emit('meditate_hp_tick', { hp: p.hp });
@@ -131,7 +291,7 @@ io.on('connection', (socket) => {
     accountsList: getPublicAccountsList()
   });
 
-  // 1. ĐĂNG KÝ XUẤT GIA (Bắt buộc chữ Thích + Chờ Thích Báo Giá phê duyệt)
+  // 1. ĐĂNG KÝ XUẤT GIA
   socket.on('register_account', (data, callback) => {
     const rawName = (data.name || '').trim();
     const password = (data.password || '').trim();
@@ -146,10 +306,10 @@ io.on('connection', (socket) => {
     const formattedName = normalizeMonkName(rawName);
     const key = formattedName.toLowerCase();
 
-    if (accounts[key]) {
+    if (accounts[key] || key.includes('tiểu đệ')) {
       return callback({
         ok: false,
-        msg: `Pháp danh "${formattedName}" đã tồn tại! Vui lòng chuyển sang tab Đăng Nhập hoặc chọn tên khác.`
+        msg: `Pháp danh "${formattedName}" đã tồn tại! Vui lòng chọn pháp danh khác.`
       });
     }
 
@@ -180,7 +340,7 @@ io.on('connection', (socket) => {
     return callback({
       ok: true,
       name: formattedName,
-      msg: `Đã gửi đơn Xin Xuất Gia cho pháp danh "${formattedName}"! Vui lòng chờ tài khoản Quản Lý (Thích Báo Giá) phê duyệt.`
+      msg: `Đã gửi đơn Xin Xuất Gia cho pháp danh "${formattedName}"! Chờ Trụ Trì (Thích Báo Giá) phê duyệt.`
     });
   });
 
@@ -215,7 +375,6 @@ io.on('connection', (socket) => {
       });
     }
 
-    // Ngắt phiên cũ nếu đăng nhập trùng tài khoản ở thiết bị khác
     for (const [sid, pl] of Object.entries(onlinePlayers)) {
       if (pl.usernameKey === key && sid !== socket.id) {
         delete onlinePlayers[sid];
@@ -364,7 +523,7 @@ io.on('connection', (socket) => {
     if (state) p.state = state;
   });
 
-  // 5. BẮT ĐẦU TỌA THIỀN 3D (Kiểm tra chính phòng hay trộm phòng khác)
+  // 5. TỌA THIỀN 3D
   socket.on('meditate_start', ({ roomDept, x, y }) => {
     const p = onlinePlayers[socket.id];
     if (!p) return;
@@ -391,7 +550,6 @@ io.on('connection', (socket) => {
     io.emit('players_sync', onlinePlayers);
   });
 
-  // 6. MỖI LẦN ẤN GÕ MÕ 3D HOẶC LẦN CHUỖI HẠT 3D TRONG GÓC NHÌN THỨ NHẤT
   socket.on('meditate_click', ({ mode, roomDept }) => {
     const p = onlinePlayers[socket.id];
     if (!p) return;
@@ -412,9 +570,8 @@ io.on('connection', (socket) => {
         color: '#4ade80'
       });
     } else {
-      // Ngồi khác phòng -> Trừ công đức của các thành viên thuộc phòng đó đang online
       Object.values(onlinePlayers).forEach(other => {
-        if (other.id !== p.id && other.dept === roomDept) {
+        if (!other.isBot && other.id !== p.id && other.dept === roomDept) {
           other.merit = Math.max(0, other.merit - 2);
           syncPlayerMeritToAccount(other);
           io.emit('effect_event', {
@@ -439,8 +596,8 @@ io.on('connection', (socket) => {
     io.emit('players_sync', onlinePlayers);
   });
 
-  // 7. VÒNG TƯƠNG TÁC 4 HƯỚNG QUANH ĐỐI TƯỢNG: ĐẤM, HÔN, DÍ DEADLINE, QUỲ LẠY
-  socket.on('interact_target', ({ targetId, type, myX, myY }) => {
+  // 6. VÒNG TƯƠNG TÁC 4 HƯỚNG (ĐẤM, HÔN, DÍ DEADLINE, QUỲ LẠY) - KỂ CẢ VỚI TIỂU SƯ ĐỆ AI
+  socket.on('interact_target', async ({ targetId, type, myX, myY }) => {
     const attacker = onlinePlayers[socket.id];
     const target = onlinePlayers[targetId];
     if (!attacker || !target || attacker.id === target.id) return;
@@ -468,10 +625,12 @@ io.on('connection', (socket) => {
       attacker.bubbleTimer = 140;
       target.hp = Math.max(0, target.hp - 15);
 
-      io.to(target.id).emit('under_attack_alert', {
-        attackerName: attacker.name,
-        hp: target.hp
-      });
+      if (!target.isBot) {
+        io.to(target.id).emit('under_attack_alert', {
+          attackerName: attacker.name,
+          hp: target.hp
+        });
+      }
 
       io.emit('effect_event', {
         type: 'punch_hit',
@@ -483,7 +642,6 @@ io.on('connection', (socket) => {
         color: '#ef4444'
       });
 
-      // Hết máu (0 HP) -> Trừ 1 nửa tổng Công Đức
       if (target.hp <= 0) {
         const lostMerit = Math.floor(target.merit / 2);
         const lootMerit = Math.floor(lostMerit * 0.5);
@@ -603,9 +761,31 @@ io.on('connection', (socket) => {
 
     io.emit('players_sync', onlinePlayers);
     broadcastAdminData();
+
+    // Nếu người bị tương tác chính là Tiểu Sư Đệ AI -> Tiểu Sư Đệ dùng AI đáp trả ngay!
+    if (target.isBot) {
+      const actionDescMap = {
+        punch: `vừa đấm vào đầu bạn làm bạn mất 15 máu, hãy mếu máo kêu cứu Trụ trì Thích Báo Giá một cách hài hước!`,
+        kiss: `vừa thơm/hôn vào má bạn tặng 10 máu, hãy ngại ngùng cảm ơn một cách hài hước!`,
+        deadline: `vừa dí Deadline gấp vào mặt bạn, hãy than thở chuyện báo giá/bản vẽ một cách hài hước!`,
+        kowtow: `vừa quỳ lạy bái kiến bạn, hãy khiêm tốn đỡ dậy và chúc công đức!`
+      };
+      const aiReply = await askTieuSuDeAI(attacker.name, attacker.dept, attacker.level, actionDescMap[type] || 'tương tác với bạn');
+      target.bubbleText = aiReply;
+      target.bubbleTimer = 280;
+      pushChat({
+        id: BOT_ID,
+        name: target.name,
+        dept: target.dept,
+        level: target.level,
+        text: aiReply,
+        isSystem: false
+      });
+      io.emit('players_sync', onlinePlayers);
+    }
   });
 
-  // 8. CÁC HÀNH LỄ CHUNG & THẮP HƯƠNG THẦN MOTOR ĐIỆN NGOÀI SÂN ĐÁ XANH
+  // 7. CÁC HÀNH LỄ CHUNG
   socket.on('action', ({ type }) => {
     const p = onlinePlayers[socket.id];
     if (!p) return;
@@ -702,11 +882,43 @@ io.on('connection', (socket) => {
     socket.broadcast.emit('player_action', { id: socket.id, type });
   });
 
-  // 9. CHAT
-  socket.on('chat', ({ text }) => {
+  // 8. CHAT & XỬ LÝ LỆNH GỌI TIỂU SƯ ĐỆ AI
+  socket.on('chat', async ({ text }) => {
     const p = onlinePlayers[socket.id];
     if (!p || !text || !text.trim()) return;
-    const cleanText = text.trim().slice(0, 140);
+    const cleanText = text.trim().slice(0, 180);
+
+    // Lệnh mật dành riêng cho Trụ Trì (Thích Báo Giá) để cài API Key ngay trong ô chat: /key AIza...
+    if (cleanText.startsWith('/key ')) {
+      if (!p.isAdmin) {
+        socket.emit('effect_event', {
+          type: 'float_text',
+          x: p.x,
+          y: p.y,
+          text: '⚠️ Chỉ Trụ Trì Thích Báo Giá mới cài được API Key!',
+          color: '#ef4444'
+        });
+        return;
+      }
+      const newKey = cleanText.slice(5).trim();
+      AI_API_KEY = newKey;
+      saveAiConfig();
+      socket.emit('effect_event', {
+        type: 'float_text',
+        x: p.x,
+        y: p.y,
+        text: '✅ Đã nạp Pháp Lực (API Key) cho Tiểu Sư Đệ!',
+        color: '#4ade80'
+      });
+      const bot = onlinePlayers[BOT_ID];
+      if (bot) {
+        bot.bubbleText = 'Đa tạ Sư Phụ Thích Báo Giá đã truyền Pháp Lực AI cho đệ! 🤖🙏';
+        bot.bubbleTimer = 260;
+        io.emit('players_sync', onlinePlayers);
+      }
+      return;
+    }
+
     p.merit += 3;
     p.bubbleText = cleanText;
     p.bubbleTimer = 240;
@@ -721,12 +933,55 @@ io.on('connection', (socket) => {
       isSystem: false
     });
     io.emit('players_sync', onlinePlayers);
+
+    // Kiểm tra nếu người chơi đang gọi hoặc hỏi Tiểu Sư Đệ AI
+    if (isCallingTieuSuDe(cleanText)) {
+      const bot = onlinePlayers[BOT_ID];
+      if (!bot) return;
+
+      // Tiểu Sư Đệ chạy lại gần người hỏi và hiện trạng thái đang suy nghĩ
+      const targetX = Math.max(1.5, Math.min(24.5, p.x + 1.1));
+      const targetY = Math.max(1.5, Math.min(23.5, p.y + 0.6));
+      bot.x = bot.destX;
+      bot.y = bot.destY;
+      bot.destX = targetX;
+      bot.destY = targetY;
+      bot.state = 'walk';
+      bot.bubbleText = '🤔 Tiểu đệ đang bấm độn suy ngẫm...';
+      bot.bubbleTimer = 200;
+
+      io.emit('player_moved', {
+        id: BOT_ID,
+        x: bot.x,
+        y: bot.y,
+        destX: bot.destX,
+        destY: bot.destY,
+        state: 'walk'
+      });
+      io.emit('players_sync', onlinePlayers);
+
+      // Gọi AI trả lời
+      const aiResponse = await askTieuSuDeAI(p.name, p.dept, p.level, cleanText);
+      bot.bubbleText = aiResponse;
+      bot.bubbleTimer = 340;
+      bot.state = 'wave';
+
+      pushChat({
+        id: BOT_ID,
+        name: bot.name,
+        dept: bot.dept,
+        level: bot.level,
+        text: aiResponse,
+        isSystem: false
+      });
+      io.emit('players_sync', onlinePlayers);
+    }
   });
 
-  // 10. HẠ SƠN = OUT NICK
+  // 9. HẠ SƠN = OUT NICK
   socket.on('leave_temple', () => {
     const p = onlinePlayers[socket.id];
-    if (!p) return;
+    if (!p || p.isBot) return;
     syncPlayerMeritToAccount(p);
     const oldName = p.name;
     const oldLevel = p.level;
@@ -744,7 +999,7 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', () => {
     const p = onlinePlayers[socket.id];
-    if (p) {
+    if (p && !p.isBot) {
       syncPlayerMeritToAccount(p);
       const oldName = p.name;
       const oldLevel = p.level;
@@ -764,5 +1019,5 @@ io.on('connection', (socket) => {
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-  console.log(`⛩️  SƯƠNG MINH TÔ MÔN TỰ đang mở cửa tại: http://localhost:${PORT}`);
+  console.log(`⛩️  SƯƠNG MINH TÔ MÔN TỰ (Có Tiểu Sư Đệ AI) đang mở tại: http://localhost:${PORT}`);
 });
