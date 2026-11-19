@@ -1,13 +1,13 @@
 {
-  "name": "suong-minh-to-mon",
-  "version": "2.0.0",
+  "name": "trai-giam-online-3d",
+  "version": "1.0.0",
   "private": true,
-  "description": "Van phong chua online",
+  "description": "Game Di Tu Online 3D Goc Nhin Thu Nhat (2 Buong Song Sat)",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js",
-    "reset-accounts": "node -e \"require('node:fs').rmSync('temple-accounts-v2.json', { force: true }); console.log('Da xoa tai khoan cua ban v2.');\""
+    "reset-accounts": "node -e \"require('node:fs').rmSync('prison_accounts.json', { force: true }); console.log('Da xoa du lieu ho so tu nhan.');\""
   },
   "engines": {
     "node": ">=18"
