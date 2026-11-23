@@ -3,10 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>TRẠI GIAM ONLINE 3D - GÓC NHÌN THỨ NHẤT</title>
+  <title>ĐÀO VÀNG ĐỐI CHIẾN - GOLD MINER CLASSIC VS</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Be+Vietnam+Pro:wght@600;700;800;900&display=swap" rel="stylesheet">
   <style>
     * {
       box-sizing: border-box;
@@ -20,245 +19,223 @@
       width: 100%;
       height: 100dvh;
       overflow: hidden;
-      background: #090b10;
-      color: #f1f5f9;
+      background: radial-gradient(circle at center, #3b2210 0%, #160b04 100%);
+      color: #fff7e6;
     }
-    #sceneContainer {
-      position: fixed;
-      inset: 0;
+    .retro-font {
+      font-family: 'Bungee', 'Be Vietnam Pro', sans-serif;
+    }
+    .wood-box {
+      background: linear-gradient(180deg, #8b4c1f 0%, #5c2d0c 100%);
+      border: 3px solid #facc15;
+      box-shadow: inset 0 2px 0 rgba(255, 240, 180, 0.35), 0 10px 28px rgba(0, 0, 0, 0.75);
+    }
+    .parchment-box {
+      background: linear-gradient(180deg, #fef3c7 0%, #e7c178 100%);
+      border: 3px solid #78350f;
+      color: #451a03;
+      box-shadow: inset 0 2px 0 #fffbeb, 0 8px 22px rgba(0, 0, 0, 0.65);
+    }
+    .gold-btn {
+      background: linear-gradient(180deg, #fde047 0%, #d97706 100%);
+      border: 3px solid #78350f;
+      color: #451a03;
+      box-shadow: inset 0 2px 0 #fef9c3, 0 5px 0 #78350f;
+      transition: transform 0.1s ease, box-shadow 0.1s ease;
+    }
+    .gold-btn:hover { filter: brightness(1.06); }
+    .gold-btn:active {
+      transform: translateY(3px);
+      box-shadow: inset 0 2px 0 #fef9c3, 0 2px 0 #78350f;
+    }
+    #gameStage {
+      position: relative;
       width: 100vw;
       height: 100dvh;
-      touch-action: none;
-      cursor: grab;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
     }
-    #sceneContainer:active {
-      cursor: grabbing;
-    }
-    .glass-panel {
-      background: rgba(15, 20, 29, 0.88);
-      border: 1.5px solid rgba(148, 163, 184, 0.32);
-      backdrop-filter: blur(8px);
-      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.65);
-    }
-    .action-btn {
-      background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
-      border: 1.5px solid #475569;
-      border-radius: 10px;
-      transition: transform 0.1s ease, border-color 0.15s ease;
-      touch-action: manipulation;
-    }
-    .action-btn:hover {
-      border-color: #facc15;
-    }
-    .action-btn:active {
-      transform: scale(0.92);
-    }
-    .crosshair {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      width: 18px;
-      height: 18px;
-      transform: translate(-50%, -50%);
-      pointer-events: none;
-      z-index: 15;
-    }
-    .crosshair::before, .crosshair::after {
-      content: '';
-      position: absolute;
-      background: rgba(255, 255, 255, 0.85);
-      box-shadow: 0 0 5px rgba(0, 0, 0, 0.95);
-    }
-    .crosshair::before { left: 8px; top: 0; width: 2px; height: 18px; }
-    .crosshair::after { top: 8px; left: 0; height: 2px; width: 18px; }
-    .crosshair.taser-aim::before, .crosshair.taser-aim::after {
-      background: #38bdf8;
-      box-shadow: 0 0 8px #38bdf8;
-    }
-
-    /* Hiệu ứng toàn màn hình khi bản thân bị bắn súng điện */
-    @keyframes shockPulse {
-      0%, 100% { box-shadow: inset 0 0 90px rgba(56, 189, 248, 0.9), inset 0 0 180px rgba(14, 165, 233, 0.65); opacity: 0.95; }
-      50% { box-shadow: inset 0 0 40px rgba(125, 211, 252, 0.6), inset 0 0 120px rgba(37, 99, 235, 0.45); opacity: 0.65; }
-    }
-    #taserScreenOverlay {
-      animation: shockPulse 0.14s infinite;
-      background: radial-gradient(circle, rgba(56,189,248,0.1) 35%, rgba(2,132,199,0.55) 100%);
-    }
-
-    /* Cần gạt ảo Joystick Mobile */
-    #joystickZone {
+    #mineCanvas {
+      display: block;
+      box-shadow: 0 0 40px rgba(0, 0, 0, 0.9), 0 0 0 4px #78350f;
+      border-radius: 6px;
+      cursor: crosshair;
       touch-action: none;
     }
-    ::-webkit-scrollbar { width: 5px; height: 5px; }
-    ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-thumb { background: #a16207; border-radius: 4px; }
   </style>
 </head>
-<body class="relative overflow-hidden">
+<body>
 
-  <!-- KHUNG RENDER 3D FIRST-PERSON -->
-  <div id="sceneContainer"></div>
-  <div id="crosshairEl" class="crosshair"></div>
+  <!-- SÂN CHƠI CHÍNH (TỰ CO GIÃN GIỮ ĐÚNG TỶ LỆ 1200x720 CỦA ĐÀO VÀNG CỔ ĐIỂN) -->
+  <div id="gameStage">
+    <canvas id="mineCanvas" width="1200" height="720"></canvas>
 
-  <!-- LỚP PHỦ ĐIỆN GIẬT XANH 3 GIÂY KHI BỊ BẮN TRÚNG -->
-  <div id="taserScreenOverlay" class="hidden fixed inset-0 z-30 pointer-events-none flex flex-col items-center justify-center">
-    <div class="px-5 py-3 rounded-2xl bg-slate-950/90 border-2 border-sky-400 text-center shadow-[0_0_30px_rgba(56,189,248,0.9)]">
-      <div class="text-2xl md:text-3xl font-black text-sky-300 tracking-wider">⚡ BỊ ĐIỆN GIẬT! ⚡</div>
-      <div id="taserCountdownText" class="text-sm font-extrabold text-white mt-1">Đang ngã gục bất động: 3.0s</div>
+    <!-- THANH CÔNG CỤ NHỎ GÓC DƯỚI TRÁI: ÂM THANH, CHAT, NHƯỜNG GHẾ -->
+    <div id="cornerControls" class="hidden fixed bottom-2.5 left-2.5 z-20 flex items-center gap-1.5">
+      <button id="btnMute" onclick="toggleMute()" class="px-2.5 py-1.5 rounded-lg bg-[#451a03]/90 border-2 border-[#facc15] text-xs font-extrabold text-[#fef08a] shadow-lg">
+        🔊
+      </button>
+      <button onclick="toggleChatBox()" class="relative px-2.5 py-1.5 rounded-lg bg-[#451a03]/90 border-2 border-[#facc15] text-xs font-extrabold text-[#fef08a] shadow-lg">
+        💬 Chat
+        <span id="chatBadge" class="hidden absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-red-500 animate-ping"></span>
+      </button>
+      <button id="btnYieldSeat" onclick="yieldSeat()" class="hidden px-2.5 py-1.5 rounded-lg bg-red-900/90 border-2 border-amber-300 text-xs font-extrabold text-amber-100 shadow-lg">
+        🪑 Nhường Ghế
+      </button>
     </div>
+
+    <!-- BIỂN BÁO KHÁN GIẢ & HÀNG CHỜ (CHỈ HIỆN KHI ĐANG XEM) -->
+    <div id="spectatorBanner" class="hidden fixed bottom-2.5 left-1/2 -translate-x-1/2 z-20 px-4 py-1.5 rounded-full bg-[#2c1205]/95 border-2 border-[#38bdf8] text-xs md:text-sm font-extrabold text-[#bae6fd] shadow-2xl flex items-center gap-2 whitespace-nowrap">
+      <span>👁️ ĐANG XEM TRỰC TIẾP</span>
+      <span class="px-2 py-0.5 rounded-full bg-sky-600 text-white text-xs" id="myQueuePosBadge">Hàng chờ #1</span>
+    </div>
+
+    <!-- NÚT NÉM MÌN LỚN CHO ĐIỆN THOẠI & PC (HIỆN KHI ĐANG KÉO VẬT NẶNG VÀ CÒN MÌN) -->
+    <button
+      id="btnThrowDynamite"
+      onclick="triggerDynamite()"
+      class="hidden fixed bottom-4 right-4 z-25 px-4 py-3 rounded-2xl bg-gradient-to-b from-red-500 to-red-800 border-3 border-yellow-300 text-white font-black text-sm shadow-[0_0_25px_rgba(239,68,68,0.85)] active:scale-90 animate-bounce flex items-center gap-1.5"
+    >
+      <span class="text-xl">🧨</span>
+      <span>NÉM MÌN (<span id="btnDynamiteCount">1</span>)</span>
+    </button>
+
+    <!-- HỘP CHAT THU GỌN -->
+    <div id="chatBox" class="hidden fixed bottom-14 left-2.5 z-30 w-72 sm:w-80 wood-box rounded-xl overflow-hidden flex flex-col">
+      <div class="px-3 py-1.5 bg-[#3b1806] border-b border-amber-500/60 flex items-center justify-between text-xs font-extrabold text-amber-300">
+        <span>💬 Trò Chuyện & Hàng Chờ (<span id="queueCountMini">0</span>)</span>
+        <button onclick="toggleChatBox()" class="text-amber-200 hover:text-white font-black">✕</button>
+      </div>
+      <div id="queueMiniBar" class="px-2.5 py-1 bg-[#2b1104] border-b border-amber-800/70 text-[10px] text-sky-300 truncate">
+        Hàng chờ: Chưa có ai
+      </div>
+      <div id="chatLog" class="h-36 p-2 overflow-y-auto space-y-1 text-xs bg-[#1e0d05]/95"></div>
+      <div class="p-1.5 bg-[#3b1806] flex gap-1.5">
+        <input id="chatInput" type="text" placeholder="Nhắn tin..." class="flex-1 bg-[#fef3c7] text-[#451a03] font-bold text-xs px-2 py-1 rounded border border-amber-700 focus:outline-none" />
+        <button onclick="sendChat()" class="px-3 py-1 rounded bg-amber-500 hover:bg-amber-400 text-[#451a03] font-black text-xs">Gửi</button>
+      </div>
+    </div>
+
+    <!-- THÔNG BÁO TOAST -->
+    <div id="toastWrap" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-1 pointer-events-none"></div>
   </div>
 
-  <!-- HEADER TRẠNG THÁI TRẠI GIAM -->
-  <header class="fixed top-0 left-0 right-0 h-11 md:h-12 z-30 glass-panel border-t-0 border-x-0 px-2 md:px-4 flex items-center justify-between gap-1.5">
-    <div class="flex items-center gap-1 md:gap-2 min-w-0">
-      <span class="text-xs md:text-base font-black tracking-wide text-amber-400 truncate">⛓️ TRẠI GIAM 3D</span>
-      <span id="door1Badge" class="px-1.5 py-0.5 rounded text-[9px] md:text-[10px] font-extrabold bg-red-900/90 border border-red-400 text-red-200 shrink-0">
-        B1: 🔐
-      </span>
-      <span id="door2Badge" class="px-1.5 py-0.5 rounded text-[9px] md:text-[10px] font-extrabold bg-red-900/90 border border-red-400 text-red-200 shrink-0">
-        B2: 🔐
-      </span>
-      <button id="btnPointerLock" onclick="togglePointerLock()" class="hidden lg:inline-flex px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 border border-slate-500 text-[10px] font-bold text-sky-300">
-        🎯 Khóa Chuột FPS
-      </button>
-    </div>
-
-    <div class="flex items-center gap-1 md:gap-2 shrink-0">
-      <div class="px-1.5 md:px-2 py-0.5 rounded-full bg-slate-900 border border-rose-500/60 text-[10px] md:text-[11px] font-extrabold text-rose-400">
-        ❤️ <span id="hudHp">100</span>
-      </div>
-      <div class="px-1.5 md:px-2 py-0.5 rounded-full bg-slate-900 border border-amber-400/60 text-[10px] md:text-[11px] font-extrabold text-amber-300">
-        ⭐ <span id="hudPoints">0</span>
-      </div>
-      <div id="hudRoleBadge" class="hidden md:inline-flex px-2.5 py-0.5 rounded-full bg-slate-800 border border-slate-500 text-[11px] font-extrabold text-slate-200">
-        Chưa vào trại
-      </div>
-      <button id="btnOpenAdmin" onclick="openAdminModal()" class="hidden px-2 py-1 rounded bg-red-700 hover:bg-red-600 border border-yellow-300 text-[10px] md:text-[11px] font-black text-white shadow">
-        👑 QL
-      </button>
-      <button onclick="logoutPrison()" class="px-1.5 py-1 rounded bg-slate-800 hover:bg-red-900 border border-slate-600 text-[10px] md:text-[11px] font-bold text-slate-200" title="Đăng xuất">
-        🚪
-      </button>
-    </div>
-  </header>
-
-  <!-- GỢI Ý TƯƠNG TÁC TRƯỚC TÂM NGẮM -->
-  <div id="interactionHint" class="hidden fixed top-14 left-1/2 -translate-x-1/2 z-20 px-3.5 py-1 rounded-full bg-slate-950/90 border border-amber-400 text-[11px] font-extrabold text-amber-300 shadow-xl pointer-events-none whitespace-nowrap"></div>
-
-  <!-- THÔNG BÁO NỔI (TOAST) -->
-  <div id="toastContainer" class="fixed top-20 left-1/2 -translate-x-1/2 z-30 flex flex-col items-center gap-1 pointer-events-none max-w-[90vw]"></div>
-
-  <!-- BẢNG CHAT: ĐẨY LÊN GÓC TRÊN TRÁI (THU GỌN MẶC ĐỊNH TRÊN MOBILE ĐỂ KHÔNG DÍNH JOYSTICK) -->
-  <section id="chatPanel" class="fixed top-12 left-2 z-20 flex flex-col items-start">
-    <button onclick="toggleChatPanel()" class="glass-panel px-2.5 py-1 rounded-lg flex items-center gap-1.5 text-[11px] font-extrabold text-sky-300 hover:border-sky-400">
-      <span>📻 Chat</span>
-      <span id="chatUnreadDot" class="hidden w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
-      <span id="chatPanelIcon" class="text-slate-300 font-black">+</span>
-    </button>
-    <div id="chatBody" class="hidden glass-panel mt-1 w-64 sm:w-80 rounded-xl overflow-hidden flex flex-col h-36 md:h-44">
-      <div id="chatLog" class="flex-1 p-2 overflow-y-auto space-y-1 text-[11px] leading-snug"></div>
-      <div class="p-1.5 bg-slate-950/85 border-t border-slate-700 flex gap-1.5">
-        <input id="chatInput" type="text" placeholder="Nhắn tin..." class="flex-1 bg-slate-900 text-white placeholder-slate-400 text-xs px-2 py-1 rounded border border-slate-600 focus:outline-none focus:border-amber-400" />
-        <button onclick="sendChat()" class="px-2.5 py-1 rounded bg-amber-600 hover:bg-amber-500 text-xs font-extrabold text-white">Gửi</button>
-      </div>
-    </div>
-  </section>
-
-  <!-- DANH SÁCH NGƯỜI TRONG TRẠI: GÓC TRÊN PHẢI (THU GỌN MẶC ĐỊNH TRÊN MOBILE) -->
-  <aside class="fixed top-12 right-2 z-20 flex flex-col items-end">
-    <button onclick="togglePlayersPanel()" class="glass-panel px-2.5 py-1 rounded-lg flex items-center gap-1.5 text-[11px] font-extrabold text-amber-300 hover:border-amber-400">
-      <span>👥 Trại (<span id="onlineCount">0</span>)</span>
-      <span id="playersPanelIcon" class="text-slate-300 font-black">+</span>
-    </button>
-    <div id="playersListBody" class="hidden glass-panel mt-1 p-2 w-52 md:w-60 rounded-xl max-h-44 md:max-h-56 overflow-y-auto space-y-1.5 text-xs"></div>
-  </aside>
-
-  <!-- CẦN GẠT ẢO JOYSTICK 360° (GÓC DƯỚI BÊN TRÁI - DÀNH CHO ĐIỆN THOẠI / TABLET) -->
-  <div id="joystickZone" class="lg:hidden fixed bottom-5 left-5 z-20 w-28 h-28 rounded-full bg-slate-900/55 border-2 border-slate-400/50 backdrop-blur-sm flex items-center justify-center shadow-2xl">
-    <div class="w-10 h-10 rounded-full border border-slate-500/40 pointer-events-none"></div>
-    <div id="joystickKnob" class="absolute w-12 h-12 rounded-full bg-gradient-to-b from-amber-400 to-amber-600 border-2 border-white/80 shadow-lg pointer-events-none"></div>
-  </div>
-
-  <!-- NÚT HÀNH ĐỘNG CHÍNH LỚN (BẮN SÚNG ĐIỆN / ĐẤM) NẰM GỌN BÊN PHẢI CHO NGÓN CÁI -->
-  <button id="primaryActionBtn" onclick="triggerPrimaryCombat()" class="hidden fixed bottom-20 right-4 z-20 w-16 h-16 rounded-full bg-gradient-to-b from-sky-400 to-blue-700 border-2 border-white text-white font-black text-xs shadow-[0_0_20px_rgba(56,189,248,0.7)] active:scale-90 flex flex-col items-center justify-center">
-    <span id="primaryActionIcon" class="text-2xl leading-none">⚡</span>
-    <span id="primaryActionLabel" class="text-[9px] mt-0.5">BẮN</span>
-  </button>
-
-  <!-- THANH KỸ NĂNG PHỤ GÓC DƯỚI PHẢI (KHÔNG ĐỤNG JOYSTICK BÊN TRÁI) -->
-  <nav id="roleActionBar" class="fixed bottom-2.5 right-2.5 z-20 max-w-[60vw] lg:max-w-[92vw] overflow-x-auto flex items-center gap-1.5 px-2 py-1.5 rounded-xl glass-panel"></nav>
-
-  <!-- MODAL ĐĂNG NHẬP / ĐĂNG KÝ -->
-  <div id="authModal" class="fixed inset-0 bg-black/85 z-40 flex items-center justify-center p-3">
-    <div class="glass-panel w-full max-w-md rounded-2xl overflow-hidden border-2 border-amber-500/80">
-      <div class="p-4 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 border-b border-slate-700">
-        <h1 class="text-lg font-black text-amber-400 tracking-wide">⛓️ TRẠI GIAM ONLINE 3D (FPS)</h1>
-        <p class="text-[11px] text-slate-300 mt-0.5">2 Buồng Song Sắt Có Khóa • Súng Điện Quản Tù • Joystick Mobile</p>
-      </div>
-
-      <div class="grid grid-cols-2 text-xs font-extrabold border-b border-slate-700 bg-slate-950">
-        <button id="tabLogin" onclick="switchAuthTab('login')" class="py-2.5 text-amber-400 bg-slate-800 border-b-2 border-amber-400">🔑 Đăng Nhập</button>
-        <button id="tabRegister" onclick="switchAuthTab('register')" class="py-2.5 text-slate-400 hover:text-white">📝 Nhập Trại (Tạo Acc)</button>
-      </div>
-
-      <div id="authMsg" class="hidden mx-4 mt-3 p-2.5 rounded text-xs font-bold border"></div>
-
-      <!-- FORM ĐĂNG NHẬP -->
-      <div id="loginForm" class="p-4 space-y-3 text-xs">
-        <div>
-          <label class="block font-bold text-slate-300 mb-1">Tên tài khoản:</label>
-          <input id="loginName" type="text" value="Trung" placeholder="Nhập tên tài khoản..." class="w-full bg-slate-900 text-white font-bold px-3 py-2 rounded-lg border border-slate-600 focus:outline-none focus:border-amber-400" />
-        </div>
-        <div>
-          <label class="block font-bold text-slate-300 mb-1">Mật khẩu:</label>
-          <input id="loginPass" type="password" placeholder="Nhập mật khẩu..." class="w-full bg-slate-900 text-white font-bold px-3 py-2 rounded-lg border border-slate-600 focus:outline-none focus:border-amber-400" />
-        </div>
-        <button onclick="submitLogin()" class="w-full py-2.5 rounded-lg bg-amber-600 hover:bg-amber-500 text-white font-black text-sm tracking-wide shadow-lg">
-          🚪 VÀO TRẠI GIAM 3D
-        </button>
-        <p class="text-[11px] text-slate-400 text-center leading-relaxed">
-          Mobile: <b>Joystick trái</b> đi lại • <b>Vuốt màn hình phải</b> xoay góc nhìn • <b>Nút ⚡ BẮN</b><br />
-          PC: <b>WASD</b> đi • <b>Chuột</b> xoay • <b>Click / Phím 3</b> bắn súng điện • <b>E</b> mở cửa
+  <!-- ==================== 1. MÀN HÌNH VÀO CHƠI (CHỈ NHẬP TÊN - KHÔNG CẦN ACC) ==================== -->
+  <div id="joinModal" class="fixed inset-0 z-40 bg-black/75 backdrop-blur-sm flex items-center justify-center p-3">
+    <div class="wood-box w-full max-w-md rounded-2xl overflow-hidden">
+      <div class="p-5 text-center bg-gradient-to-b from-[#a1551c] to-[#5c2b0a] border-b-2 border-[#facc15]">
+        <div class="text-4xl mb-1">⛏️💰</div>
+        <h1 class="retro-font text-2xl sm:text-3xl text-[#fde047] drop-shadow-[0_3px_0_#451a03] tracking-wide">
+          ĐÀO VÀNG ĐỐI CHIẾN
+        </h1>
+        <p class="text-xs font-bold text-amber-100 mt-1">
+          Gold Miner Classic 2 Người • 20+ Màn Huyền Thoại
         </p>
       </div>
 
-      <!-- FORM ĐĂNG KÝ -->
-      <div id="registerForm" class="hidden p-4 space-y-3 text-xs">
-        <div>
-          <label class="block font-bold text-slate-300 mb-1">Tên phạm nhân:</label>
-          <input id="regName" type="text" placeholder="VD: Hải Bánh, Tuấn Khỉ..." class="w-full bg-slate-900 text-white font-bold px-3 py-2 rounded-lg border border-slate-600 focus:outline-none focus:border-amber-400" />
+      <div class="p-5 space-y-4">
+        <!-- Trạng thái phòng trực tiếp -->
+        <div class="parchment-box rounded-xl p-3 text-xs space-y-1.5">
+          <div class="flex items-center justify-between font-extrabold">
+            <span>⛏️ Thợ mỏ trong phòng:</span>
+            <span id="lobbySlotsText" class="px-2 py-0.5 rounded bg-amber-800 text-amber-100">0 / 2</span>
+          </div>
+          <div id="lobbyPlayersNames" class="text-[11px] font-bold text-amber-900">
+            Đang trống — Vào là chơi ngay!
+          </div>
+          <div id="lobbyQueueInfo" class="text-[11px] font-bold text-sky-900 hidden"></div>
         </div>
+
         <div>
-          <label class="block font-bold text-slate-300 mb-1">Mật khẩu:</label>
-          <input id="regPass" type="password" placeholder="Tạo mật khẩu..." class="w-full bg-slate-900 text-white font-bold px-3 py-2 rounded-lg border border-slate-600 focus:outline-none focus:border-amber-400" />
+          <label class="block text-xs font-extrabold text-amber-200 mb-1.5">
+            Tên Thợ Mỏ (không cần đăng ký tài khoản):
+          </label>
+          <input
+            id="playerNameInput"
+            type="text"
+            maxlength="16"
+            placeholder="Nhập tên của bạn (VD: Ông Lão, Cu Tí)..."
+            class="w-full bg-[#fef9c3] text-[#451a03] placeholder-amber-800/60 font-extrabold text-sm px-3.5 py-2.5 rounded-xl border-2 border-[#78350f] focus:outline-none focus:border-[#fde047]"
+          />
+          <div id="joinError" class="hidden text-xs font-extrabold text-red-300 mt-1.5"></div>
         </div>
+
+        <button id="btnJoinGame" onclick="submitJoin()" class="gold-btn w-full py-3 rounded-xl retro-font text-base tracking-wider cursor-pointer">
+          ⛏️ VÀO MỎ NGAY
+        </button>
+
+        <p class="text-[11px] text-amber-200/90 text-center leading-relaxed">
+          <b>PC:</b> Phím <b>Space / ↓ / Click</b> thả móc • <b>↑ / W</b> ném Mìn<br/>
+          <b>Điện thoại:</b> Chạm màn hình thả móc • Bấm nút <b>🧨 Ném Mìn</b>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 2. CỬA HÀNG ÔNG CHỦ GIỮA CÁC MÀN ==================== -->
+  <div id="shopModal" class="hidden fixed inset-0 z-35 bg-black/75 backdrop-blur-sm flex items-center justify-center p-2.5">
+    <div class="wood-box w-full max-w-3xl rounded-2xl overflow-hidden flex flex-col max-h-[94dvh]">
+      <div class="px-4 py-3 bg-gradient-to-r from-[#78350f] via-[#a16207] to-[#78350f] border-b-2 border-[#facc15] flex flex-wrap items-center justify-between gap-2">
         <div>
-          <label class="block font-bold text-slate-300 mb-1">Chọn Buồng Giam:</label>
-          <select id="regCell" class="w-full bg-slate-900 text-white font-bold px-3 py-2 rounded-lg border border-slate-600">
-            <option value="1">⛓️ Buồng Giam 1 (Bên Trái)</option>
-            <option value="2">⛓️ Buồng Giam 2 (Bên Phải)</option>
-          </select>
+          <h2 class="retro-font text-lg sm:text-xl text-[#fde047] drop-shadow-[0_2px_0_#451a03]">
+            🏪 CỬA HÀNG ÔNG CHỦ
+          </h2>
+          <p class="text-[11px] font-bold text-amber-100">
+            Mua đồ chuẩn bị cho <span id="shopNextLevelText" class="text-yellow-300 font-black">Màn 2</span>!
+          </p>
         </div>
-        <button onclick="submitRegister()" class="w-full py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-black text-sm tracking-wide shadow-lg">
-          📝 TẠO HỒ SƠ TÙ THƯỜNG
+        <div class="flex items-center gap-2">
+          <div class="px-3 py-1 rounded-lg bg-[#2e1204] border-2 border-amber-400 text-xs sm:text-sm font-black text-yellow-300">
+            ⏱️ <span id="shopTimerText">18</span>s
+          </div>
+          <div id="shopMyCashBadge" class="px-3 py-1 rounded-lg bg-emerald-950 border-2 border-emerald-400 text-xs sm:text-sm font-black text-emerald-300">
+            💵 $0
+          </div>
+        </div>
+      </div>
+
+      <!-- Bảng tóm tắt 2 người chơi trong Shop -->
+      <div id="shopPlayersBar" class="grid grid-cols-2 gap-2 px-4 py-2 bg-[#361706] border-b border-amber-700/70 text-xs"></div>
+
+      <!-- 5 vật phẩm kinh điển -->
+      <div id="shopItemsGrid" class="p-3 sm:p-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2.5 overflow-y-auto"></div>
+
+      <div class="px-4 py-2.5 bg-[#2e1204] border-t-2 border-amber-700 flex items-center justify-between gap-2">
+        <span id="shopHintText" class="text-[11px] font-bold text-amber-200">
+          Bấm vào món đồ để mua cho màn kế tiếp!
+        </span>
+        <button id="btnShopReady" onclick="clickShopReady()" class="gold-btn px-5 py-2 rounded-xl font-black text-xs sm:text-sm cursor-pointer shrink-0">
+          ✅ SẴN SÀNG QUA MÀN
         </button>
       </div>
     </div>
   </div>
 
-  <!-- MODAL QUẢN LÝ TRẠI (QUẢN TÙ) -->
-  <div id="adminModal" class="hidden fixed inset-0 bg-black/85 z-50 items-center justify-center p-3">
-    <div class="glass-panel w-full max-w-3xl max-h-[88dvh] rounded-2xl flex flex-col overflow-hidden border-2 border-amber-400">
-      <div class="p-3.5 bg-slate-900 border-b border-slate-700 flex items-center justify-between">
-        <div>
-          <h2 class="text-sm md:text-base font-black text-amber-400">👑 SỔ QUẢN LÝ TRẠI GIAM (QUẢN TÙ)</h2>
-          <p class="text-[11px] text-slate-400">Bổ nhiệm Trưởng Buồng, điều chuyển Buồng 1 / Buồng 2, cộng trừ điểm hoặc xóa hồ sơ</p>
-        </div>
-        <button onclick="closeAdminModal()" class="text-slate-300 hover:text-white font-black text-lg px-2">✕</button>
+  <!-- ==================== 3. MÀN HÌNH KẾT THÚC TRẬN ĐẤU ==================== -->
+  <div id="gameoverModal" class="hidden fixed inset-0 z-35 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3">
+    <div class="wood-box w-full max-w-lg rounded-2xl overflow-hidden text-center">
+      <div class="p-4 bg-gradient-to-b from-red-800 to-red-950 border-b-2 border-yellow-400">
+        <h2 class="retro-font text-2xl text-yellow-300 drop-shadow-[0_3px_0_#450a0a]">🏁 KẾT THÚC CHUYẾN ĐÀO</h2>
+        <p id="goReasonText" class="text-xs font-bold text-red-100 mt-1"></p>
       </div>
-      <div id="adminListContainer" class="p-3 overflow-y-auto space-y-2 flex-1 text-xs"></div>
-      <div class="p-2.5 bg-slate-950 border-t border-slate-700 flex justify-end">
-        <button onclick="closeAdminModal()" class="px-4 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-xs font-bold text-white">Đóng</button>
+      <div class="p-5 space-y-4">
+        <div id="goChampionText" class="parchment-box rounded-xl p-3 font-black text-base text-amber-950"></div>
+        <div id="goScoreboard" class="grid grid-cols-2 gap-3 text-xs"></div>
+        <div id="goPlayerButtons" class="flex items-center justify-center gap-3 pt-1">
+          <button onclick="clickRestart()" class="gold-btn px-6 py-2.5 rounded-xl retro-font text-sm cursor-pointer">
+            🔄 CHƠI LẠI MÀN 1
+          </button>
+          <button onclick="yieldSeat()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border-2 border-amber-300 text-amber-100 font-extrabold text-xs cursor-pointer">
+            🪑 Nhường Hàng Chờ
+          </button>
+        </div>
+        <p id="goSpectatorNote" class="hidden text-xs font-bold text-sky-300">
+          Đang chờ 2 thợ mỏ bấm Chơi Lại hoặc Nhường Ghế...
+        </p>
       </div>
     </div>
   </div>
@@ -266,1717 +243,1394 @@
   <script src="/socket.io/socket.io.js"></script>
   <script>
     // =========================================================================
-    // 1. ÂM THANH WEB AUDIO API (SÚNG ĐIỆN RÈ XANH, KHÓA CỬA, SONG SẮT, CÒI)
+    // 1. ÂM THANH RETRO ĐÀO VÀNG HUYỀN THOẠI (WEB AUDIO API)
     // =========================================================================
     const AudioCtx = window.AudioContext || window.webkitAudioContext;
     let audioCtx = null;
+    let muted = false;
 
     function ensureAudio() {
       if (!audioCtx) audioCtx = new AudioCtx();
       if (audioCtx.state === 'suspended') audioCtx.resume();
     }
 
-    function playDoorLockSound(locked) {
+    function toggleMute() {
+      muted = !muted;
+      document.getElementById('btnMute').textContent = muted ? '🔇' : '🔊';
+    }
+
+    function playSfx(type) {
+      if (muted) return;
       try {
         ensureAudio();
         const now = audioCtx.currentTime;
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(locked ? 240 : 180, now);
-        osc.frequency.exponentialRampToValueAtTime(locked ? 90 : 320, now + 0.22);
-        gain.gain.setValueAtTime(0.22, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.26);
-        osc.connect(gain); gain.connect(audioCtx.destination);
-        osc.start(now); osc.stop(now + 0.27);
+
+        if (type === 'drop') {
+          const o = audioCtx.createOscillator();
+          const g = audioCtx.createGain();
+          o.type = 'triangle';
+          o.frequency.setValueAtTime(420, now);
+          o.frequency.exponentialRampToValueAtTime(190, now + 0.09);
+          g.gain.setValueAtTime(0.18, now);
+          g.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+          o.connect(g); g.connect(audioCtx.destination);
+          o.start(now); o.stop(now + 0.11);
+        } else if (type === 'grab_gold' || type === 'grab_diamond') {
+          const freqs = type === 'grab_diamond' ? [1100, 1650] : [680, 920];
+          freqs.forEach((f, idx) => {
+            const o = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            o.type = 'sine';
+            o.frequency.setValueAtTime(f, now + idx * 0.05);
+            g.gain.setValueAtTime(0.22, now + idx * 0.05);
+            g.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.05 + 0.18);
+            o.connect(g); g.connect(audioCtx.destination);
+            o.start(now + idx * 0.05); o.stop(now + idx * 0.05 + 0.19);
+          });
+        } else if (type === 'grab_rock') {
+          const o = audioCtx.createOscillator();
+          const g = audioCtx.createGain();
+          o.type = 'square';
+          o.frequency.setValueAtTime(120, now);
+          o.frequency.exponentialRampToValueAtTime(55, now + 0.1);
+          g.gain.setValueAtTime(0.18, now);
+          g.gain.exponentialRampToValueAtTime(0.001, now + 0.11);
+          o.connect(g); g.connect(audioCtx.destination);
+          o.start(now); o.stop(now + 0.12);
+        } else if (type === 'cash' || type === 'big_cash') {
+          const notes = type === 'big_cash' ? [523, 659, 784, 1046] : [660, 880];
+          notes.forEach((f, i) => {
+            const o = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            o.type = 'triangle';
+            o.frequency.setValueAtTime(f, now + i * 0.06);
+            g.gain.setValueAtTime(0.22, now + i * 0.06);
+            g.gain.exponentialRampToValueAtTime(0.001, now + i * 0.06 + 0.2);
+            o.connect(g); g.connect(audioCtx.destination);
+            o.start(now + i * 0.06); o.stop(now + i * 0.06 + 0.22);
+          });
+        } else if (type === 'boom') {
+          const bufSize = audioCtx.sampleRate * 0.45;
+          const buf = audioCtx.createBuffer(1, bufSize, audioCtx.sampleRate);
+          const data = buf.getChannelData(0);
+          for (let i = 0; i < bufSize; i++) data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufSize * 0.25));
+          const noise = audioCtx.createBufferSource();
+          noise.buffer = buf;
+          const filter = audioCtx.createBiquadFilter();
+          filter.type = 'lowpass';
+          filter.frequency.setValueAtTime(420, now);
+          const g = audioCtx.createGain();
+          g.gain.setValueAtTime(0.55, now);
+          g.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+          noise.connect(filter); filter.connect(g); g.connect(audioCtx.destination);
+          noise.start(now);
+        } else if (type === 'level_clear' || type === 'start') {
+          const melody = type === 'level_clear' ? [523, 659, 784, 1046, 1318] : [440, 554, 659];
+          melody.forEach((f, i) => {
+            const o = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            o.type = 'triangle';
+            o.frequency.setValueAtTime(f, now + i * 0.09);
+            g.gain.setValueAtTime(0.2, now + i * 0.09);
+            g.gain.exponentialRampToValueAtTime(0.001, now + i * 0.09 + 0.24);
+            o.connect(g); g.connect(audioCtx.destination);
+            o.start(now + i * 0.09); o.stop(now + i * 0.09 + 0.25);
+          });
+        } else if (type === 'gameover') {
+          [392, 349, 311, 261].forEach((f, i) => {
+            const o = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            o.type = 'sawtooth';
+            o.frequency.setValueAtTime(f, now + i * 0.16);
+            g.gain.setValueAtTime(0.14, now + i * 0.16);
+            g.gain.exponentialRampToValueAtTime(0.001, now + i * 0.16 + 0.28);
+            o.connect(g); g.connect(audioCtx.destination);
+            o.start(now + i * 0.16); o.stop(now + i * 0.16 + 0.3);
+          });
+        }
       } catch (e) {}
-    }
-
-    function playBarClangSound() {
-      try {
-        ensureAudio();
-        const now = audioCtx.currentTime;
-        [620, 930, 1480].forEach((f, i) => {
-          const osc = audioCtx.createOscillator();
-          const gain = audioCtx.createGain();
-          osc.type = 'triangle';
-          osc.frequency.setValueAtTime(f, now);
-          gain.gain.setValueAtTime(0.18 / (i + 1), now);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
-          osc.connect(gain); gain.connect(audioCtx.destination);
-          osc.start(now); osc.stop(now + 0.46);
-        });
-      } catch (e) {}
-    }
-
-    function playPunchSound() {
-      try {
-        ensureAudio();
-        const now = audioCtx.currentTime;
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(160, now);
-        osc.frequency.exponentialRampToValueAtTime(45, now + 0.14);
-        gain.gain.setValueAtTime(0.28, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
-        osc.connect(gain); gain.connect(audioCtx.destination);
-        osc.start(now); osc.stop(now + 0.16);
-      } catch (e) {}
-    }
-
-    // Tiếng súng điện rè rè chói tai kiểu Taser thật
-    function playTaserZapSound(longShock = false) {
-      try {
-        ensureAudio();
-        const dur = longShock ? 0.9 : 0.35;
-        const now = audioCtx.currentTime;
-        const osc = audioCtx.createOscillator();
-        const lfo = audioCtx.createOscillator();
-        const lfoGain = audioCtx.createGain();
-        const gain = audioCtx.createGain();
-
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(140, now);
-
-        lfo.type = 'square';
-        lfo.frequency.setValueAtTime(48, now);
-        lfoGain.gain.setValueAtTime(95, now);
-
-        lfo.connect(lfoGain);
-        lfoGain.connect(osc.frequency);
-
-        gain.gain.setValueAtTime(0.22, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + dur);
-
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start(now);
-        lfo.start(now);
-        osc.stop(now + dur + 0.02);
-        lfo.stop(now + dur + 0.02);
-      } catch (e) {}
-    }
-
-    let alarmInterval = null;
-    function setAlarmAudio(active) {
-      if (alarmInterval) { clearInterval(alarmInterval); alarmInterval = null; }
-      if (!active) return;
-      const beep = () => {
-        try {
-          ensureAudio();
-          const now = audioCtx.currentTime;
-          const osc = audioCtx.createOscillator();
-          const gain = audioCtx.createGain();
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(520, now);
-          osc.frequency.linearRampToValueAtTime(860, now + 0.4);
-          osc.frequency.linearRampToValueAtTime(520, now + 0.8);
-          gain.gain.setValueAtTime(0.11, now);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.82);
-          osc.connect(gain); gain.connect(audioCtx.destination);
-          osc.start(now); osc.stop(now + 0.85);
-        } catch (e) {}
-      };
-      beep();
-      alarmInterval = setInterval(beep, 1200);
     }
 
     // =========================================================================
-    // 2. BIẾN TRẠNG THÁI GAME & MẠNG SOCKET.IO
+    // 2. BIẾN TRẠNG THÁI CLIENT & CO GIÃN CANVAS 1200x720
     // =========================================================================
     const socket = io();
+    const canvas = document.getElementById('mineCanvas');
+    const ctx = canvas.getContext('2d');
 
-    let myId = null;
-    let myPlayer = null;
-    let players = {};
-    let accountsList = [];
-    let selectedTargetId = null;
-    let myStunnedUntil = 0;
+    const WORLD_W = 1200;
+    const WORLD_H = 720;
+    const SURFACE_Y = 142;
+    const ANCHORS = [
+      { x: 350, y: 112 },
+      { x: 850, y: 112 }
+    ];
 
-    let prisonState = {
-      cells: {
-        1: { locked: true, name: 'Buồng 1' },
-        2: { locked: true, name: 'Buồng 2' }
-      },
-      alarmActive: false
+    let hasJoined = false;
+    let myRole = null; // 'player' | 'spectator'
+    let mySlot = null; // 0 | 1 | null
+
+    let roomMeta = {
+      phase: 'waiting',
+      level: 1,
+      levelName: 'Khởi Đầu Mỏ Vàng',
+      theme: 'earth',
+      goal: 650,
+      timeLeft: 60,
+      countdown: 0,
+      shopTimeLeft: 0,
+      shopItems: [],
+      lastRoundWinner: null,
+      gameoverReason: '',
+      championText: '',
+      slots: [null, null],
+      queue: []
     };
 
-    const keys = { w: false, a: false, s: false, d: false };
-    const joyVec = { x: 0, y: 0 }; // Giá trị Joystick ảo từ -1 đến 1
+    let livePlayers = [null, null];
+    let liveItems = [];
+    let explosions = [];
+    let scorePopups = [];
+    let screenShake = 0;
+    let renderTick = 0;
 
-    let playerPos = new THREE.Vector3(0, 1.65, 3.4);
-    let camYaw = 0;
-    let camPitch = 0;
-    let handAnimTime = 0;
-    let lastSyncTime = 0;
+    // Tạo nền đất phân tầng địa chất vào Offscreen Canvas cho mượt 60fps
+    const bgCache = document.createElement('canvas');
+    bgCache.width = WORLD_W;
+    bgCache.height = WORLD_H;
+    const bgCtx = bgCache.getContext('2d');
+    let cachedTheme = '';
 
-    // Mở sẵn bảng Chat & Danh sách trên PC, thu gọn mặc định trên Mobile
-    const isDesktopInit = window.innerWidth >= 1024;
-    if (isDesktopInit) {
-      document.getElementById('chatBody').classList.remove('hidden');
-      document.getElementById('chatPanelIcon').textContent = '−';
-      document.getElementById('playersListBody').classList.remove('hidden');
-      document.getElementById('playersPanelIcon').textContent = '−';
-    }
+    const DIRT_THEMES = {
+      earth: { top: '#d99a4e', mid: '#a86523', bot: '#633510', streak: 'rgba(82, 40, 10, 0.24)', pebble: '#4d270a' },
+      amber: { top: '#e0a943', mid: '#b06f1c', bot: '#5e3508', streak: 'rgba(92, 48, 8, 0.25)', pebble: '#4a2605' },
+      rust:  { top: '#cc7c47', mid: '#944a21', bot: '#52220d', streak: 'rgba(72, 24, 10, 0.28)', pebble: '#3b1507' },
+      stone: { top: '#948675', mid: '#6b5e51', bot: '#3d342d', streak: 'rgba(38, 32, 27, 0.30)', pebble: '#29221d' },
+      deep:  { top: '#8c6d56', mid: '#593e32', bot: '#291a16', streak: 'rgba(20, 12, 10, 0.32)', pebble: '#1c110f' },
+      bone:  { top: '#b89668', mid: '#85623d', bot: '#4a321c', streak: 'rgba(58, 38, 18, 0.28)', pebble: '#38220f' },
+      lava:  { top: '#a85a32', mid: '#6e2c1b', bot: '#36110b', streak: 'rgba(220, 60, 20, 0.22)', pebble: '#260b07' }
+    };
 
-    // =========================================================================
-    // 3. CẢNH 3D TRẠI GIAM 2 BUỒNG SONG SẮT (THREE.JS)
-    // =========================================================================
-    const container = document.getElementById('sceneContainer');
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x0b0f17);
-    scene.fog = new THREE.FogExp2(0x0b0f17, 0.032);
+    function buildDirtBackground(themeKey) {
+      if (cachedTheme === themeKey) return;
+      cachedTheme = themeKey;
+      const th = DIRT_THEMES[themeKey] || DIRT_THEMES.earth;
 
-    const camera = new THREE.PerspectiveCamera(72, window.innerWidth / window.innerHeight, 0.1, 60);
-    scene.add(camera);
+      // 1. Bầu trời vàng ấm & đồi núi phía trên (y: 0 -> SURFACE_Y)
+      const skyGrad = bgCtx.createLinearGradient(0, 0, 0, SURFACE_Y);
+      skyGrad.addColorStop(0, '#60a5fa');
+      skyGrad.addColorStop(0.55, '#bae6fd');
+      skyGrad.addColorStop(1, '#fef3c7');
+      bgCtx.fillStyle = skyGrad;
+      bgCtx.fillRect(0, 0, WORLD_W, SURFACE_Y);
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    container.appendChild(renderer.domElement);
-
-    function createConcreteTexture(baseHex, gridHex, repeatX, repeatY) {
-      const c = document.createElement('canvas');
-      c.width = 256; c.height = 256;
-      const g = c.getContext('2d');
-      g.fillStyle = baseHex;
-      g.fillRect(0, 0, 256, 256);
-      for (let i = 0; i < 1400; i++) {
-        g.fillStyle = `rgba(0,0,0,${Math.random() * 0.08})`;
-        g.fillRect(Math.random() * 256, Math.random() * 256, 3, 3);
-      }
-      g.strokeStyle = gridHex;
-      g.lineWidth = 2;
-      g.strokeRect(0, 0, 256, 256);
-      g.beginPath();
-      g.moveTo(0, 128); g.lineTo(256, 128);
-      g.moveTo(128, 0); g.lineTo(128, 256);
-      g.stroke();
-
-      const tex = new THREE.CanvasTexture(c);
-      tex.wrapS = THREE.RepeatWrapping;
-      tex.wrapT = THREE.RepeatWrapping;
-      tex.repeat.set(repeatX, repeatY);
-      return tex;
-    }
-
-    function createSignTexture(title, sub, bg = '#1e293b', fg = '#facc15') {
-      const c = document.createElement('canvas');
-      c.width = 512; c.height = 160;
-      const g = c.getContext('2d');
-      g.fillStyle = bg;
-      g.fillRect(0, 0, 512, 160);
-      g.strokeStyle = fg;
-      g.lineWidth = 8;
-      g.strokeRect(6, 6, 500, 148);
-      g.fillStyle = fg;
-      g.font = '900 54px "Be Vietnam Pro", sans-serif';
-      g.textAlign = 'center';
-      g.fillText(title, 256, 78);
-      g.fillStyle = '#e2e8f0';
-      g.font = '700 28px "Be Vietnam Pro", sans-serif';
-      g.fillText(sub, 256, 128);
-      return new THREE.CanvasTexture(c);
-    }
-
-    // Ánh sáng
-    scene.add(new THREE.AmbientLight(0xdbeafe, 0.58));
-
-    const corridorLight = new THREE.PointLight(0xfef3c7, 1.15, 22);
-    corridorLight.position.set(0, 3.8, 2.2);
-    scene.add(corridorLight);
-
-    const cell1Light = new THREE.PointLight(0xe0f2fe, 0.9, 14);
-    cell1Light.position.set(-4, 3.7, -4);
-    scene.add(cell1Light);
-
-    const cell2Light = new THREE.PointLight(0xe0f2fe, 0.9, 14);
-    cell2Light.position.set(4, 3.7, -4);
-    scene.add(cell2Light);
-
-    const alarmLight = new THREE.PointLight(0xff0000, 0, 26);
-    alarmLight.position.set(0, 3.9, 0.5);
-    scene.add(alarmLight);
-
-    const floorMat = new THREE.MeshStandardMaterial({
-      map: createConcreteTexture('#334155', 'rgba(15,23,42,0.45)', 8, 7),
-      roughness: 0.85
-    });
-    const wallMat = new THREE.MeshStandardMaterial({
-      map: createConcreteTexture('#475569', 'rgba(30,41,59,0.55)', 6, 2),
-      roughness: 0.9
-    });
-    const ceilMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.95 });
-    const ironMat = new THREE.MeshStandardMaterial({ color: 0x1e242c, metalness: 0.82, roughness: 0.28 });
-    const woodMat = new THREE.MeshStandardMaterial({ color: 0x6b4423, roughness: 0.8 });
-
-    // Danh sách tường bê tông đặc chắn đạn (không bắn xuyên tường bê tông, nhưng bắn xuyên song sắt được)
-    const wallOccluders = [];
-
-    const floor = new THREE.Mesh(new THREE.PlaneGeometry(16, 13), floorMat);
-    floor.rotation.x = -Math.PI / 2;
-    floor.position.set(0, 0, -0.5);
-    scene.add(floor);
-    wallOccluders.push(floor);
-
-    const ceiling = new THREE.Mesh(new THREE.PlaneGeometry(16, 13), ceilMat);
-    ceiling.rotation.x = Math.PI / 2;
-    ceiling.position.set(0, 4.2, -0.5);
-    scene.add(ceiling);
-
-    function addWall(w, h, d, x, y, z, blocksShot = true) {
-      const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), wallMat);
-      m.position.set(x, y, z);
-      scene.add(m);
-      if (blocksShot) wallOccluders.push(m);
-      return m;
-    }
-
-    addWall(16.4, 4.2, 0.3, 0, 2.1, -7.15);
-    addWall(16.4, 4.2, 0.3, 0, 2.1, 6.15);
-    addWall(0.3, 4.2, 13.4, -8.15, 2.1, -0.5);
-    addWall(0.3, 4.2, 13.4, 8.15, 2.1, -0.5);
-    addWall(0.32, 4.2, 6.15, 0, 2.1, -4.0); // Vách ngăn giữa Buồng 1 và Buồng 2
-    addWall(16, 0.85, 0.34, 0, 3.78, -1.0); // Dầm ngang phía trên song sắt
-
-    // Biển tên 2 buồng
-    const sign1 = new THREE.Mesh(
-      new THREE.PlaneGeometry(2.6, 0.72),
-      new THREE.MeshBasicMaterial({ map: createSignTexture('BUỒNG GIAM 1', 'KHU A • SONG SẮT') })
-    );
-    sign1.position.set(-4, 3.78, -0.81);
-    scene.add(sign1);
-
-    const sign2 = new THREE.Mesh(
-      new THREE.PlaneGeometry(2.6, 0.72),
-      new THREE.MeshBasicMaterial({ map: createSignTexture('BUỒNG GIAM 2', 'KHU B • SONG SẮT') })
-    );
-    sign2.position.set(4, 3.78, -0.81);
-    scene.add(sign2);
-
-    const doorObjects = {};
-    const clickableDoors = [];
-
-    function createFixedBars(xStart, xEnd, zPos) {
-      const barH = 3.4;
-      for (let x = xStart; x <= xEnd + 0.01; x += 0.28) {
-        const bar = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, barH, 8), ironMat);
-        bar.position.set(x, barH / 2, zPos);
-        scene.add(bar);
-      }
-      [0.2, 1.7, 3.25].forEach((yh) => {
-        const rail = new THREE.Mesh(new THREE.BoxGeometry(xEnd - xStart + 0.12, 0.09, 0.12), ironMat);
-        rail.position.set((xStart + xEnd) / 2, yh, zPos);
-        scene.add(rail);
-      });
-    }
-
-    createFixedBars(-7.9, -5.25, -1.0);
-    createFixedBars(-2.75, -0.15, -1.0);
-    createFixedBars(0.15, 2.75, -1.0);
-    createFixedBars(5.25, 7.9, -1.0);
-
-    function createSlidingCellDoor(cellId, centerX, slideDir) {
-      const doorW = 2.4;
-      const doorH = 3.35;
-      const group = new THREE.Group();
-      group.position.set(centerX, 0, -0.92);
-
-      const frameMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.9, roughness: 0.25 });
-      const leftPost = new THREE.Mesh(new THREE.BoxGeometry(0.11, doorH, 0.11), frameMat);
-      leftPost.position.set(-doorW / 2, doorH / 2, 0);
-      group.add(leftPost);
-
-      const rightPost = new THREE.Mesh(new THREE.BoxGeometry(0.11, doorH, 0.11), frameMat);
-      rightPost.position.set(doorW / 2, doorH / 2, 0);
-      group.add(rightPost);
-
-      [0.12, 1.65, doorH - 0.08].forEach((yh) => {
-        const hBar = new THREE.Mesh(new THREE.BoxGeometry(doorW, 0.11, 0.11), frameMat);
-        hBar.position.set(0, yh, 0);
-        group.add(hBar);
+      // Mây trắng cổ điển
+      bgCtx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+      [
+        [150, 52, 34], [182, 48, 28], [122, 56, 22],
+        [560, 44, 30], [592, 40, 26], [532, 48, 20],
+        [990, 54, 36], [1025, 48, 28], [960, 58, 22]
+      ].forEach(([cx, cy, r]) => {
+        bgCtx.beginPath();
+        bgCtx.arc(cx, cy, r, 0, Math.PI * 2);
+        bgCtx.fill();
       });
 
-      for (let bx = -doorW / 2 + 0.26; bx < doorW / 2 - 0.1; bx += 0.26) {
-        const bar = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, doorH - 0.15, 8), ironMat);
-        bar.position.set(bx, doorH / 2, 0);
-        group.add(bar);
+      // Đồi đất xa phía sau
+      bgCtx.fillStyle = '#c2813d';
+      bgCtx.beginPath();
+      bgCtx.moveTo(0, SURFACE_Y);
+      bgCtx.quadraticCurveTo(180, 82, 390, SURFACE_Y);
+      bgCtx.quadraticCurveTo(640, 72, 870, SURFACE_Y);
+      bgCtx.quadraticCurveTo(1060, 86, WORLD_W, SURFACE_Y);
+      bgCtx.fill();
+
+      // Đường ray gỗ & dầm mặt đất
+      bgCtx.fillStyle = '#5c2e0e';
+      bgCtx.fillRect(0, SURFACE_Y - 12, WORLD_W, 14);
+      bgCtx.fillStyle = '#854d0e';
+      bgCtx.fillRect(0, SURFACE_Y - 10, WORLD_W, 5);
+      for (let rx = 20; rx < WORLD_W; rx += 56) {
+        bgCtx.fillStyle = '#3b1806';
+        bgCtx.fillRect(rx, SURFACE_Y - 12, 10, 14);
       }
 
-      const lockBox = new THREE.Mesh(
-        new THREE.BoxGeometry(0.28, 0.36, 0.18),
-        new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.8 })
-      );
-      lockBox.position.set(-slideDir * (doorW / 2 - 0.22), 1.35, 0.05);
-      group.add(lockBox);
+      // 2. Lòng đất phân tầng giàu họa tiết kiểu Đào Vàng huyền thoại
+      const dirtGrad = bgCtx.createLinearGradient(0, SURFACE_Y, 0, WORLD_H);
+      dirtGrad.addColorStop(0, th.top);
+      dirtGrad.addColorStop(0.42, th.mid);
+      dirtGrad.addColorStop(1, th.bot);
+      bgCtx.fillStyle = dirtGrad;
+      bgCtx.fillRect(0, SURFACE_Y, WORLD_W, WORLD_H - SURFACE_Y);
 
-      const hitBox = new THREE.Mesh(
-        new THREE.BoxGeometry(doorW, doorH, 0.35),
-        new THREE.MeshBasicMaterial({ visible: false })
-      );
-      hitBox.position.set(0, doorH / 2, 0);
-      hitBox.userData = { interactType: 'door', cellId };
-      group.add(hitBox);
-      clickableDoors.push(hitBox);
+      // Các vệt địa tầng uốn lượn ngang
+      bgCtx.fillStyle = th.streak;
+      for (let row = 0; row < 7; row++) {
+        const yBase = SURFACE_Y + 45 + row * 82;
+        bgCtx.beginPath();
+        bgCtx.moveTo(0, yBase);
+        for (let x = 0; x <= WORLD_W; x += 120) {
+          bgCtx.quadraticCurveTo(x + 60, yBase + (row % 2 === 0 ? 18 : -18), x + 120, yBase);
+        }
+        bgCtx.lineTo(WORLD_W, yBase + 26);
+        bgCtx.lineTo(0, yBase + 26);
+        bgCtx.closePath();
+        bgCtx.fill();
+      }
 
-      scene.add(group);
-
-      const panelX = centerX + slideDir * (doorW / 2 + 0.35);
-      const ctrlBox = new THREE.Mesh(
-        new THREE.BoxGeometry(0.26, 0.44, 0.16),
-        new THREE.MeshStandardMaterial({ color: 0x1e293b })
-      );
-      ctrlBox.position.set(panelX, 1.55, -0.84);
-      ctrlBox.userData = { interactType: 'door', cellId };
-      scene.add(ctrlBox);
-      clickableDoors.push(ctrlBox);
-
-      const ledMat = new THREE.MeshBasicMaterial({ color: 0xef4444 });
-      const led = new THREE.Mesh(new THREE.SphereGeometry(0.07, 12, 12), ledMat);
-      led.position.set(panelX, 1.66, -0.74);
-      scene.add(led);
-
-      doorObjects[cellId] = {
-        group,
-        closedX: centerX,
-        openX: centerX + slideDir * 2.15,
-        ledMat
+      // Hạt sỏi nhỏ li ti trong lòng đất (cố định hạt giống để không nhấp nháy)
+      let seed = themeKey.charCodeAt(0) * 997;
+      const rand = () => {
+        seed = (seed * 16807) % 2147483647;
+        return (seed - 1) / 2147483646;
       };
-    }
-
-    createSlidingCellDoor(1, -4.0, 1);
-    createSlidingCellDoor(2, 4.0, -1);
-
-    function furnishCell(xOffset, sideDir) {
-      const winFrame = new THREE.Mesh(
-        new THREE.PlaneGeometry(2.2, 0.9),
-        new THREE.MeshBasicMaterial({ color: 0x1d3557 })
-      );
-      winFrame.position.set(xOffset, 3.1, -6.98);
-      scene.add(winFrame);
-      for (let wx = xOffset - 0.85; wx <= xOffset + 0.86; wx += 0.34) {
-        const b = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.95, 6), ironMat);
-        b.position.set(wx, 3.1, -6.94);
-        scene.add(b);
+      for (let i = 0; i < 240; i++) {
+        const px = rand() * WORLD_W;
+        const py = SURFACE_Y + 12 + rand() * (WORLD_H - SURFACE_Y - 20);
+        const pr = 1.5 + rand() * 4.5;
+        bgCtx.fillStyle = rand() > 0.35 ? th.pebble : 'rgba(255, 224, 150, 0.16)';
+        bgCtx.beginPath();
+        bgCtx.ellipse(px, py, pr * 1.3, pr, rand() * Math.PI, 0, Math.PI * 2);
+        bgCtx.fill();
       }
 
-      const bedX = xOffset + sideDir * 2.75;
-      const bedZ = -5.5;
-      const bedFrameMat = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.7 });
-      const mattressMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.95 });
-
-      [[-0.55, -1.0], [0.55, -1.0], [-0.55, 1.0], [0.55, 1.0]].forEach(([dx, dz]) => {
-        const post = new THREE.Mesh(new THREE.BoxGeometry(0.08, 2.2, 0.08), bedFrameMat);
-        post.position.set(bedX + dx, 1.1, bedZ + dz);
-        scene.add(post);
-      });
-      [0.55, 1.65].forEach((yh) => {
-        const bunk = new THREE.Mesh(new THREE.BoxGeometry(1.15, 0.14, 2.05), mattressMat);
-        bunk.position.set(bedX, yh, bedZ);
-        scene.add(bunk);
-      });
-
-      const bench = new THREE.Mesh(
-        new THREE.BoxGeometry(1.6, 0.55, 0.65),
-        new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.95 })
-      );
-      bench.position.set(xOffset - sideDir * 1.4, 0.28, -6.5);
-      scene.add(bench);
-
-      const toilet = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.24, 0.2, 0.5, 12),
-        new THREE.MeshStandardMaterial({ color: 0xcbd5e1, metalness: 0.6, roughness: 0.3 })
-      );
-      toilet.position.set(xOffset - sideDir * 3.1, 0.25, -6.4);
-      scene.add(toilet);
+      // Cột gỗ chống hầm mỏ 2 bên mép trái/phải
+      bgCtx.fillStyle = '#451a03';
+      bgCtx.fillRect(0, SURFACE_Y, 16, WORLD_H - SURFACE_Y);
+      bgCtx.fillRect(WORLD_W - 16, SURFACE_Y, 16, WORLD_H - SURFACE_Y);
+      bgCtx.fillStyle = '#78350f';
+      bgCtx.fillRect(4, SURFACE_Y, 6, WORLD_H - SURFACE_Y);
+      bgCtx.fillRect(WORLD_W - 10, SURFACE_Y, 6, WORLD_H - SURFACE_Y);
     }
 
-    furnishCell(-4, -1);
-    furnishCell(4, 1);
+    buildDirtBackground('earth');
 
-    const desk = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.95, 1.1), woodMat);
-    desk.position.set(0, 0.48, 4.75);
-    scene.add(desk);
-
-    const monitor = new THREE.Mesh(
-      new THREE.BoxGeometry(0.95, 0.58, 0.08),
-      new THREE.MeshBasicMaterial({ color: 0x0ea5e9 })
-    );
-    monitor.position.set(-0.6, 1.32, 4.75);
-    scene.add(monitor);
-
-    const wardenSign = new THREE.Mesh(
-      new THREE.PlaneGeometry(2.8, 0.65),
-      new THREE.MeshBasicMaterial({ map: createSignTexture('BÀN TRỰC QUẢN TÙ', 'TRUNG • ĐIỀU KHIỂN 2 BUỒNG', '#7f1d1d', '#fde047') })
-    );
-    wardenSign.position.set(0, 2.75, 5.98);
-    wardenSign.rotation.y = Math.PI;
-    scene.add(wardenSign);
+    function fitCanvasToScreen() {
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const scale = Math.min((vw - 8) / WORLD_W, (vh - 8) / WORLD_H);
+      canvas.style.width = `${Math.floor(WORLD_W * scale)}px`;
+      canvas.style.height = `${Math.floor(WORLD_H * scale)}px`;
+    }
+    window.addEventListener('resize', fitCanvasToScreen);
+    fitCanvasToScreen();
 
     // =========================================================================
-    // 4. TAY & SÚNG ĐIỆN GÓC NHÌN THỨ NHẤT (VIEWMODEL GẮN CAMERA)
+    // 3. VẼ ĐỒ HỌA VECTOR ĐÀO VÀNG HUYỀN THOẠI
     // =========================================================================
-    const fpHandGroup = new THREE.Group();
-    camera.add(fpHandGroup);
-    let taserMuzzlePoint = null;
-    let taserArcMesh = null;
+    function drawGoldNugget(x, y, r, rot) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(rot);
 
-    function rebuildFirstPersonHand(role) {
-      while (fpHandGroup.children.length > 0) fpHandGroup.remove(fpHandGroup.children[0]);
-      taserMuzzlePoint = null;
-      taserArcMesh = null;
+      // Bóng đổ dưới cục vàng
+      ctx.fillStyle = 'rgba(0,0,0,0.32)';
+      ctx.beginPath();
+      ctx.ellipse(3, 5, r * 1.02, r * 0.85, 0, 0, Math.PI * 2);
+      ctx.fill();
 
-      const skinMat = new THREE.MeshStandardMaterial({ color: 0xf1c27d });
-      const sleeveColor = role === 'Quản Tù' ? 0x1e3a8a : (role === 'Trưởng Buồng' ? 0x334155 : 0xea580c);
-      const sleeveMat = new THREE.MeshStandardMaterial({ color: sleeveColor });
+      // Khối đa giác cục vàng đặc trưng
+      const pts = [
+        [-0.95, -0.25], [-0.55, -0.88], [0.25, -0.92], [0.92, -0.35],
+        [0.98, 0.32], [0.45, 0.88], [-0.48, 0.85], [-0.96, 0.35]
+      ];
+      const grad = ctx.createRadialGradient(-r * 0.25, -r * 0.28, r * 0.1, 0, 0, r * 1.15);
+      grad.addColorStop(0, '#fef9c3');
+      grad.addColorStop(0.32, '#facc15');
+      grad.addColorStop(0.75, '#d97706');
+      grad.addColorStop(1, '#92400e');
 
-      const arm = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.15, 0.48), sleeveMat);
-      arm.position.set(0.36, -0.34, -0.52);
-      arm.rotation.x = 0.18;
-      fpHandGroup.add(arm);
+      ctx.fillStyle = grad;
+      ctx.strokeStyle = '#78350f';
+      ctx.lineWidth = Math.max(2, r * 0.08);
+      ctx.beginPath();
+      pts.forEach(([px, py], i) => {
+        if (i === 0) ctx.moveTo(px * r, py * r);
+        else ctx.lineTo(px * r, py * r);
+      });
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
 
-      const fist = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.13, 0.15), skinMat);
-      fist.position.set(0.35, -0.28, -0.76);
-      fpHandGroup.add(fist);
+      // Mặt cắt sáng bóng lấp lánh trên cục vàng
+      ctx.fillStyle = 'rgba(255, 255, 220, 0.65)';
+      ctx.beginPath();
+      ctx.moveTo(-0.45 * r, -0.58 * r);
+      ctx.lineTo(0.18 * r, -0.62 * r);
+      ctx.lineTo(0.35 * r, -0.18 * r);
+      ctx.lineTo(-0.22 * r, -0.12 * r);
+      ctx.closePath();
+      ctx.fill();
 
-      if (role === 'Quản Tù') {
-        // SÚNG ĐIỆN TASER 3D (Thân vàng đen + 2 đầu điện cực phát tia xanh)
-        const gunGroup = new THREE.Group();
-        gunGroup.position.set(0.34, -0.22, -0.82);
+      ctx.restore();
+    }
 
-        const bodyYellow = new THREE.Mesh(
-          new THREE.BoxGeometry(0.085, 0.11, 0.34),
-          new THREE.MeshStandardMaterial({ color: 0xfacc15, roughness: 0.35, metalness: 0.2 })
-        );
-        gunGroup.add(bodyYellow);
+    function drawRock(x, y, r, rot) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(rot);
 
-        const topRail = new THREE.Mesh(
-          new THREE.BoxGeometry(0.065, 0.035, 0.32),
-          new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.7 })
-        );
-        topRail.position.set(0, 0.065, 0);
-        gunGroup.add(topRail);
+      ctx.fillStyle = 'rgba(0,0,0,0.32)';
+      ctx.beginPath();
+      ctx.ellipse(3, 5, r * 1.0, r * 0.84, 0, 0, Math.PI * 2);
+      ctx.fill();
 
-        const grip = new THREE.Mesh(
-          new THREE.BoxGeometry(0.075, 0.16, 0.09),
-          new THREE.MeshStandardMaterial({ color: 0x0f172a })
-        );
-        grip.position.set(0, -0.1, 0.08);
-        grip.rotation.x = 0.25;
-        gunGroup.add(grip);
+      const pts = [
+        [-0.96, -0.18], [-0.62, -0.84], [0.15, -0.94], [0.82, -0.52],
+        [0.96, 0.22], [0.55, 0.86], [-0.35, 0.90], [-0.90, 0.45]
+      ];
+      const grad = ctx.createRadialGradient(-r * 0.2, -r * 0.25, r * 0.1, 0, 0, r * 1.1);
+      grad.addColorStop(0, '#cbd5e1');
+      grad.addColorStop(0.5, '#64748b');
+      grad.addColorStop(1, '#334155');
 
-        // Hai điện cực kim loại phía trước họng súng
-        const prongMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.9 });
-        [-0.024, 0.024].forEach((px) => {
-          const prong = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, 0.08, 6), prongMat);
-          prong.rotation.x = Math.PI / 2;
-          prong.position.set(px, 0.015, -0.2);
-          gunGroup.add(prong);
+      ctx.fillStyle = grad;
+      ctx.strokeStyle = '#1e293b';
+      ctx.lineWidth = Math.max(2, r * 0.08);
+      ctx.beginPath();
+      pts.forEach(([px, py], i) => {
+        if (i === 0) ctx.moveTo(px * r, py * r);
+        else ctx.lineTo(px * r, py * r);
+      });
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Vết nứt đá
+      ctx.strokeStyle = '#1e293b';
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.moveTo(-0.35 * r, -0.25 * r);
+      ctx.lineTo(0.05 * r, 0.05 * r);
+      ctx.lineTo(0.45 * r, -0.15 * r);
+      ctx.moveTo(0.05 * r, 0.05 * r);
+      ctx.lineTo(-0.15 * r, 0.48 * r);
+      ctx.stroke();
+
+      ctx.restore();
+    }
+
+    function drawDiamond(x, y, r) {
+      ctx.save();
+      ctx.translate(x, y);
+
+      const sparkle = 0.75 + Math.sin(renderTick * 0.16 + x) * 0.25;
+      const glow = ctx.createRadialGradient(0, 0, 2, 0, 0, r * 1.9);
+      glow.addColorStop(0, `rgba(125, 211, 252, ${0.7 * sparkle})`);
+      glow.addColorStop(1, 'rgba(56, 189, 248, 0)');
+      ctx.fillStyle = glow;
+      ctx.beginPath();
+      ctx.arc(0, 0, r * 1.9, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Hình viên kim cương cắt giác
+      const grad = ctx.createLinearGradient(-r, -r, r, r);
+      grad.addColorStop(0, '#ffffff');
+      grad.addColorStop(0.35, '#7dd3fc');
+      grad.addColorStop(0.75, '#0284c7');
+      grad.addColorStop(1, '#0369a1');
+
+      ctx.fillStyle = grad;
+      ctx.strokeStyle = '#e0f2fe';
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      ctx.moveTo(-r * 0.65, -r * 0.75);
+      ctx.lineTo(r * 0.65, -r * 0.75);
+      ctx.lineTo(r * 1.05, -r * 0.15);
+      ctx.lineTo(0, r * 1.05);
+      ctx.lineTo(-r * 1.05, -r * 0.15);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Đường giác cắt bên trong
+      ctx.strokeStyle = 'rgba(255,255,255,0.85)';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(-r * 1.05, -r * 0.15); ctx.lineTo(r * 1.05, -r * 0.15);
+      ctx.moveTo(-r * 0.45, -r * 0.15); ctx.lineTo(0, r * 1.05);
+      ctx.moveTo(r * 0.45, -r * 0.15); ctx.lineTo(0, r * 1.05);
+      ctx.stroke();
+
+      ctx.restore();
+    }
+
+    function drawMysteryBag(x, y, r) {
+      ctx.save();
+      ctx.translate(x, y);
+
+      ctx.fillStyle = 'rgba(0,0,0,0.28)';
+      ctx.beginPath();
+      ctx.ellipse(2, r * 0.78, r * 0.9, r * 0.35, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Miệng túi cột dây
+      ctx.fillStyle = '#c2813d';
+      ctx.strokeStyle = '#5c2d0c';
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      ctx.moveTo(-r * 0.42, -r * 0.95);
+      ctx.lineTo(r * 0.42, -r * 0.95);
+      ctx.lineTo(r * 0.25, -r * 0.52);
+      ctx.lineTo(-r * 0.25, -r * 0.52);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Thân túi phình to
+      const grad = ctx.createRadialGradient(-r * 0.2, -r * 0.1, 2, 0, 0, r * 1.1);
+      grad.addColorStop(0, '#f3d19c');
+      grad.addColorStop(0.65, '#c2813d');
+      grad.addColorStop(1, '#7c4416');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.ellipse(0, r * 0.15, r * 0.92, r * 0.85, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // Dây thắt đỏ
+      ctx.strokeStyle = '#dc2626';
+      ctx.lineWidth = 3.5;
+      ctx.beginPath();
+      ctx.moveTo(-r * 0.34, -r * 0.52);
+      ctx.lineTo(r * 0.34, -r * 0.52);
+      ctx.stroke();
+
+      // Dấu ? nổi bật
+      ctx.fillStyle = '#fef08a';
+      ctx.strokeStyle = '#451a03';
+      ctx.lineWidth = 3;
+      ctx.font = `900 ${Math.round(r * 1.15)}px "Bungee", sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.strokeText('?', 0, r * 0.22);
+      ctx.fillText('?', 0, r * 0.22);
+
+      ctx.restore();
+    }
+
+    function drawTntBarrel(x, y, r) {
+      ctx.save();
+      ctx.translate(x, y);
+
+      // Thùng gỗ đỏ TNT huyền thoại
+      ctx.fillStyle = '#dc2626';
+      ctx.strokeStyle = '#450a0a';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.roundRect(-r * 0.82, -r * 0.98, r * 1.64, r * 1.96, 6);
+      ctx.fill();
+      ctx.stroke();
+
+      // Đai sắt đen trên & dưới
+      ctx.fillStyle = '#1e293b';
+      ctx.fillRect(-r * 0.85, -r * 0.72, r * 1.7, r * 0.22);
+      ctx.fillRect(-r * 0.85, r * 0.50, r * 1.7, r * 0.22);
+
+      // Nhãn vàng chữ TNT
+      ctx.fillStyle = '#fef08a';
+      ctx.fillRect(-r * 0.82, -r * 0.34, r * 1.64, r * 0.68);
+      ctx.fillStyle = '#991b1b';
+      ctx.font = `900 ${Math.round(r * 0.62)}px "Bungee", sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('TNT', 0, 1);
+
+      // Ngòi nổ lóe lửa nhẹ trên nắp
+      ctx.strokeStyle = '#fde68a';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(0, -r * 0.98);
+      ctx.quadraticCurveTo(6, -r * 1.28, 12, -r * 1.22);
+      ctx.stroke();
+      ctx.fillStyle = renderTick % 8 < 4 ? '#facc15' : '#f97316';
+      ctx.beginPath();
+      ctx.arc(13, -r * 1.22, 4.2, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.restore();
+    }
+
+    function drawPig(x, y, r, vx, hasDiamond) {
+      ctx.save();
+      ctx.translate(x, y);
+      const facing = vx >= 0 ? 1 : -1;
+      ctx.scale(facing, 1);
+
+      const legSwing = Math.sin(renderTick * 0.42 + x * 0.05) * 4;
+
+      // Chân chạy
+      ctx.strokeStyle = '#7c2d12';
+      ctx.lineWidth = 4;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(-8, 10); ctx.lineTo(-10 + legSwing, 19);
+      ctx.moveTo(8, 10);  ctx.lineTo(10 - legSwing, 19);
+      ctx.stroke();
+
+      // Thân chuột chũi / heo đất
+      ctx.fillStyle = '#f4a29e';
+      ctx.strokeStyle = '#7c2d12';
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      ctx.ellipse(0, 2, r * 1.05, r * 0.72, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // Tai & mũi heo
+      ctx.fillStyle = '#fb7185';
+      ctx.beginPath();
+      ctx.arc(r * 0.45, -r * 0.55, 6, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.ellipse(r * 0.98, 2, 6, 8, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // Mắt tròn tinh ranh
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(r * 0.52, -3, 4.2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#0f172a';
+      ctx.beginPath();
+      ctx.arc(r * 0.6, -3, 2.2, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Nếu là chuột/heo ngậm kim cương -> vẽ viên kim cương trước mõm!
+      if (hasDiamond) {
+        drawDiamond(r * 1.38, -2, 10);
+      }
+
+      ctx.restore();
+    }
+
+    function drawBoneOrSkull(x, y, r, rot, isSkull) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(rot);
+
+      ctx.fillStyle = '#f1f5f9';
+      ctx.strokeStyle = '#475569';
+      ctx.lineWidth = 2;
+
+      if (isSkull) {
+        ctx.beginPath();
+        ctx.arc(0, -3, r * 0.72, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillRect(-r * 0.36, r * 0.25, r * 0.72, r * 0.45);
+        ctx.strokeRect(-r * 0.36, r * 0.25, r * 0.72, r * 0.45);
+        ctx.fillStyle = '#1e293b';
+        ctx.beginPath();
+        ctx.arc(-5.5, -3, 3.8, 0, Math.PI * 2);
+        ctx.arc(5.5, -3, 3.8, 0, Math.PI * 2);
+        ctx.fill();
+      } else {
+        ctx.beginPath();
+        ctx.roundRect(-r * 0.72, -5, r * 1.44, 10, 4);
+        ctx.fill();
+        ctx.stroke();
+        [[-r * 0.72, -5], [-r * 0.72, 5], [r * 0.72, -5], [r * 0.72, 5]].forEach(([bx, by]) => {
+          ctx.beginPath();
+          ctx.arc(bx, by, 5.5, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
         });
-
-        // Tia điện xanh nhỏ nhấp nháy giữa 2 điện cực
-        taserArcMesh = new THREE.Mesh(
-          new THREE.BoxGeometry(0.055, 0.014, 0.014),
-          new THREE.MeshBasicMaterial({ color: 0x38bdf8 })
-        );
-        taserArcMesh.position.set(0, 0.015, -0.22);
-        gunGroup.add(taserArcMesh);
-
-        // Điểm đầu nòng để vẽ tia sét khi bắn
-        taserMuzzlePoint = new THREE.Object3D();
-        taserMuzzlePoint.position.set(0, 0.015, -0.24);
-        gunGroup.add(taserMuzzlePoint);
-
-        fpHandGroup.add(gunGroup);
       }
-
-      document.getElementById('crosshairEl').classList.toggle('taser-aim', role === 'Quản Tù');
+      ctx.restore();
     }
 
-    // =========================================================================
-    // 5. HIỆU ỨNG TIA SÉT 3D KHI BẮN SÚNG ĐIỆN & LỒNG ĐIỆN GIẬT XANH QUANH TÙ NHÂN
-    // =========================================================================
-    const activeLightningBeams = [];
+    function drawItem(it) {
+      if (it.type.startsWith('gold_')) drawGoldNugget(it.x, it.y, it.r, it.rot);
+      else if (it.type.startsWith('rock_')) drawRock(it.x, it.y, it.r, it.rot);
+      else if (it.type === 'diamond') drawDiamond(it.x, it.y, it.r);
+      else if (it.type === 'bag') drawMysteryBag(it.x, it.y, it.r);
+      else if (it.type === 'tnt') drawTntBarrel(it.x, it.y, it.r);
+      else if (it.type === 'pig' || it.type === 'pig_diamond') drawPig(it.x, it.y, it.r, it.vx, it.type === 'pig_diamond');
+      else if (it.type === 'bone' || it.type === 'skull') drawBoneOrSkull(it.x, it.y, it.r, it.rot, it.type === 'skull');
+    }
 
-    function spawnTaserBeam3D(fromPos, toPos) {
-      const start = new THREE.Vector3(fromPos.x, fromPos.y, fromPos.z);
-      const end = new THREE.Vector3(toPos.x, toPos.y, toPos.z);
-      const group = new THREE.Group();
+    // Vẽ Ông Lão Thợ Mỏ Đào Vàng Huyền Thoại ngồi trên xe tời gỗ
+    function drawOldMiner(slotIdx, player) {
+      const anchor = ANCHORS[slotIdx];
+      const cx = anchor.x;
+      const cy = anchor.y;
+      const isP1 = slotIdx === 0;
+      const shirtCol = isP1 ? '#dc2626' : '#2563eb';
+      const hatCol = isP1 ? '#facc15' : '#38bdf8';
 
-      // Vẽ 2 tia sét ziczac màu xanh sáng + trắng lõi
-      [0x38bdf8, 0xe0f2fe].forEach((hex, idx) => {
-        const segments = 10;
-        const pts = [];
-        for (let i = 0; i <= segments; i++) {
-          const t = i / segments;
-          const p = new THREE.Vector3().lerpVectors(start, end, t);
-          if (i > 0 && i < segments) {
-            const jitter = idx === 0 ? 0.16 : 0.08;
-            p.x += (Math.random() - 0.5) * jitter;
-            p.y += (Math.random() - 0.5) * jitter;
-            p.z += (Math.random() - 0.5) * jitter;
-          }
-          pts.push(p);
-        }
-        const geo = new THREE.BufferGeometry().setFromPoints(pts);
-        const mat = new THREE.LineBasicMaterial({ color: hex, transparent: true, opacity: 1 });
-        group.add(new THREE.Line(geo, mat));
+      ctx.save();
+      ctx.translate(cx, cy);
+
+      // Xe goòng gỗ + bệ tời
+      ctx.fillStyle = '#78350f';
+      ctx.strokeStyle = '#3b1806';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.roundRect(-48, -14, 96, 30, 6);
+      ctx.fill();
+      ctx.stroke();
+
+      // Bánh xe sắt 2 bên
+      ctx.fillStyle = '#334155';
+      [-32, 32].forEach((wx) => {
+        ctx.beginPath();
+        ctx.arc(wx, 18, 10, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
       });
 
-      // Chớp sáng xanh tại điểm trúng
-      const hitGlow = new THREE.PointLight(0x38bdf8, 3.2, 6);
-      hitGlow.position.copy(end);
-      group.add(hitGlow);
+      if (player) {
+        const isPulling = player.hook.state === 'retract';
+        const isStraining = player.animState === 'strain';
+        const crankSpin = isPulling ? renderTick * (isStraining ? 0.14 : 0.35) : 0;
+        const bob = isStraining ? Math.sin(renderTick * 0.6) * 2.2 : 0;
 
-      scene.add(group);
-      activeLightningBeams.push({ group, expiresAt: performance.now() + 340 });
-    }
+        // Thân ông lão thợ mỏ
+        ctx.fillStyle = shirtCol;
+        ctx.strokeStyle = '#1e293b';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.roundRect(-22, -52 + bob, 44, 38, 10);
+        ctx.fill();
+        ctx.stroke();
 
-    // Tạo cụm tia điện xanh bao quanh cơ thể tù nhân khi bị giật 3 giây
-    function createBodyShockCage() {
-      const shockGroup = new THREE.Group();
-      shockGroup.visible = false;
+        // Dây yếm quần thợ mỏ
+        ctx.fillStyle = '#1e293b';
+        ctx.fillRect(-13, -50 + bob, 6, 34);
+        ctx.fillRect(7, -50 + bob, 6, 34);
 
-      // Vỏ ánh sáng xanh lam bán trong suốt
-      const aura = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.55, 0.55, 1.9, 10, 4, true),
-        new THREE.MeshBasicMaterial({
-          color: 0x38bdf8,
-          wireframe: true,
-          transparent: true,
-          opacity: 0.85
-        })
-      );
-      aura.position.y = 1.05;
-      shockGroup.add(aura);
+        // Đầu & khuôn mặt
+        ctx.fillStyle = isStraining ? '#fca5a5' : '#fed7aa';
+        ctx.beginPath();
+        ctx.arc(0, -68 + bob, 19, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
 
-      // 4 đường tia sét chạy dọc thân người
-      const boltLines = [];
-      for (let b = 0; b < 4; b++) {
-        const pts = [];
-        for (let i = 0; i < 6; i++) pts.push(new THREE.Vector3(0, i * 0.35, 0));
-        const geo = new THREE.BufferGeometry().setFromPoints(pts);
-        const line = new THREE.Line(geo, new THREE.LineBasicMaterial({ color: 0x7dd3fc }));
-        shockGroup.add(line);
-        boltLines.push(line);
-      }
+        // Bộ râu trắng rậm rạp huyền thoại
+        ctx.fillStyle = '#f8fafc';
+        ctx.beginPath();
+        ctx.arc(-8, -56 + bob, 9, 0, Math.PI * 2);
+        ctx.arc(0, -52 + bob, 11, 0, Math.PI * 2);
+        ctx.arc(8, -56 + bob, 9, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
 
-      const shockLight = new THREE.PointLight(0x0ea5e9, 2.4, 5.5);
-      shockLight.position.set(0, 1.1, 0);
-      shockGroup.add(shockLight);
+        // Mắt & lông mày
+        ctx.fillStyle = '#0f172a';
+        ctx.beginPath();
+        ctx.arc(-6, -71 + bob, 2.5, 0, Math.PI * 2);
+        ctx.arc(6, -71 + bob, 2.5, 0, Math.PI * 2);
+        ctx.fill();
 
-      return { shockGroup, aura, boltLines, shockLight };
-    }
+        // Mũ thợ mỏ có đèn pha
+        ctx.fillStyle = hatCol;
+        ctx.beginPath();
+        ctx.arc(0, -78 + bob, 19, Math.PI, 0);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillRect(-24, -80 + bob, 48, 6);
+        ctx.strokeRect(-24, -80 + bob, 48, 6);
 
-    // =========================================================================
-    // 6. DỰNG NHÂN VẬT 3D CỦA NGƯỜI CHƠI KHÁC
-    // =========================================================================
-    const playerMeshes = {};
+        // Đèn pin nhỏ trên mũ
+        ctx.fillStyle = '#fef9c3';
+        ctx.beginPath();
+        ctx.arc(0, -87 + bob, 5.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
 
-    function createNameTagSprite(p) {
-      const c = document.createElement('canvas');
-      c.width = 512; c.height = 128;
-      const g = c.getContext('2d');
-      g.fillStyle = 'rgba(15, 23, 42, 0.88)';
-      g.fillRect(16, 12, 480, 104);
+        // Cuộn tời quay dây thép ở mặt trước xe goòng
+        ctx.save();
+        ctx.translate(0, 2);
+        ctx.rotate(crankSpin);
+        ctx.fillStyle = '#94a3b8';
+        ctx.strokeStyle = '#1e293b';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.arc(0, 0, 14, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(-12, 0); ctx.lineTo(12, 0);
+        ctx.moveTo(0, -12); ctx.lineTo(0, 12);
+        ctx.stroke();
+        ctx.restore();
 
-      const borderCol = p.role === 'Quản Tù' ? '#38bdf8' : (p.role === 'Trưởng Buồng' ? '#facc15' : '#fb923c');
-      g.strokeStyle = borderCol;
-      g.lineWidth = 6;
-      g.strokeRect(16, 12, 480, 104);
-
-      g.fillStyle = borderCol;
-      g.font = '800 34px "Be Vietnam Pro", sans-serif';
-      g.textAlign = 'center';
-      g.fillText(`[${p.role}] ${p.name}`, 256, 58);
-
-      g.fillStyle = '#1e293b';
-      g.fillRect(80, 76, 352, 22);
-      const pct = Math.max(0, Math.min(1, (p.hp ?? 100) / 100));
-      g.fillStyle = pct > 0.5 ? '#22c55e' : (pct > 0.25 ? '#f59e0b' : '#ef4444');
-      g.fillRect(80, 76, 352 * pct, 22);
-
-      const tex = new THREE.CanvasTexture(c);
-      const mat = new THREE.SpriteMaterial({ map: tex, transparent: true });
-      const sp = new THREE.Sprite(mat);
-      sp.scale.set(1.75, 0.44, 1);
-      sp.position.set(0, 2.3, 0);
-      return sp;
-    }
-
-    function createPlayerAvatar3D(p) {
-      const rootGroup = new THREE.Group();
-      const bodyPivot = new THREE.Group(); // Dùng để đổ ngã xuống đất khi bị điện giật
-      rootGroup.add(bodyPivot);
-
-      const torsoCol = p.role === 'Quản Tù' ? 0x1d4ed8 : (p.role === 'Trưởng Buồng' ? 0x1e293b : 0xea580c);
-      const legCol = p.role === 'Quản Tù' ? 0x0f172a : (p.role === 'Trưởng Buồng' ? 0x0f172a : 0xc2410c);
-
-      const torsoMat = new THREE.MeshStandardMaterial({ color: torsoCol, roughness: 0.7 });
-      const legMat = new THREE.MeshStandardMaterial({ color: legCol, roughness: 0.8 });
-      const skinMat = new THREE.MeshStandardMaterial({ color: 0xf1c27d });
-
-      const leftLeg = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.78, 0.24), legMat);
-      leftLeg.position.set(-0.15, 0.39, 0);
-      bodyPivot.add(leftLeg);
-
-      const rightLeg = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.78, 0.24), legMat);
-      rightLeg.position.set(0.15, 0.39, 0);
-      bodyPivot.add(rightLeg);
-
-      const torso = new THREE.Mesh(new THREE.BoxGeometry(0.58, 0.72, 0.32), torsoMat);
-      torso.position.set(0, 1.14, 0);
-      bodyPivot.add(torso);
-
-      const leftArm = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.65, 0.2), torsoMat);
-      leftArm.position.set(-0.4, 1.12, 0);
-      bodyPivot.add(leftArm);
-
-      const rightArm = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.65, 0.2), torsoMat);
-      rightArm.position.set(0.4, 1.12, 0);
-      bodyPivot.add(rightArm);
-
-      const head = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.42, 0.42), skinMat);
-      head.position.set(0, 1.72, 0);
-      bodyPivot.add(head);
-
-      // Hitbox rộng hơn một chút giúp ngắm bắn súng điện trên điện thoại dễ trúng
-      const hitCylinder = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.55, 0.55, 2.0, 8),
-        new THREE.MeshBasicMaterial({ visible: false })
-      );
-      hitCylinder.position.set(0, 1.0, 0);
-      hitCylinder.userData = { interactType: 'player', playerId: p.id };
-      rootGroup.add(hitCylinder);
-
-      if (p.role === 'Quản Tù') {
-        const cap = new THREE.Mesh(
-          new THREE.CylinderGeometry(0.26, 0.23, 0.14, 12),
-          new THREE.MeshStandardMaterial({ color: 0x0f172a })
-        );
-        cap.position.set(0, 1.98, 0);
-        bodyPivot.add(cap);
-        const badge = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.08, 0.04), new THREE.MeshBasicMaterial({ color: 0xfacc15 }));
-        badge.position.set(0, 1.98, -0.23);
-        bodyPivot.add(badge);
-      } else if (p.role === 'Trưởng Buồng') {
-        const glasses = new THREE.Mesh(new THREE.BoxGeometry(0.44, 0.11, 0.06), new THREE.MeshBasicMaterial({ color: 0x020617 }));
-        glasses.position.set(0, 1.75, -0.21);
-        bodyPivot.add(glasses);
-        const armband = new THREE.Mesh(new THREE.BoxGeometry(0.21, 0.14, 0.22), new THREE.MeshBasicMaterial({ color: 0xdc2626 }));
-        armband.position.set(-0.4, 1.24, 0);
-        bodyPivot.add(armband);
-      }
-
-      // Lồng điện giật xanh gắn theo thân người
-      const shock = createBodyShockCage();
-      bodyPivot.add(shock.shockGroup);
-
-      const tag = createNameTagSprite(p);
-      rootGroup.add(tag);
-
-      rootGroup.position.set(p.x, 0, p.z);
-      rootGroup.rotation.y = p.yaw || 0;
-      scene.add(rootGroup);
-
-      return {
-        group: rootGroup,
-        bodyPivot,
-        hitCylinder,
-        tag,
-        leftLeg,
-        rightLeg,
-        leftArm,
-        rightArm,
-        shock,
-        role: p.role,
-        hp: p.hp,
-        targetX: p.x,
-        targetZ: p.z,
-        targetYaw: p.yaw || 0,
-        animTimer: 0,
-        stunnedUntil: 0
-      };
-    }
-
-    function syncPlayerAvatars() {
-      for (const pid of Object.keys(playerMeshes)) {
-        if (!players[pid] || pid === myId) {
-          scene.remove(playerMeshes[pid].group);
-          delete playerMeshes[pid];
+        // Hiệu ứng hào quang nếu có Nước Tăng Lực
+        if (player.buffs?.strength) {
+          ctx.strokeStyle = 'rgba(249, 115, 22, 0.85)';
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.arc(0, -52, 42 + Math.sin(renderTick * 0.25) * 3, 0, Math.PI * 2);
+          ctx.stroke();
         }
+      } else {
+        // Vị trí đang trống
+        ctx.fillStyle = 'rgba(0,0,0,0.45)';
+        ctx.font = '800 13px "Be Vietnam Pro", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('Đang chờ người...', 0, -24);
       }
-      Object.values(players).forEach((p) => {
-        if (p.id === myId) return;
-        const existing = playerMeshes[p.id];
-        if (!existing || existing.role !== p.role) {
-          if (existing) scene.remove(existing.group);
-          playerMeshes[p.id] = createPlayerAvatar3D(p);
-        } else {
-          existing.targetX = p.x;
-          existing.targetZ = p.z;
-          existing.targetYaw = p.yaw || 0;
-          if (existing.hp !== p.hp) {
-            existing.hp = p.hp;
-            existing.group.remove(existing.tag);
-            existing.tag = createNameTagSprite(p);
-            existing.group.add(existing.tag);
-          }
-        }
+
+      ctx.restore();
+    }
+
+    // Vẽ Dây Tời & Càng Gắp Sắt mở/đóng chuẩn Đào Vàng
+    function drawHookAndRope(player) {
+      if (!player) return;
+      const anchor = ANCHORS[player.slot];
+      const h = player.hook;
+      const hx = anchor.x + Math.cos(h.angle) * h.length;
+      const hy = anchor.y + Math.sin(h.angle) * h.length;
+
+      // Dây cáp thép
+      ctx.save();
+      ctx.strokeStyle = player.slot === 0 ? '#1e293b' : '#0f172a';
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.moveTo(anchor.x, anchor.y + 4);
+      ctx.lineTo(hx, hy);
+      ctx.stroke();
+
+      ctx.strokeStyle = '#cbd5e1';
+      ctx.lineWidth = 1.4;
+      ctx.setLineDash([6, 6]);
+      ctx.beginPath();
+      ctx.moveTo(anchor.x, anchor.y + 4);
+      ctx.lineTo(hx, hy);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Càng gắp 2 ngàm
+      ctx.translate(hx, hy);
+      ctx.rotate(h.angle - Math.PI / 2);
+
+      const spread = h.grabbedId ? 0.18 : (h.state === 'extend' ? 0.52 : 0.34);
+
+      ctx.fillStyle = '#475569';
+      ctx.strokeStyle = '#0f172a';
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      ctx.arc(0, 0, 7, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      [-1, 1].forEach((side) => {
+        ctx.save();
+        ctx.rotate(side * spread);
+        ctx.strokeStyle = player.slot === 0 ? '#e2e8f0' : '#bae6fd';
+        ctx.lineWidth = 5;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(0, 3);
+        ctx.quadraticCurveTo(side * 16, 15, side * 9, 28);
+        ctx.stroke();
+        ctx.strokeStyle = '#1e293b';
+        ctx.lineWidth = 1.6;
+        ctx.stroke();
+        ctx.restore();
       });
+
+      ctx.restore();
+    }
+
+    // Vẽ Thanh Bảng Gỗ HUD Truyền Thống Ngay Trên Bầu Trời (Giống Y Hệt Bản Huyền Thoại)
+    function drawClassicTopHUD() {
+      const p0 = livePlayers[0];
+      const p1 = livePlayers[1];
+
+      // --- BẢNG GỖ NGƯỜI CHƠI 1 (TRÁI) ---
+      drawPlayerWoodPlaque(16, 10, 305, 86, p0, 0, '#dc2626');
+
+      // --- BẢNG GỖ TRUNG TÂM: MÀN, MỤC TIÊU, THỜI GIAN ---
+      ctx.save();
+      ctx.fillStyle = '#5c2d0c';
+      ctx.strokeStyle = '#facc15';
+      ctx.lineWidth = 3.5;
+      ctx.beginPath();
+      ctx.roundRect(455, 8, 290, 92, 12);
+      ctx.fill();
+      ctx.stroke();
+
+      // Tên Màn
+      ctx.textAlign = 'center';
+      ctx.font = '900 17px "Bungee", "Be Vietnam Pro", sans-serif';
+      ctx.fillStyle = '#fde047';
+      ctx.fillText(`MÀN ${roomMeta.level}`, 532, 34);
+
+      // Đồng hồ đếm ngược
+      const urgent = roomMeta.phase === 'playing' && roomMeta.timeLeft <= 10;
+      ctx.font = '900 26px "Bungee", sans-serif';
+      ctx.fillStyle = urgent && renderTick % 16 < 8 ? '#ef4444' : '#ffffff';
+      ctx.fillText(`⏱ ${roomMeta.timeLeft}`, 675, 40);
+
+      // Mục tiêu ($)
+      ctx.font = '800 16px "Be Vietnam Pro", sans-serif';
+      ctx.fillStyle = '#bbf7d0';
+      ctx.fillText(`MỤC TIÊU: $${(roomMeta.goal || 0).toLocaleString()}`, 600, 66);
+
+      ctx.font = '700 11px "Be Vietnam Pro", sans-serif';
+      ctx.fillStyle = '#fde68a';
+      ctx.fillText(roomMeta.levelName || '', 600, 88);
+      ctx.restore();
+
+      // --- BẢNG GỖ NGƯỜI CHƠI 2 (PHẢI) ---
+      drawPlayerWoodPlaque(WORLD_W - 321, 10, 305, 86, p1, 1, '#2563eb');
+    }
+
+    function drawPlayerWoodPlaque(x, y, w, h, p, slotIdx, accentCol) {
+      const isMe = myRole === 'player' && mySlot === slotIdx;
+      ctx.save();
+
+      ctx.fillStyle = '#4a2107';
+      ctx.strokeStyle = isMe ? '#4ade80' : '#facc15';
+      ctx.lineWidth = isMe ? 4 : 3;
+      ctx.beginPath();
+      ctx.roundRect(x, y, w, h, 12);
+      ctx.fill();
+      ctx.stroke();
+
+      // Dải màu nhận diện P1 (Đỏ) / P2 (Xanh)
+      ctx.fillStyle = accentCol;
+      ctx.beginPath();
+      ctx.roundRect(x + 8, y + 8, 36, 26, 6);
+      ctx.fill();
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '900 14px "Be Vietnam Pro", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(`P${slotIdx + 1}`, x + 26, y + 26);
+
+      if (p) {
+        ctx.textAlign = 'left';
+        ctx.fillStyle = '#fef3c7';
+        ctx.font = '800 15px "Be Vietnam Pro", sans-serif';
+        const displayName = `${p.name}${isMe ? ' (BẠN)' : ''}`;
+        ctx.fillText(displayName.slice(0, 18), x + 52, y + 26);
+
+        // Số Cúp Màn
+        ctx.textAlign = 'right';
+        ctx.fillStyle = '#fde047';
+        ctx.font = '800 14px "Be Vietnam Pro", sans-serif';
+        ctx.fillText(`👑 ${p.crowns || 0}`, x + w - 12, y + 26);
+
+        // Tổng tiền ($) màu xanh lá kinh điển
+        ctx.textAlign = 'left';
+        const passedGoal = p.money >= roomMeta.goal;
+        ctx.fillStyle = passedGoal ? '#4ade80' : '#facc15';
+        ctx.font = '900 24px "Bungee", "Be Vietnam Pro", sans-serif';
+        ctx.fillText(`$${(p.money || 0).toLocaleString()}`, x + 14, y + 66);
+
+        // Số mìn & icon Buffs đang có
+        ctx.textAlign = 'right';
+        let icons = `🧨${p.dynamite || 0}`;
+        if (p.buffs?.strength) icons += ' 💪';
+        if (p.buffs?.clover) icons += ' 🍀';
+        if (p.buffs?.rockBook) icons += ' 📘';
+        if (p.buffs?.diamondPolish) icons += ' 💎';
+        ctx.fillStyle = '#fef08a';
+        ctx.font = '800 14px "Be Vietnam Pro", sans-serif';
+        ctx.fillText(icons, x + w - 12, y + 65);
+      } else {
+        ctx.textAlign = 'left';
+        ctx.fillStyle = '#d6b287';
+        ctx.font = '700 14px "Be Vietnam Pro", sans-serif';
+        ctx.fillText('Đang chờ đối thủ...', x + 52, y + 26);
+        ctx.font = '700 13px "Be Vietnam Pro", sans-serif';
+        ctx.fillText('Vị trí trống', x + 14, y + 62);
+      }
+
+      ctx.restore();
+    }
+
+    function drawCenterOverlayBanner(title, subtitle, accent = '#fde047') {
+      ctx.save();
+      ctx.fillStyle = 'rgba(20, 9, 3, 0.78)';
+      ctx.beginPath();
+      ctx.roundRect(WORLD_W / 2 - 330, WORLD_H / 2 - 75, 660, 150, 18);
+      ctx.fill();
+      ctx.strokeStyle = accent;
+      ctx.lineWidth = 4;
+      ctx.stroke();
+
+      ctx.textAlign = 'center';
+      ctx.fillStyle = accent;
+      ctx.font = '900 32px "Bungee", "Be Vietnam Pro", sans-serif';
+      ctx.fillText(title, WORLD_W / 2, WORLD_H / 2 - 12);
+
+      ctx.fillStyle = '#fffbeb';
+      ctx.font = '800 18px "Be Vietnam Pro", sans-serif';
+      ctx.fillText(subtitle, WORLD_W / 2, WORLD_H / 2 + 34);
+      ctx.restore();
     }
 
     // =========================================================================
-    // 7. BẮN SÚNG ĐIỆN TỪ XA (QUẢN TÙ) & CHẠM CỬA / CHỌN MỤC TIÊU
+    // 4. VÒNG LẶP VẼ 60FPS
     // =========================================================================
-    const raycaster = new THREE.Raycaster();
+    function renderLoop() {
+      requestAnimationFrame(renderLoop);
+      renderTick++;
 
-    function fireWardenTaser() {
-      if (!myPlayer || myPlayer.role !== 'Quản Tù') return;
+      ctx.save();
+      if (screenShake > 0) {
+        ctx.translate((Math.random() - 0.5) * screenShake, (Math.random() - 0.5) * screenShake);
+        screenShake = Math.max(0, screenShake - 0.9);
+      }
+
+      // 1. Nền bầu trời + lòng đất theo chủ đề màn
+      buildDirtBackground(roomMeta.theme || 'earth');
+      ctx.drawImage(bgCache, 0, 0);
+
+      // 2. Vẽ các vật phẩm trong lòng đất
+      for (const it of liveItems) {
+        drawItem(it);
+      }
+
+      // 3. Vẽ 2 ông lão thợ mỏ & càng gắp
+      drawOldMiner(0, livePlayers[0]);
+      drawOldMiner(1, livePlayers[1]);
+      drawHookAndRope(livePlayers[0]);
+      drawHookAndRope(livePlayers[1]);
+
+      // 4. Hiệu ứng nổ TNT / Mìn
+      for (let i = explosions.length - 1; i >= 0; i--) {
+        const ex = explosions[i];
+        ex.life -= 0.04;
+        if (ex.life <= 0) {
+          explosions.splice(i, 1);
+          continue;
+        }
+        const curR = ex.r * (1.15 - ex.life * 0.5);
+        const grad = ctx.createRadialGradient(ex.x, ex.y, 6, ex.x, ex.y, curR);
+        grad.addColorStop(0, `rgba(255, 255, 210, ${ex.life})`);
+        grad.addColorStop(0.4, `rgba(251, 146, 60, ${ex.life * 0.9})`);
+        grad.addColorStop(0.78, `rgba(220, 38, 38, ${ex.life * 0.65})`);
+        grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(ex.x, ex.y, curR, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // 5. Chữ cộng tiền nổi lên từ xe tời
+      for (let i = scorePopups.length - 1; i >= 0; i--) {
+        const sp = scorePopups[i];
+        sp.y -= 1.3;
+        sp.life--;
+        if (sp.life <= 0) {
+          scorePopups.splice(i, 1);
+          continue;
+        }
+        ctx.save();
+        ctx.globalAlpha = Math.min(1, sp.life / 20);
+        ctx.font = '900 26px "Bungee", "Be Vietnam Pro", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.strokeStyle = '#2e1204';
+        ctx.lineWidth = 5;
+        ctx.strokeText(sp.text, sp.x, sp.y);
+        ctx.fillStyle = sp.color;
+        ctx.fillText(sp.text, sp.x, sp.y);
+        ctx.restore();
+      }
+
+      // 6. Bảng HUD gỗ cổ điển phía trên
+      drawClassicTopHUD();
+
+      // 7. Thông báo trạng thái giữa màn hình (Chờ người 2 / Đếm ngược / Qua màn)
+      if (hasJoined) {
+        if (roomMeta.phase === 'waiting') {
+          drawCenterOverlayBanner(
+            '⏳ ĐANG CHỜ ĐỐI THỦ THỨ 2...',
+            'Gửi link phòng cho bạn bè cùng vào đào vàng đối chiến!',
+            '#fde047'
+          );
+        } else if (roomMeta.phase === 'countdown') {
+          drawCenterOverlayBanner(
+            `MÀN ${roomMeta.level}: ${roomMeta.levelName.toUpperCase()}`,
+            `Bắt đầu sau ${Math.max(1, roomMeta.countdown)} giây... Mục tiêu: $${roomMeta.goal.toLocaleString()}`,
+            '#4ade80'
+          );
+        } else if (roomMeta.phase === 'level_summary') {
+          drawCenterOverlayBanner(
+            `🎉 HOÀN THÀNH MÀN ${roomMeta.level}!`,
+            roomMeta.lastRoundWinner || 'Đang mở Cửa Hàng Ông Chủ...',
+            '#4ade80'
+          );
+        }
+      }
+
+      ctx.restore();
+
+      // Cập nhật hiện/ẩn nút Ném Mìn khi người chơi đang kéo vật nặng
+      const dynBtn = document.getElementById('btnThrowDynamite');
+      if (myRole === 'player' && mySlot !== null && roomMeta.phase === 'playing') {
+        const me = livePlayers[mySlot];
+        const canUseDyn = me && me.dynamite > 0 && me.hook.state === 'retract' && me.hook.grabbedId;
+        dynBtn.classList.toggle('hidden', !canUseDyn);
+        if (canUseDyn) document.getElementById('btnDynamiteCount').textContent = me.dynamite;
+      } else {
+        dynBtn.classList.add('hidden');
+      }
+    }
+
+    renderLoop();
+
+    // =========================================================================
+    // 5. ĐIỀU KHIỂN PC & ĐIỆN THOẠI
+    // =========================================================================
+    function triggerDropHook() {
+      if (!hasJoined || myRole !== 'player' || roomMeta.phase !== 'playing') return;
       ensureAudio();
-      handAnimTime = 1.0;
-
-      // Lấy tọa độ đầu nòng súng điện trong không gian 3D
-      const muzzleWorld = new THREE.Vector3();
-      if (taserMuzzlePoint) {
-        taserMuzzlePoint.getWorldPosition(muzzleWorld);
-      } else {
-        muzzleWorld.copy(camera.position);
-      }
-
-      raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
-      const playerHits = Object.values(playerMeshes).map((pm) => pm.hitCylinder);
-      const allTargets = [...playerHits, ...wallOccluders];
-      const hits = raycaster.intersectObjects(allTargets, false);
-
-      let hitPlayerId = null;
-      let endPoint = new THREE.Vector3();
-      raycaster.ray.at(14, endPoint);
-
-      if (hits.length > 0 && hits[0].distance <= 16.0) {
-        endPoint.copy(hits[0].point);
-        if (hits[0].object.userData?.interactType === 'player') {
-          hitPlayerId = hits[0].object.userData.playerId;
-        }
-      }
-
-      // Hỗ trợ tự bắt tâm nhẹ (Aim-Assist) trên điện thoại nếu tâm ngắm gần sát tù nhân trong 15m
-      if (!hitPlayerId) {
-        const camDir = new THREE.Vector3();
-        camera.getWorldDirection(camDir);
-        let bestDot = 0.975; // Góc lệch ~12 độ quanh tâm ngắm
-        for (const [pid, pm] of Object.entries(playerMeshes)) {
-          const targetCenter = new THREE.Vector3(pm.group.position.x, 1.15, pm.group.position.z);
-          const toTarget = targetCenter.clone().sub(camera.position);
-          const dist = toTarget.length();
-          if (dist > 15.5) continue;
-          const dirNorm = toTarget.clone().normalize();
-          const dot = camDir.dot(dirNorm);
-          if (dot > bestDot) {
-            // Kiểm tra không bị tường bê tông che khuất
-            raycaster.set(camera.position, dirNorm);
-            const wallHits = raycaster.intersectObjects(wallOccluders, false);
-            if (!wallHits.length || wallHits[0].distance > dist - 0.3) {
-              bestDot = dot;
-              hitPlayerId = pid;
-              endPoint.copy(targetCenter);
-            }
-          }
-        }
-      }
-
-      socket.emit('taser_shoot', {
-        from: { x: muzzleWorld.x, y: muzzleWorld.y, z: muzzleWorld.z },
-        to: { x: endPoint.x, y: endPoint.y, z: endPoint.z },
-        hitPlayerId
-      });
+      socket.emit('drop_hook');
     }
 
-    function triggerPrimaryCombat() {
-      if (!myPlayer) return;
-      if (myPlayer.role === 'Quản Tù') {
-        fireWardenTaser();
-      } else {
-        triggerRoleAction('punch');
-      }
+    function triggerDynamite() {
+      if (!hasJoined || myRole !== 'player' || roomMeta.phase !== 'playing') return;
+      ensureAudio();
+      socket.emit('use_dynamite');
     }
 
-    // =========================================================================
-    // 8. VA CHẠM TƯỜNG & KHÓA CỬA SONG SẮT 2 BUỒNG
-    // =========================================================================
-    function canCrossDoor(x, isWarden) {
-      const inDoor1 = x > -5.0 && x < -3.0;
-      const inDoor2 = x > 3.0 && x < 5.0;
-      if (inDoor1 && (!prisonState.cells[1].locked || isWarden)) return true;
-      if (inDoor2 && (!prisonState.cells[2].locked || isWarden)) return true;
-      return false;
-    }
-
-    function resolveMovement(oldX, oldZ, nextX, nextZ) {
-      const isWarden = myPlayer && myPlayer.role === 'Quản Tù';
-      let rx = Math.max(-7.5, Math.min(7.5, nextX));
-      let rz = Math.max(-6.5, Math.min(5.5, nextZ));
-
-      if (rz < -0.65) {
-        if (oldX < 0 && rx > -0.45) rx = -0.45;
-        if (oldX > 0 && rx < 0.45) rx = 0.45;
-      }
-
-      const crossingBars = (oldZ < -1.0 && rz > -1.42) || (oldZ > -1.0 && rz < -0.58) || (rz > -1.42 && rz < -0.58);
-      if (crossingBars && !canCrossDoor(rx, isWarden)) {
-        if (oldZ <= -1.0) rz = Math.min(rz, -1.42);
-        else rz = Math.max(rz, -0.58);
-      }
-
-      if (rx > -1.85 && rx < 1.85 && rz > 3.95 && rz < 5.55) {
-        if (oldZ <= 3.95) rz = 3.95;
-        else if (oldX <= -1.85) rx = -1.85;
-        else if (oldX >= 1.85) rx = 1.85;
-      }
-
-      return { x: rx, z: rz };
-    }
-
-    // =========================================================================
-    // 9. ĐIỀU KHIỂN ĐA CHẠM MOBILE (JOYSTICK TRÁI + XOAY CAMERA PHẢI) & PC
-    // =========================================================================
-    const joyZone = document.getElementById('joystickZone');
-    const joyKnob = document.getElementById('joystickKnob');
-    let joyTouchId = null;
-    const JOY_MAX_R = 40;
-
-    function updateJoystickFromPoint(clientX, clientY) {
-      const rect = joyZone.getBoundingClientRect();
-      const cx = rect.left + rect.width / 2;
-      const cy = rect.top + rect.height / 2;
-      let dx = clientX - cx;
-      let dy = clientY - cy;
-      const dist = Math.hypot(dx, dy);
-      if (dist > JOY_MAX_R) {
-        dx = (dx / dist) * JOY_MAX_R;
-        dy = (dy / dist) * JOY_MAX_R;
-      }
-      joyKnob.style.transform = `translate(${dx}px, ${dy}px)`;
-      joyVec.x = dx / JOY_MAX_R;
-      joyVec.y = -dy / JOY_MAX_R; // Đẩy lên = đi tới (+1)
-    }
-
-    function resetJoystick() {
-      joyTouchId = null;
-      joyVec.x = 0;
-      joyVec.y = 0;
-      joyKnob.style.transform = 'translate(0px, 0px)';
-    }
-
-    joyZone.addEventListener('touchstart', (e) => {
-      e.stopPropagation();
+    canvas.addEventListener('pointerdown', (e) => {
       e.preventDefault();
-      if (joyTouchId === null && e.changedTouches.length > 0) {
-        const t = e.changedTouches[0];
-        joyTouchId = t.identifier;
-        updateJoystickFromPoint(t.clientX, t.clientY);
-      }
-    }, { passive: false });
-
-    joyZone.addEventListener('touchmove', (e) => {
-      e.stopPropagation();
-      e.preventDefault();
-      for (const t of e.changedTouches) {
-        if (t.identifier === joyTouchId) {
-          updateJoystickFromPoint(t.clientX, t.clientY);
-          break;
-        }
-      }
-    }, { passive: false });
-
-    joyZone.addEventListener('touchend', (e) => {
-      e.stopPropagation();
-      for (const t of e.changedTouches) {
-        if (t.identifier === joyTouchId) { resetJoystick(); break; }
-      }
+      triggerDropHook();
     });
-    joyZone.addEventListener('touchcancel', resetJoystick);
-
-    // Xoay camera bằng ngón tay riêng biệt (đa chạm độc lập với Joystick) & Chuột PC
-    let isMouseLook = false;
-    let lookTouchId = null;
-    let lastLookX = 0, lastLookY = 0;
-    let dragDist = 0;
-
-    function togglePointerLock() {
-      if (document.pointerLockElement === renderer.domElement) {
-        document.exitPointerLock();
-      } else {
-        renderer.domElement.requestPointerLock();
-      }
-    }
-
-    document.addEventListener('pointerlockchange', () => {
-      const locked = document.pointerLockElement === renderer.domElement;
-      const btn = document.getElementById('btnPointerLock');
-      if (btn) btn.textContent = locked ? '🔓 ESC thoát chuột' : '🎯 Khóa Chuột FPS';
-    });
-
-    renderer.domElement.addEventListener('mousedown', (e) => {
-      if (document.pointerLockElement === renderer.domElement) {
-        if (myPlayer?.role === 'Quản Tù') fireWardenTaser();
-        else handleTapOnScene(window.innerWidth / 2, window.innerHeight / 2);
-        return;
-      }
-      isMouseLook = true;
-      lastLookX = e.clientX;
-      lastLookY = e.clientY;
-      dragDist = 0;
-    });
-
-    window.addEventListener('mousemove', (e) => {
-      if (document.pointerLockElement === renderer.domElement) {
-        camYaw -= e.movementX * 0.0025;
-        camPitch = Math.max(-1.15, Math.min(1.15, camPitch - e.movementY * 0.0025));
-        return;
-      }
-      if (!isMouseLook) return;
-      const dx = e.clientX - lastLookX;
-      const dy = e.clientY - lastLookY;
-      dragDist += Math.hypot(dx, dy);
-      camYaw -= dx * 0.0042;
-      camPitch = Math.max(-1.15, Math.min(1.15, camPitch - dy * 0.0035));
-      lastLookX = e.clientX;
-      lastLookY = e.clientY;
-    });
-
-    window.addEventListener('mouseup', (e) => {
-      if (isMouseLook && dragDist < 6) {
-        handleTapOnScene(e.clientX, e.clientY);
-      }
-      isMouseLook = false;
-    });
-
-    renderer.domElement.addEventListener('touchstart', (e) => {
-      for (const t of e.changedTouches) {
-        if (lookTouchId === null && t.identifier !== joyTouchId) {
-          lookTouchId = t.identifier;
-          lastLookX = t.clientX;
-          lastLookY = t.clientY;
-          dragDist = 0;
-          break;
-        }
-      }
-    }, { passive: true });
-
-    renderer.domElement.addEventListener('touchmove', (e) => {
-      for (const t of e.changedTouches) {
-        if (t.identifier === lookTouchId) {
-          const dx = t.clientX - lastLookX;
-          const dy = t.clientY - lastLookY;
-          dragDist += Math.hypot(dx, dy);
-          camYaw -= dx * 0.0062;
-          camPitch = Math.max(-1.1, Math.min(1.1, camPitch - dy * 0.0048));
-          lastLookX = t.clientX;
-          lastLookY = t.clientY;
-          break;
-        }
-      }
-    }, { passive: true });
-
-    renderer.domElement.addEventListener('touchend', (e) => {
-      for (const t of e.changedTouches) {
-        if (t.identifier === lookTouchId) {
-          if (dragDist < 10) handleTapOnScene(t.clientX, t.clientY);
-          lookTouchId = null;
-          break;
-        }
-      }
-    });
-
-    function handleTapOnScene(clientX, clientY) {
-      if (!myPlayer || Date.now() < myStunnedUntil) return;
-      const ndc = new THREE.Vector2(
-        (clientX / window.innerWidth) * 2 - 1,
-        -(clientY / window.innerHeight) * 2 + 1
-      );
-      raycaster.setFromCamera(ndc, camera);
-      const targets = [...Object.values(playerMeshes).map(pm => pm.hitCylinder), ...clickableDoors];
-      const hits = raycaster.intersectObjects(targets, false);
-      if (!hits.length || hits[0].distance > 12) return;
-
-      const data = hits[0].object.userData;
-      if (data.interactType === 'door' && hits[0].distance < 6.5) {
-        if (myPlayer.role === 'Quản Tù') {
-          socket.emit('toggle_cell_lock', { cellId: data.cellId });
-        } else {
-          triggerRoleAction('clang_bars');
-        }
-      } else if (data.interactType === 'player') {
-        selectedTargetId = data.playerId;
-        const t = players[selectedTargetId];
-        if (t) showToast(`🎯 Đã chọn mục tiêu: [${t.role}] ${t.name}`, '#38bdf8');
-      }
-    }
 
     window.addEventListener('keydown', (e) => {
-      if (['INPUT', 'SELECT', 'TEXTAREA'].includes(document.activeElement?.tagName)) return;
-      const k = e.key.toLowerCase();
-      if (k === 'w' || e.key === 'ArrowUp') keys.w = true;
-      if (k === 's' || e.key === 'ArrowDown') keys.s = true;
-      if (k === 'a' || e.key === 'ArrowLeft') keys.a = true;
-      if (k === 'd' || e.key === 'ArrowRight') keys.d = true;
-
-      if (Date.now() < myStunnedUntil) return;
-
-      if (k === 'e') {
-        if (myPlayer?.role === 'Quản Tù') {
-          const d1 = Math.hypot(playerPos.x - (-4), playerPos.z - (-1));
-          const d2 = Math.hypot(playerPos.x - 4, playerPos.z - (-1));
-          if (Math.min(d1, d2) < 4.5) {
-            socket.emit('toggle_cell_lock', { cellId: d1 < d2 ? 1 : 2 });
-          }
-        } else if (myPlayer) {
-          triggerRoleAction('clang_bars');
-        }
-      }
-
-      if (myPlayer) {
-        if (myPlayer.role === 'Quản Tù') {
-          if (k === '1') socket.emit('toggle_cell_lock', { cellId: 1 });
-          if (k === '2') socket.emit('toggle_cell_lock', { cellId: 2 });
-          if (k === '3') fireWardenTaser();
-          if (k === '4') socket.emit('toggle_alarm');
-          if (k === '5') socket.emit('roll_call');
-          if (k === '6') openAdminModal();
-        } else if (myPlayer.role === 'Trưởng Buồng') {
-          if (k === '1') triggerRoleAction('punch');
-          if (k === '2') triggerRoleAction('collect_tax');
-          if (k === '3') triggerRoleAction('share_food');
-          if (k === '4') triggerRoleAction('clang_bars');
-          if (k === '5') triggerRoleAction('workout');
-        } else {
-          if (k === '1') triggerRoleAction('punch');
-          if (k === '2') triggerRoleAction('workout');
-          if (k === '3') triggerRoleAction('bribe');
-          if (k === '4') triggerRoleAction('clang_bars');
-          if (k === '5') triggerRoleAction('scavenge');
-        }
+      if (['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) return;
+      if (e.code === 'Space' || e.key === 'ArrowDown' || e.key.toLowerCase() === 's') {
+        e.preventDefault();
+        triggerDropHook();
+      } else if (e.key === 'ArrowUp' || e.key.toLowerCase() === 'w' || e.key.toLowerCase() === 'e') {
+        e.preventDefault();
+        triggerDynamite();
       }
     });
 
-    window.addEventListener('keyup', (e) => {
-      const k = e.key.toLowerCase();
-      if (k === 'w' || e.key === 'ArrowUp') keys.w = false;
-      if (k === 's' || e.key === 'ArrowDown') keys.s = false;
-      if (k === 'a' || e.key === 'ArrowLeft') keys.a = false;
-      if (k === 'd' || e.key === 'ArrowRight') keys.d = false;
-    });
+    // =========================================================================
+    // 6. CẬP NHẬT UI PHÒNG CHỜ, CỬA HÀNG, KHÁN GIẢ & CHAT
+    // =========================================================================
+    function updateLobbyPreview(meta) {
+      const count = (meta.slots[0] ? 1 : 0) + (meta.slots[1] ? 1 : 0);
+      document.getElementById('lobbySlotsText').textContent = `${count} / 2`;
 
-    // =========================================================================
-    // 10. THANH KỸ NĂNG, CHAT & QUẢN LÝ
-    // =========================================================================
-    function renderRoleActionBar() {
-      const nav = document.getElementById('roleActionBar');
-      const primaryBtn = document.getElementById('primaryActionBtn');
-      if (!myPlayer) {
-        nav.innerHTML = '';
-        primaryBtn.classList.add('hidden');
+      const names = meta.slots.filter(Boolean).map((p) => `P${p.slot + 1}: ${p.name}`);
+      document.getElementById('lobbyPlayersNames').textContent =
+        names.length > 0 ? names.join('  ⚔️  ') : 'Đang trống — Vào là chơi ngay!';
+
+      const qEl = document.getElementById('lobbyQueueInfo');
+      const btn = document.getElementById('btnJoinGame');
+      if (count >= 2) {
+        qEl.classList.remove('hidden');
+        qEl.textContent = `Phòng đã đủ 2 người! Bạn sẽ vào Xem Trực Tiếp & Hàng Chờ #${(meta.queue?.length || 0) + 1}`;
+        btn.textContent = '👁️ VÀO XEM & XẾP HÀNG CHỜ';
+      } else {
+        qEl.classList.add('hidden');
+        btn.textContent = '⛏️ VÀO MỎ CHIẾN NGAY';
+      }
+    }
+
+    function updateOverlaysFromMeta() {
+      updateLobbyPreview(roomMeta);
+      if (!hasJoined) return;
+
+      // Thanh điều khiển góc dưới
+      document.getElementById('cornerControls').classList.remove('hidden');
+      document.getElementById('btnYieldSeat').classList.toggle('hidden', myRole !== 'player');
+
+      // Biển Khán Giả & vị trí Hàng Chờ
+      const specBanner = document.getElementById('spectatorBanner');
+      if (myRole === 'spectator') {
+        specBanner.classList.remove('hidden');
+        const meInQueue = (roomMeta.queue || []).find((q) => q.id === socket.id);
+        document.getElementById('myQueuePosBadge').textContent = meInQueue
+          ? `Hàng chờ #${meInQueue.pos}`
+          : 'Đang xem';
+      } else {
+        specBanner.classList.add('hidden');
+      }
+
+      // Danh sách hàng chờ thu gọn trong hộp chat
+      const qList = roomMeta.queue || [];
+      document.getElementById('queueCountMini').textContent = qList.length;
+      document.getElementById('queueMiniBar').textContent =
+        qList.length > 0
+          ? 'Hàng chờ: ' + qList.map((q) => `#${q.pos} ${q.name}`).join(', ')
+          : 'Hàng chờ: Chưa có ai';
+
+      // Modal Cửa Hàng Ông Chủ
+      const shopModal = document.getElementById('shopModal');
+      if (roomMeta.phase === 'shop') {
+        shopModal.classList.remove('hidden');
+        renderShopUI();
+      } else {
+        shopModal.classList.add('hidden');
+      }
+
+      // Modal Kết Thúc Trận Đấu
+      const goModal = document.getElementById('gameoverModal');
+      if (roomMeta.phase === 'gameover') {
+        goModal.classList.remove('hidden');
+        document.getElementById('goReasonText').textContent = roomMeta.gameoverReason;
+        document.getElementById('goChampionText').textContent = roomMeta.championText;
+
+        const sb = document.getElementById('goScoreboard');
+        sb.innerHTML = '';
+        (roomMeta.slots || []).forEach((p, idx) => {
+          if (!p) return;
+          const card = document.createElement('div');
+          card.className = 'p-3 rounded-xl bg-[#361706] border-2 border-amber-500 text-center';
+          card.innerHTML = `
+            <div class="font-extrabold text-amber-200">P${idx + 1}: ${p.name}</div>
+            <div class="retro-font text-lg text-emerald-400 mt-1">$${p.money.toLocaleString()}</div>
+            <div class="text-xs font-bold text-yellow-300 mt-0.5">👑 ${p.crowns} Cúp Màn</div>
+          `;
+          sb.appendChild(card);
+        });
+
+        document.getElementById('goPlayerButtons').classList.toggle('hidden', myRole !== 'player');
+        document.getElementById('goSpectatorNote').classList.toggle('hidden', myRole === 'player');
+      } else {
+        goModal.classList.add('hidden');
+      }
+    }
+
+    function renderShopUI() {
+      document.getElementById('shopNextLevelText').textContent = `Màn ${roomMeta.level + 1}`;
+      document.getElementById('shopTimerText').textContent = roomMeta.shopTimeLeft;
+
+      const me = myRole === 'player' && mySlot !== null ? roomMeta.slots[mySlot] : null;
+      const cashBadge = document.getElementById('shopMyCashBadge');
+      if (me) {
+        cashBadge.classList.remove('hidden');
+        cashBadge.textContent = `💵 $${me.money.toLocaleString()}`;
+      } else {
+        cashBadge.classList.add('hidden');
+      }
+
+      // Trạng thái 2 người trong Shop
+      const pBar = document.getElementById('shopPlayersBar');
+      pBar.innerHTML = '';
+      (roomMeta.slots || []).forEach((p, idx) => {
+        if (!p) return;
+        const div = document.createElement('div');
+        div.className = 'flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-[#240e03] border border-amber-700';
+        div.innerHTML = `
+          <span class="font-extrabold text-amber-200 truncate">P${idx + 1}: ${p.name} (<span class="text-emerald-400">$${p.money.toLocaleString()}</span>)</span>
+          <span class="px-2 py-0.5 rounded text-[10px] font-black shrink-0 ${p.shopReady ? 'bg-emerald-600 text-white' : 'bg-amber-800 text-amber-200'}">
+            ${p.shopReady ? '✅ Sẵn sàng' : '🛒 Đang mua'}
+          </span>
+        `;
+        pBar.appendChild(div);
+      });
+
+      // Lưới 5 món đồ kinh điển
+      const grid = document.getElementById('shopItemsGrid');
+      grid.innerHTML = '';
+      (roomMeta.shopItems || []).forEach((item) => {
+        const boughtCount = me?.boughtShop?.[item.id] || 0;
+        const isMaxed = item.id === 'dynamite' ? boughtCount >= 3 || (me?.dynamite || 0) >= 8 : Boolean(boughtCount);
+        const canAfford = me && me.money >= item.price && !isMaxed;
+
+        const card = document.createElement('button');
+        card.disabled = !canAfford;
+        card.className = `parchment-box rounded-xl p-2.5 flex flex-col items-center justify-between text-center transition ${
+          canAfford ? 'hover:-translate-y-1 cursor-pointer' : 'opacity-65 cursor-not-allowed'
+        }`;
+        card.innerHTML = `
+          <div class="text-3xl">${item.icon}</div>
+          <div class="font-black text-xs text-amber-950 mt-1 leading-tight">${item.name}</div>
+          <div class="text-[10px] font-bold text-amber-900/90 my-1 leading-snug">${item.desc}</div>
+          <div class="w-full py-1 rounded-lg font-black text-xs ${
+            isMaxed
+              ? 'bg-emerald-700 text-white'
+              : canAfford
+              ? 'bg-amber-700 text-yellow-200'
+              : 'bg-stone-500 text-stone-200'
+          }">
+            ${isMaxed ? '✅ ĐÃ MUA' : `$${item.price.toLocaleString()}`}
+          </div>
+        `;
+        if (canAfford) {
+          card.onclick = () => socket.emit('buy_shop_item', { itemId: item.id });
+        }
+        grid.appendChild(card);
+      });
+
+      const readyBtn = document.getElementById('btnShopReady');
+      const hintEl = document.getElementById('shopHintText');
+      if (myRole !== 'player') {
+        readyBtn.classList.add('hidden');
+        hintEl.textContent = '👁️ Bạn đang xem 2 thợ mỏ mua đồ trong Cửa Hàng...';
+      } else {
+        readyBtn.classList.remove('hidden');
+        readyBtn.disabled = Boolean(me?.shopReady);
+        readyBtn.textContent = me?.shopReady ? '⏳ CHỜ ĐỐI THỦ...' : '✅ SẴN SÀNG QUA MÀN';
+        hintEl.textContent = 'Bấm vào món đồ để mua cho màn kế tiếp!';
+      }
+    }
+
+    function submitJoin() {
+      const name = document.getElementById('playerNameInput').value.trim();
+      const err = document.getElementById('joinError');
+      if (name.length < 2) {
+        err.textContent = '⚠️ Nhập tên từ 2 ký tự trở lên nhé!';
+        err.classList.remove('hidden');
         return;
       }
+      err.classList.add('hidden');
+      ensureAudio();
 
-      // Hiển thị nút lớn bên phải cho Quản Tù (Bắn Súng Điện) hoặc Tù nhân (Đấm)
-      primaryBtn.classList.remove('hidden');
-      if (myPlayer.role === 'Quản Tù') {
-        primaryBtn.className = 'fixed bottom-20 right-4 z-20 w-16 h-16 rounded-full bg-gradient-to-b from-sky-400 to-blue-700 border-2 border-white text-white font-black shadow-[0_0_22px_rgba(56,189,248,0.85)] active:scale-90 flex flex-col items-center justify-center';
-        document.getElementById('primaryActionIcon').textContent = '⚡';
-        document.getElementById('primaryActionLabel').textContent = 'SÚNG ĐIỆN';
-      } else {
-        primaryBtn.className = 'fixed bottom-20 right-4 z-20 w-15 h-15 rounded-full bg-gradient-to-b from-orange-500 to-red-700 border-2 border-amber-200 text-white font-black shadow-xl active:scale-90 flex flex-col items-center justify-center';
-        document.getElementById('primaryActionIcon').textContent = '👊';
-        document.getElementById('primaryActionLabel').textContent = 'ĐẤM';
-      }
-
-      let buttons = [];
-      if (myPlayer.role === 'Quản Tù') {
-        buttons = [
-          { key: '1', icon: prisonState.cells[1].locked ? '🔓' : '🔐', label: prisonState.cells[1].locked ? 'Mở B1' : 'Khóa B1', fn: () => socket.emit('toggle_cell_lock', { cellId: 1 }), border: 'border-amber-400' },
-          { key: '2', icon: prisonState.cells[2].locked ? '🔓' : '🔐', label: prisonState.cells[2].locked ? 'Mở B2' : 'Khóa B2', fn: () => socket.emit('toggle_cell_lock', { cellId: 2 }), border: 'border-amber-400' },
-          { key: '3', icon: '⚡', label: 'Súng Điện', fn: fireWardenTaser, border: 'border-sky-400' },
-          { key: '4', icon: '🚨', label: prisonState.alarmActive ? 'Tắt Còi' : 'Báo Động', fn: () => socket.emit('toggle_alarm'), border: 'border-red-500' },
-          { key: '5', icon: '📢', label: 'Điểm Danh', fn: () => socket.emit('roll_call'), border: 'border-purple-400' },
-          { key: '6', icon: '👑', label: 'Quản Lý', fn: openAdminModal, border: 'border-yellow-300' }
-        ];
-      } else if (myPlayer.role === 'Trưởng Buồng') {
-        buttons = [
-          { key: '2', icon: '🚬', label: 'Thu Phế', fn: () => triggerRoleAction('collect_tax'), border: 'border-amber-400' },
-          { key: '3', icon: '🍱', label: 'Chia Cơm', fn: () => triggerRoleAction('share_food'), border: 'border-emerald-400' },
-          { key: '4', icon: '🔔', label: 'Đập Sắt', fn: () => triggerRoleAction('clang_bars'), border: 'border-slate-400' },
-          { key: '5', icon: '💪', label: 'Tập Tạ', fn: () => triggerRoleAction('workout'), border: 'border-sky-400' }
-        ];
-      } else {
-        buttons = [
-          { key: '2', icon: '💪', label: 'Hít Đất', fn: () => triggerRoleAction('workout'), border: 'border-emerald-400' },
-          { key: '3', icon: '🚬', label: 'Nộp Phế', fn: () => triggerRoleAction('bribe'), border: 'border-amber-400' },
-          { key: '4', icon: '🙏', label: 'Xin Ân Xá', fn: () => triggerRoleAction('clang_bars'), border: 'border-slate-400' },
-          { key: '5', icon: '🔍', label: 'Lục Buồng', fn: () => triggerRoleAction('scavenge'), border: 'border-purple-400' }
-        ];
-      }
-
-      nav.innerHTML = '';
-      buttons.forEach((b) => {
-        const el = document.createElement('button');
-        el.className = `action-btn ${b.border} relative w-14 md:w-18 h-12 md:h-14 flex flex-col items-center justify-center px-1 shrink-0`;
-        el.innerHTML = `
-          <span class="hidden lg:block absolute top-0.5 left-1 text-[9px] font-black text-amber-300">${b.key}</span>
-          <span class="text-base md:text-lg leading-none">${b.icon}</span>
-          <span class="text-[8px] md:text-[10px] font-extrabold text-slate-100 mt-0.5 truncate max-w-full">${b.label}</span>
-        `;
-        el.onclick = b.fn;
-        nav.appendChild(el);
+      socket.emit('join_game', { name }, (res) => {
+        if (!res || !res.ok) {
+          err.textContent = res?.msg || 'Không thể vào phòng!';
+          err.classList.remove('hidden');
+          return;
+        }
+        hasJoined = true;
+        myRole = res.role;
+        mySlot = res.slot;
+        document.getElementById('joinModal').classList.add('hidden');
+        updateOverlaysFromMeta();
       });
     }
 
-    function triggerRoleAction(action) {
-      if (!myPlayer || Date.now() < myStunnedUntil) return;
-      handAnimTime = 1.0;
-      socket.emit('role_action', { action, targetId: selectedTargetId });
-    }
-
-    function updateHUD() {
-      const b1 = document.getElementById('door1Badge');
-      const b2 = document.getElementById('door2Badge');
-      b1.textContent = prisonState.cells[1].locked ? 'B1: 🔐' : 'B1: 🔓';
-      b1.className = `px-1.5 py-0.5 rounded text-[9px] md:text-[10px] font-extrabold border shrink-0 ${
-        prisonState.cells[1].locked ? 'bg-red-900/90 border-red-400 text-red-200' : 'bg-emerald-900/90 border-emerald-400 text-emerald-200'
-      }`;
-      b2.textContent = prisonState.cells[2].locked ? 'B2: 🔐' : 'B2: 🔓';
-      b2.className = `px-1.5 py-0.5 rounded text-[9px] md:text-[10px] font-extrabold border shrink-0 ${
-        prisonState.cells[2].locked ? 'bg-red-900/90 border-red-400 text-red-200' : 'bg-emerald-900/90 border-emerald-400 text-emerald-200'
-      }`;
-
-      if (myPlayer) {
-        document.getElementById('hudHp').textContent = myPlayer.hp;
-        document.getElementById('hudPoints').textContent = (myPlayer.points || 0).toLocaleString();
-        document.getElementById('hudRoleBadge').textContent = `${myPlayer.role}: ${myPlayer.name}${myPlayer.cell ? ` (B${myPlayer.cell})` : ''}`;
-        document.getElementById('btnOpenAdmin').classList.toggle('hidden', myPlayer.role !== 'Quản Tù');
-        renderRoleActionBar();
-      }
-    }
-
-    function renderOnlineList() {
-      const list = Object.values(players);
-      document.getElementById('onlineCount').textContent = list.length;
-      const box = document.getElementById('playersListBody');
-      box.innerHTML = '';
-
-      list.forEach((p) => {
-        const isMe = p.id === myId;
-        const badgeColor = p.role === 'Quản Tù' ? 'bg-blue-700 text-sky-100' : (p.role === 'Trưởng Buồng' ? 'bg-amber-600 text-white' : 'bg-orange-700 text-orange-100');
-        const row = document.createElement('div');
-        row.className = `p-1.5 rounded-lg border flex items-center justify-between gap-1 cursor-pointer ${
-          isMe ? 'bg-slate-800 border-amber-400' : 'bg-slate-900/80 border-slate-700 hover:border-sky-400'
-        }`;
-        row.innerHTML = `
-          <div class="min-w-0">
-            <div class="font-extrabold text-slate-100 truncate">${isMe ? '👉 ' : ''}${p.name}</div>
-            <div class="text-[10px] text-slate-400">❤️ ${p.hp} • ⭐ ${p.points}${p.cell ? ` • B${p.cell}` : ''}</div>
-          </div>
-          <span class="px-1.5 py-0.5 rounded text-[9px] font-black shrink-0 ${badgeColor}">${p.role}</span>
-        `;
-        row.onclick = () => {
-          if (!isMe) {
-            selectedTargetId = p.id;
-            showToast(`🎯 Đã chọn mục tiêu: [${p.role}] ${p.name}`, '#38bdf8');
-          }
-        };
-        box.appendChild(row);
-      });
-    }
-
-    function showToast(text, color = '#facc15') {
-      const wrap = document.getElementById('toastContainer');
-      const div = document.createElement('div');
-      div.className = 'px-3 py-1.5 rounded-lg bg-slate-950/92 border text-[11px] font-extrabold shadow-xl transition-all duration-300 text-center';
-      div.style.borderColor = color;
-      div.style.color = color;
-      div.textContent = text;
-      wrap.appendChild(div);
-      setTimeout(() => { div.style.opacity = '0'; div.style.transform = 'translateY(-10px)'; }, 2300);
-      setTimeout(() => div.remove(), 2700);
-    }
-
-    function appendChat(item) {
-      const log = document.getElementById('chatLog');
-      const div = document.createElement('div');
-      div.className = item.isSystem ? 'p-1.5 rounded bg-slate-800/90 border border-amber-500/40 text-amber-200' : 'text-slate-200';
-      const prefix = item.isSystem ? item.name : `[${item.role}] ${item.name}`;
-      div.innerHTML = `<span class="font-extrabold text-amber-400">${prefix}:</span> <span>${item.text}</span>`;
-      log.appendChild(div);
-      while (log.children.length > 50) log.removeChild(log.firstChild);
-      log.scrollTop = log.scrollHeight;
-
-      if (document.getElementById('chatBody').classList.contains('hidden')) {
-        document.getElementById('chatUnreadDot').classList.remove('hidden');
-      }
-    }
-
-    const chatInput = document.getElementById('chatInput');
-    chatInput.addEventListener('keydown', (e) => {
-      e.stopPropagation();
-      if (e.key === 'Enter') sendChat();
+    document.getElementById('playerNameInput').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') submitJoin();
     });
 
-    function sendChat() {
-      const txt = chatInput.value.trim();
-      if (!txt) return;
-      socket.emit('chat', { text: txt });
-      chatInput.value = '';
+    function clickShopReady() {
+      socket.emit('shop_ready');
     }
 
-    function togglePlayersPanel() {
-      const body = document.getElementById('playersListBody');
-      const hidden = body.classList.toggle('hidden');
-      document.getElementById('playersPanelIcon').textContent = hidden ? '+' : '−';
+    function clickRestart() {
+      socket.emit('restart_match');
     }
 
-    function toggleChatPanel() {
-      const body = document.getElementById('chatBody');
-      const hidden = body.classList.toggle('hidden');
-      document.getElementById('chatPanelIcon').textContent = hidden ? '+' : '−';
+    function yieldSeat() {
+      socket.emit('yield_seat');
+    }
+
+    function toggleChatBox() {
+      const box = document.getElementById('chatBox');
+      const hidden = box.classList.toggle('hidden');
       if (!hidden) {
-        document.getElementById('chatUnreadDot').classList.add('hidden');
+        document.getElementById('chatBadge').classList.add('hidden');
         const log = document.getElementById('chatLog');
         log.scrollTop = log.scrollHeight;
       }
     }
 
-    // =========================================================================
-    // 11. ĐĂNG NHẬP / ĐĂNG KÝ / SỔ QUẢN LÝ
-    // =========================================================================
-    function switchAuthTab(tab) {
-      const isLogin = tab === 'login';
-      document.getElementById('loginForm').classList.toggle('hidden', !isLogin);
-      document.getElementById('registerForm').classList.toggle('hidden', isLogin);
-      document.getElementById('tabLogin').className = isLogin
-        ? 'py-2.5 text-amber-400 bg-slate-800 border-b-2 border-amber-400'
-        : 'py-2.5 text-slate-400 hover:text-white';
-      document.getElementById('tabRegister').className = !isLogin
-        ? 'py-2.5 text-amber-400 bg-slate-800 border-b-2 border-amber-400'
-        : 'py-2.5 text-slate-400 hover:text-white';
-      document.getElementById('authMsg').classList.add('hidden');
+    function appendChatMsg(msg) {
+      const log = document.getElementById('chatLog');
+      const div = document.createElement('div');
+      div.className = msg.isSystem ? 'p-1 rounded bg-amber-950/90 border border-amber-600/60 text-amber-200' : 'text-amber-50';
+      div.innerHTML = `<span class="font-extrabold text-yellow-400">${msg.name}:</span> <span>${msg.text}</span>`;
+      log.appendChild(div);
+      while (log.children.length > 45) log.removeChild(log.firstChild);
+      log.scrollTop = log.scrollHeight;
+
+      if (document.getElementById('chatBox').classList.contains('hidden')) {
+        document.getElementById('chatBadge').classList.remove('hidden');
+      }
     }
 
-    function showAuthMsg(msg, ok = false) {
-      const box = document.getElementById('authMsg');
-      box.classList.remove('hidden');
-      box.className = `mx-4 mt-3 p-2.5 rounded text-xs font-bold border ${
-        ok ? 'bg-emerald-950 border-emerald-400 text-emerald-200' : 'bg-red-950 border-red-400 text-red-200'
-      }`;
-      box.textContent = msg;
+    const chatInputEl = document.getElementById('chatInput');
+    chatInputEl.addEventListener('keydown', (e) => {
+      e.stopPropagation();
+      if (e.key === 'Enter') sendChat();
+    });
+
+    function sendChat() {
+      const txt = chatInputEl.value.trim();
+      if (!txt) return;
+      socket.emit('chat', { text: txt });
+      chatInputEl.value = '';
     }
 
-    function submitRegister() {
-      const name = document.getElementById('regName').value.trim();
-      const password = document.getElementById('regPass').value.trim();
-      const cell = Number(document.getElementById('regCell').value);
-      socket.emit('register_account', { name, password, cell }, (res) => {
-        showAuthMsg(res.msg, res.ok);
-        if (res.ok) {
-          document.getElementById('loginName').value = res.name;
-          document.getElementById('loginPass').value = password;
-          setTimeout(() => switchAuthTab('login'), 1000);
-        }
-      });
-    }
-
-    function submitLogin() {
-      const name = document.getElementById('loginName').value.trim();
-      const password = document.getElementById('loginPass').value.trim();
-      socket.emit('login_account', { name, password }, (res) => {
-        if (!res.ok) return showAuthMsg(res.msg, false);
-        ensureAudio();
-        myId = socket.id;
-        myPlayer = res.player;
-        prisonState = res.prisonState;
-        accountsList = res.accountsList || [];
-
-        playerPos.set(myPlayer.x, 1.65, myPlayer.z);
-        camYaw = myPlayer.yaw || 0;
-        camPitch = 0;
-
-        rebuildFirstPersonHand(myPlayer.role);
-        document.getElementById('authModal').classList.add('hidden');
-        updateHUD();
-        renderOnlineList();
-        renderAdminList();
-      });
-    }
-
-    function logoutPrison() {
-      if (document.pointerLockElement) document.exitPointerLock();
-      socket.emit('logout_prison');
-      myPlayer = null;
-      document.getElementById('authModal').classList.remove('hidden');
-      showAuthMsg('Bạn đã rời khỏi trại giam.', true);
-    }
-
-    function openAdminModal() {
-      if (document.pointerLockElement) document.exitPointerLock();
-      document.getElementById('adminModal').classList.remove('hidden');
-      document.getElementById('adminModal').classList.add('flex');
-      renderAdminList();
-    }
-
-    function closeAdminModal() {
-      document.getElementById('adminModal').classList.add('hidden');
-      document.getElementById('adminModal').classList.remove('flex');
-    }
-
-    function renderAdminList() {
-      const box = document.getElementById('adminListContainer');
-      if (!box) return;
-      box.innerHTML = '';
-
-      accountsList.forEach((acc) => {
-        const row = document.createElement('div');
-        row.className = 'p-2.5 rounded-xl bg-slate-900/90 border border-slate-700 flex flex-col md:flex-row md:items-center justify-between gap-2';
-        row.innerHTML = `
-          <div>
-            <div class="font-black text-sm text-amber-300">${acc.name} ${acc.usernameKey === 'trung' ? '<span class="px-1.5 py-0.5 rounded bg-red-700 text-white text-[9px]">CHỦ TRẠI</span>' : ''}</div>
-            <div class="text-[11px] text-slate-400">Điểm cải tạo: <b class="text-white">${acc.points}</b></div>
-          </div>
-          <div class="flex flex-wrap items-center gap-1.5">
-            <select id="admRole_${acc.usernameKey}" class="bg-slate-800 text-white px-2 py-1 rounded border border-slate-600 font-bold">
-              ${['Tù Thường', 'Trưởng Buồng', 'Quản Tù'].map(r => `<option value="${r}" ${acc.role === r ? 'selected' : ''}>${r}</option>`).join('')}
-            </select>
-            <select id="admCell_${acc.usernameKey}" class="bg-slate-800 text-amber-300 px-2 py-1 rounded border border-slate-600 font-bold">
-              <option value="1" ${acc.cell === 1 ? 'selected' : ''}>Buồng 1</option>
-              <option value="2" ${acc.cell === 2 ? 'selected' : ''}>Buồng 2</option>
-            </select>
-            <button onclick="adminUpdate('${acc.usernameKey}', 0)" class="px-2.5 py-1 rounded bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold">💾 Lưu</button>
-            <button onclick="adminUpdate('${acc.usernameKey}', 50)" class="px-2 py-1 rounded bg-sky-700 hover:bg-sky-600 text-white font-bold">+50⭐</button>
-            <button onclick="adminUpdate('${acc.usernameKey}', -50)" class="px-2 py-1 rounded bg-amber-700 hover:bg-amber-600 text-white font-bold">-50⭐</button>
-            ${acc.usernameKey !== 'trung' ? `<button onclick="adminDelete('${acc.usernameKey}')" class="px-2 py-1 rounded bg-red-800 hover:bg-red-700 text-white font-bold">🗑️</button>` : ''}
-          </div>
-        `;
-        box.appendChild(row);
-      });
-    }
-
-    function adminUpdate(targetKey, pointsDelta) {
-      const newRole = document.getElementById(`admRole_${targetKey}`).value;
-      const newCell = Number(document.getElementById(`admCell_${targetKey}`).value);
-      socket.emit('admin_manage', { actionType: 'update', targetKey, newRole, newCell, pointsDelta }, (res) => {
-        if (res && !res.ok) showToast(res.msg, '#ef4444');
-        else showToast('✅ Đã cập nhật hồ sơ!', '#4ade80');
-      });
-    }
-
-    function adminDelete(targetKey) {
-      socket.emit('admin_manage', { actionType: 'delete', targetKey }, (res) => {
-        if (res && !res.ok) showToast(res.msg, '#ef4444');
-        else showToast('🗑️ Đã xóa hồ sơ khỏi trại!', '#f97316');
-      });
+    function showToast(text, color = '#fde047') {
+      const wrap = document.getElementById('toastWrap');
+      const div = document.createElement('div');
+      div.className = 'px-4 py-1.5 rounded-xl bg-[#2e1204]/95 border-2 text-xs font-extrabold shadow-2xl transition-all duration-300';
+      div.style.borderColor = color;
+      div.style.color = color;
+      div.textContent = text;
+      wrap.appendChild(div);
+      setTimeout(() => { div.style.opacity = '0'; div.style.transform = 'translateY(-10px)'; }, 2200);
+      setTimeout(() => div.remove(), 2600);
     }
 
     // =========================================================================
-    // 12. LẮNG NGHE SỰ KIỆN SOCKET TỪ SERVER
+    // 7. LẮNG NGHE SOCKET TỪ SERVER
     // =========================================================================
-    socket.on('init_state', ({ prisonState: ps, players: srvPlayers, accountsList: accs }) => {
-      prisonState = ps;
-      players = srvPlayers || {};
-      accountsList = accs || [];
+    socket.on('lobby_preview', (meta) => {
+      roomMeta = meta;
+      updateLobbyPreview(meta);
+    });
+
+    socket.on('joined_sync', ({ role, slot, meta, items, chatHistory }) => {
+      myRole = role;
+      mySlot = slot;
+      roomMeta = meta;
+      liveItems = items || [];
       document.getElementById('chatLog').innerHTML = '';
-      (ps.chatHistory || []).forEach(appendChat);
-      updateHUD();
-      renderOnlineList();
-      syncPlayerAvatars();
+      (chatHistory || []).forEach(appendChatMsg);
+      updateOverlaysFromMeta();
     });
 
-    socket.on('prison_state_sync', (ps) => {
-      prisonState = ps;
-      setAlarmAudio(ps.alarmActive);
-      updateHUD();
-    });
-
-    socket.on('players_sync', (srvPlayers) => {
-      players = srvPlayers || {};
-      if (myId && players[myId]) {
-        const oldRole = myPlayer?.role;
-        myPlayer = players[myId];
-        if (oldRole && oldRole !== myPlayer.role) rebuildFirstPersonHand(myPlayer.role);
-      }
-      updateHUD();
-      renderOnlineList();
-      syncPlayerAvatars();
-    });
-
-    socket.on('accounts_updated', (accs) => {
-      accountsList = accs || [];
-      renderAdminList();
-    });
-
-    socket.on('player_moved', ({ id, x, z, yaw }) => {
-      if (players[id]) {
-        players[id].x = x;
-        players[id].z = z;
-        players[id].yaw = yaw;
-      }
-      if (playerMeshes[id]) {
-        playerMeshes[id].targetX = x;
-        playerMeshes[id].targetZ = z;
-        playerMeshes[id].targetYaw = yaw;
-      }
-    });
-
-    socket.on('player_anim', ({ id }) => {
-      if (playerMeshes[id]) playerMeshes[id].animTimer = 1.0;
-    });
-
-    socket.on('taser_beam', ({ from, to, hitPlayerId }) => {
-      spawnTaserBeam3D(from, to);
-      playTaserZapSound(Boolean(hitPlayerId));
-    });
-
-    socket.on('player_stunned', ({ targetId, duration }) => {
-      const until = Date.now() + (duration || 3000);
-      if (targetId === myId) {
-        myStunnedUntil = until;
-        playTaserZapSound(true);
-      } else if (playerMeshes[targetId]) {
-        playerMeshes[targetId].stunnedUntil = until;
-      }
-    });
-
-    socket.on('force_teleport', ({ x, z, yaw, msg }) => {
-      playerPos.set(x, 1.65, z);
-      if (typeof yaw === 'number') camYaw = yaw;
-      if (msg) showToast(msg, '#facc15');
-    });
-
-    socket.on('force_logout', (reason) => {
-      if (document.pointerLockElement) document.exitPointerLock();
-      myPlayer = null;
-      document.getElementById('authModal').classList.remove('hidden');
-      showAuthMsg(reason, false);
-    });
-
-    socket.on('toast_notice', ({ text, color }) => showToast(text, color));
-    socket.on('chat_message', appendChat);
-
-    socket.on('sound_event', (ev) => {
-      if (ev.type === 'door_lock') playDoorLockSound(ev.locked);
-      else if (ev.type === 'bar_clang') playBarClangSound();
-      else if (ev.type === 'punch') playPunchSound();
-    });
-
-    // =========================================================================
-    // 13. VÒNG LẶP RENDER 3D 60FPS (DI CHUYỂN + GIẬT ĐIỆN NGÃ GỤC 3 GIÂY)
-    // =========================================================================
-    const clock = new THREE.Clock();
-
-    function animate() {
-      requestAnimationFrame(animate);
-      const dt = Math.min(clock.getDelta(), 0.05);
-      const nowPerf = performance.now();
-      const nowMs = Date.now();
-
-      const amIStunned = nowMs < myStunnedUntil;
-      const overlayEl = document.getElementById('taserScreenOverlay');
-
-      // 1. Xử lý di chuyển hoặc hiệu ứng ngã gục giật điện cho bản thân
-      if (myPlayer && document.getElementById('authModal').classList.contains('hidden')) {
-        if (amIStunned) {
-          // Hiển thị màn hình xanh lóe điện + đếm ngược 3.0s
-          const remain = Math.max(0, (myStunnedUntil - nowMs) / 1000).toFixed(1);
-          overlayEl.classList.remove('hidden');
-          document.getElementById('taserCountdownText').textContent = `Đang ngã gục co giật: ${remain}s`;
-
-          // Hạ camera xuống sát sàn và nghiêng người + rung mạnh
-          playerPos.y += (0.38 - playerPos.y) * 0.2;
-          camera.rotation.z = 0.78 + (Math.random() - 0.5) * 0.14;
-        } else {
-          overlayEl.classList.add('hidden');
-          camera.rotation.z += (0 - camera.rotation.z) * 0.18;
-
-          const kbF = (keys.w ? 1 : 0) - (keys.s ? 1 : 0);
-          const kbR = (keys.d ? 1 : 0) - (keys.a ? 1 : 0);
-          const moveF = Math.max(-1, Math.min(1, kbF + joyVec.y));
-          const moveR = Math.max(-1, Math.min(1, kbR + joyVec.x));
-
-          if (Math.hypot(moveF, moveR) > 0.08) {
-            const speed = (myPlayer.role === 'Quản Tù' ? 4.4 : 3.8) * dt;
-            const forwardX = -Math.sin(camYaw);
-            const forwardZ = -Math.cos(camYaw);
-            const rightX = Math.cos(camYaw);
-            const rightZ = -Math.sin(camYaw);
-
-            let dx = forwardX * moveF + rightX * moveR;
-            let dz = forwardZ * moveF + rightZ * moveR;
-            const len = Math.hypot(dx, dz) || 1;
-            const mag = Math.min(1, Math.hypot(moveF, moveR));
-            dx = (dx / len) * speed * mag;
-            dz = (dz / len) * speed * mag;
-
-            const resolved = resolveMovement(playerPos.x, playerPos.z, playerPos.x + dx, playerPos.z + dz);
-            playerPos.x = resolved.x;
-            playerPos.z = resolved.z;
-            playerPos.y += (1.65 + Math.sin(nowPerf * 0.012) * 0.04 - playerPos.y) * 0.35;
-          } else {
-            playerPos.y += (1.65 - playerPos.y) * 0.18;
-          }
-
-          if (nowPerf - lastSyncTime > 50) {
-            lastSyncTime = nowPerf;
-            socket.emit('player_transform', { x: playerPos.x, z: playerPos.z, yaw: camYaw });
-          }
-        }
-
-        // Gợi ý tương tác khi đứng gần cửa 2 buồng
-        const hintEl = document.getElementById('interactionHint');
-        const distDoor1 = Math.hypot(playerPos.x - (-4), playerPos.z - (-1));
-        const distDoor2 = Math.hypot(playerPos.x - 4, playerPos.z - (-1));
-        if (Math.min(distDoor1, distDoor2) < 2.8 && !amIStunned) {
-          const cid = distDoor1 < distDoor2 ? 1 : 2;
-          const locked = prisonState.cells[cid].locked;
-          hintEl.textContent = myPlayer.role === 'Quản Tù'
-            ? `Chạm cửa / [E]: ${locked ? '🔓 Mở Khóa' : '🔐 Khóa'} Buồng ${cid}`
-            : `Chạm cửa / [E]: 🔔 Gõ Song Sắt Buồng ${cid}`;
-          hintEl.classList.remove('hidden');
-        } else {
-          hintEl.classList.add('hidden');
-        }
-      }
-
-      // 2. Cập nhật Camera FPS (thêm rung giật nhẹ nếu bị điện giật)
-      camera.position.copy(playerPos);
-      if (amIStunned) {
-        camera.position.x += (Math.random() - 0.5) * 0.06;
-        camera.position.y += (Math.random() - 0.5) * 0.06;
-      }
-      camera.rotation.order = 'YXZ';
-      camera.rotation.y = camYaw + (amIStunned ? (Math.random() - 0.5) * 0.05 : 0);
-      camera.rotation.x = camPitch + (amIStunned ? (Math.random() - 0.5) * 0.05 : 0);
-
-      // Hiệu ứng giật nòng súng điện / vung tay
-      if (taserArcMesh) {
-        taserArcMesh.visible = Math.random() > 0.35;
-      }
-      if (handAnimTime > 0) {
-        handAnimTime = Math.max(0, handAnimTime - dt * 5.0);
-        const kick = Math.sin(handAnimTime * Math.PI);
-        fpHandGroup.position.z = myPlayer?.role === 'Quản Tù' ? kick * 0.14 : -kick * 0.28;
-        fpHandGroup.rotation.x = myPlayer?.role === 'Quản Tù' ? kick * 0.22 : -kick * 0.55;
+    socket.on('role_assigned', ({ role, slot }) => {
+      myRole = role;
+      mySlot = slot;
+      if (role === 'player') {
+        playSfx('start');
+        showToast(`⛏️ Đến lượt bạn! Bạn là Người Chơi ${slot + 1}!`, '#4ade80');
       } else {
-        fpHandGroup.position.z = 0;
-        fpHandGroup.rotation.x = 0;
+        showToast('👁️ Bạn đã chuyển sang chế độ Xem & Hàng Chờ!', '#38bdf8');
       }
-
-      // 3. Chuyển động trượt cửa song sắt + đèn LED
-      [1, 2].forEach((cid) => {
-        const door = doorObjects[cid];
-        const locked = prisonState.cells[cid].locked;
-        const targetX = locked ? door.closedX : door.openX;
-        door.group.position.x += (targetX - door.group.position.x) * 0.12;
-        door.ledMat.color.setHex(locked ? 0xef4444 : 0x22c55e);
-      });
-
-      // 4. Đèn báo động đỏ
-      if (prisonState.alarmActive) {
-        alarmLight.intensity = 1.6 + Math.sin(nowPerf * 0.015) * 1.4;
-        alarmLight.position.x = Math.sin(nowPerf * 0.008) * 4.5;
-      } else {
-        alarmLight.intensity = 0;
-      }
-
-      // 5. Dọn các tia sét súng điện đã hết thời gian hiển thị
-      for (let i = activeLightningBeams.length - 1; i >= 0; i--) {
-        if (nowPerf >= activeLightningBeams[i].expiresAt) {
-          scene.remove(activeLightningBeams[i].group);
-          activeLightningBeams.splice(i, 1);
-        }
-      }
-
-      // 6. Hoạt ảnh người chơi khác (di chuyển + NGÃ XUỐNG ĐẤT CO GIẬT ĐIỆN XANH 3 GIÂY)
-      Object.values(playerMeshes).forEach((pm) => {
-        const isStunned = nowMs < (pm.stunnedUntil || 0);
-
-        if (isStunned) {
-          // Ngã ngửa nằm bẹp xuống sàn + run rẩy co giật
-          pm.bodyPivot.rotation.x += (-Math.PI / 2 - pm.bodyPivot.rotation.x) * 0.25;
-          pm.bodyPivot.position.y += (0.24 - pm.bodyPivot.position.y) * 0.25;
-          pm.bodyPivot.position.x = (Math.random() - 0.5) * 0.1;
-          pm.bodyPivot.position.z = (Math.random() - 0.5) * 0.1;
-
-          // Chân tay co giật liên tục
-          pm.leftArm.rotation.z = 0.5 + (Math.random() - 0.5) * 0.8;
-          pm.rightArm.rotation.z = -0.5 + (Math.random() - 0.5) * 0.8;
-          pm.leftLeg.rotation.x = (Math.random() - 0.5) * 0.6;
-          pm.rightLeg.rotation.x = (Math.random() - 0.5) * 0.6;
-
-          // Bật lồng điện xanh nhấp nháy & cập nhật tia sét nhảy quanh người
-          pm.shock.shockGroup.visible = true;
-          pm.shock.aura.rotation.y += 0.28;
-          pm.shock.shockLight.intensity = 1.8 + Math.random() * 2.2;
-          pm.shock.boltLines.forEach((line, idx) => {
-            const posAttr = line.geometry.attributes.position;
-            const ang = (idx * Math.PI) / 2 + nowPerf * 0.01;
-            for (let k = 0; k < posAttr.count; k++) {
-              const r = 0.35 + Math.random() * 0.28;
-              posAttr.setXYZ(
-                k,
-                Math.cos(ang + k * 0.4) * r,
-                0.2 + k * 0.34,
-                Math.sin(ang + k * 0.4) * r
-              );
-            }
-            posAttr.needsUpdate = true;
-          });
-          pm.tag.position.y = 1.15;
-        } else {
-          // Đứng dậy bình thường và tắt tia điện xanh
-          pm.shock.shockGroup.visible = false;
-          pm.bodyPivot.rotation.x += (0 - pm.bodyPivot.rotation.x) * 0.18;
-          pm.bodyPivot.position.y += (0 - pm.bodyPivot.position.y) * 0.18;
-          pm.bodyPivot.position.x *= 0.7;
-          pm.bodyPivot.position.z *= 0.7;
-          pm.leftArm.rotation.z *= 0.75;
-          pm.rightArm.rotation.z *= 0.75;
-          pm.tag.position.y += (2.3 - pm.tag.position.y) * 0.18;
-
-          const dx = pm.targetX - pm.group.position.x;
-          const dz = pm.targetZ - pm.group.position.z;
-          const moving = Math.hypot(dx, dz) > 0.03;
-
-          pm.group.position.x += dx * 0.18;
-          pm.group.position.z += dz * 0.18;
-          pm.group.rotation.y = pm.targetYaw;
-
-          if (moving) {
-            const s = Math.sin(nowPerf * 0.012) * 0.55;
-            pm.leftLeg.rotation.x = s;
-            pm.rightLeg.rotation.x = -s;
-          } else {
-            pm.leftLeg.rotation.x *= 0.8;
-            pm.rightLeg.rotation.x *= 0.8;
-          }
-
-          if (pm.animTimer > 0) {
-            pm.animTimer = Math.max(0, pm.animTimer - dt * 3.5);
-            pm.rightArm.rotation.x = -Math.sin(pm.animTimer * Math.PI) * 1.4;
-          } else {
-            pm.rightArm.rotation.x *= 0.8;
-          }
-        }
-      });
-
-      renderer.render(scene, camera);
-    }
-
-    window.addEventListener('resize', () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
+      updateOverlaysFromMeta();
     });
 
-    animate();
+    socket.on('room_meta', (meta) => {
+      roomMeta = meta;
+      updateOverlaysFromMeta();
+    });
+
+    socket.on('level_init', ({ meta, items }) => {
+      roomMeta = meta;
+      liveItems = items || [];
+      explosions = [];
+      updateOverlaysFromMeta();
+    });
+
+    socket.on('tick', (snap) => {
+      roomMeta.phase = snap.phase;
+      roomMeta.timeLeft = snap.timeLeft;
+      roomMeta.countdown = snap.countdown;
+      roomMeta.shopTimeLeft = snap.shopTimeLeft;
+      livePlayers = snap.players;
+      liveItems = snap.items;
+
+      if (snap.phase === 'shop') {
+        document.getElementById('shopTimerText').textContent = snap.shopTimeLeft;
+      }
+    });
+
+    socket.on('explosion', ({ blasts }) => {
+      screenShake = 14;
+      (blasts || []).forEach((b) => {
+        explosions.push({ x: b.x, y: b.y, r: b.r || 120, life: 1.0 });
+      });
+    });
+
+    socket.on('score_popup', (pop) => {
+      scorePopups.push({ ...pop, life: 55 });
+    });
+
+    socket.on('sfx', ({ type }) => playSfx(type));
+    socket.on('toast', ({ text, color }) => showToast(text, color));
+    socket.on('chat_msg', appendChatMsg);
   </script>
 </body>
 </html>
