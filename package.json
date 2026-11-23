@@ -1,13 +1,12 @@
 {
-  "name": "trai-giam-online-3d",
+  "name": "dao-vang-doi-chien",
   "version": "1.0.0",
   "private": true,
-  "description": "Game Di Tu Online 3D ",
+  "description": "Game Dao Vang Doi Chien Online 2 Nguoi + Hang Cho Xem Truc Tiep",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "node --watch server.js",
-    "reset-accounts": "node -e \"require('node:fs').rmSync('prison_accounts.json', { force: true }); console.log('Da xoa du lieu ho so tu nhan.');\""
+    "dev": "node --watch server.js"
   },
   "engines": {
     "node": ">=18"
