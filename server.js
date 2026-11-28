@@ -364,7 +364,6 @@ async function generateRoundWithGameMaster(topicPref = 'hot_drama', roomUsed = [
   const blocked = getBlockedTargets(topicPref, roomUsed);
   const blockedNormSet = new Set(blocked.map(normalizeVN));
 
-  // Thử tối đa 2 lần nếu AI lỡ bốc trùng nhân vật cũ
   for (let attempt = 0; attempt < 2; attempt++) {
     const randomSubAngle = cfg.subAngles[Math.floor(Math.random() * cfg.subAngles.length)];
     const randomSeed = Math.floor(10000 + Math.random() * 90000);
@@ -443,7 +442,6 @@ Hãy tạo vòng chơi mới thật cuốn hút!`;
     }
   }
 
-  // Fallback từ kho dự phòng (ưu tiên các mục chưa dùng)
   const deckKeys = Object.keys(FALLBACK_DECKS);
   let chosenDeck = FALLBACK_DECKS[topicPref];
   if (!chosenDeck) {
@@ -466,7 +464,6 @@ Hãy tạo vòng chơi mới thật cuốn hút!`;
   };
 }
 
-// Quản trò (API cũ) chấm kết quả và viết lời công bố
 async function judgeGuessWithGameMaster(guesserName, guessText, targetSecret, topicName) {
   const gNorm = normalizeVN(guessText);
   if (!gNorm) {
@@ -508,7 +505,6 @@ Người chơi "${guesserName}" chốt đáp án: "${guessText}"`;
     console.error('Loi Quan tro cham dap an:', e.message);
   }
 
-  // Fallback chấm cục bộ nếu API lỗi
   const allValidNames = [targetSecret.name, ...(targetSecret.aliases || [])].map(normalizeVN).filter(Boolean);
   for (const valid of allValidNames) {
     if (gNorm === valid || (gNorm.length >= 4 && valid.includes(gNorm)) || (valid.length >= 4 && gNorm.includes(valid))) {
@@ -572,7 +568,6 @@ async function aiOpponentThinkAndAct(topic, aiHistory, aiSecretName) {
   const totalQuestions = aiHistory.filter(i => !i.isGuess).length;
   const wrongGuesses = aiHistory.filter(i => i.isGuess).map(i => i.question);
 
-  // Đếm số câu HỎI THÔNG TIN kể từ lần đoán sai gần nhất
   let questionsSinceLastGuess = 0;
   for (let i = aiHistory.length - 1; i >= 0; i--) {
     if (aiHistory[i].isGuess) break;
@@ -580,7 +575,6 @@ async function aiOpponentThinkAndAct(topic, aiHistory, aiSecretName) {
   }
 
   const hasGuessedBefore = wrongGuesses.length > 0;
-  // BẮT BUỘC: Chưa hỏi đủ 4 câu thì cấm đoán; nếu vừa đoán sai thì phải hỏi thêm ÍT NHẤT 3 câu mới được đoán tiếp!
   const allowGuess = hasGuessedBefore
     ? (questionsSinceLastGuess >= 3)
     : (totalQuestions >= 4);
@@ -626,10 +620,9 @@ CHỈ TRẢ VỀ JSON HỢP LỆ:
         let act = parsed.action === 'guess' ? 'guess' : 'ask';
         const txt = String(parsed.text).trim().slice(0, 180);
 
-        // Chặn cứng nếu AI vi phạm lệnh cấm đoán hoặc đoán lại tên đã sai
         const repeatedWrongGuess = act === 'guess' && wrongGuesses.some(w => normalizeVN(w) === normalizeVN(txt));
         if ((!allowGuess && act === 'guess') || repeatedWrongGuess) {
-          continue; // Thử gọi lại lần 2 bắt buộc hỏi
+          continue;
         }
 
         return {
@@ -643,7 +636,6 @@ CHỈ TRẢ VỀ JSON HỢP LỆ:
     }
   }
 
-  // Fallback câu hỏi an toàn chưa từng hỏi
   const fallbackPool = [
     'Đối tượng bí mật của bạn có xuất xứ từ Việt Nam không?',
     'Đối tượng này có phải là con người thật đang còn sống không?',
@@ -664,7 +656,7 @@ CHỈ TRẢ VỀ JSON HỢP LỆ:
   };
 }
 
-// ================= QUẢN LÝ TÀI KHOẢN (ĐĂNG KÝ LÀ VÀO NGAY) =================
+// ================= QUẢN LÝ TÀI KHOẢN & CHAT SẢNH =================
 let accounts = {};
 
 function loadAccounts() {
@@ -687,6 +679,7 @@ loadAccounts();
 
 const onlineUsers = {}; // socketId -> { id, usernameKey, name, avatar, roomId }
 const rooms = {};       // roomId -> Room
+const lobbyChat = [];   // Chat chung cho tất cả người online (ngoài sảnh & trong phòng đều mở tab Sảnh xem được)
 let roomCounter = 100;
 
 function getLobbyState() {
@@ -877,7 +870,6 @@ async function triggerAITurn(room) {
       recordMatchResult(room, 'p2', verdict.announcement);
       return;
     } else {
-      // Đoán sai -> không giới hạn lượt đoán, chuyển lượt sang người chơi
       room.turnSide = 'p1';
       room.turnPhase = 'asking';
       broadcastRoom(room);
@@ -959,6 +951,7 @@ function removeUserFromRoom(socketId, reasonMsg = '') {
 // ================= SOCKET.IO HANDLERS =================
 io.on('connection', (socket) => {
   socket.emit('lobby_update', getLobbyState());
+  socket.emit('lobby_chat_update', lobbyChat);
 
   // 1. ĐĂNG KÝ TẠO ACC -> VÀO ĐƯỢC LUÔN
   socket.on('register', ({ name, password, avatar }, cb) => {
@@ -1002,7 +995,8 @@ io.on('connection', (socket) => {
         name: cleanName,
         avatar: accounts[key].avatar
       },
-      lobby: getLobbyState()
+      lobby: getLobbyState(),
+      lobbyChat
     });
   });
 
@@ -1045,11 +1039,30 @@ io.on('connection', (socket) => {
         name: acc.name,
         avatar: acc.avatar || '🕵️'
       },
-      lobby: getLobbyState()
+      lobby: getLobbyState(),
+      lobbyChat
     });
   });
 
-  // 3. TẠO PHÒNG (PvP hoặc 1 vs AI)
+  // 3. CHAT SẢNH CHUNG (MỌI NGƯỜI ONLINE NHẮN VỚI NHAU)
+  socket.on('lobby_chat', ({ text }) => {
+    const user = onlineUsers[socket.id];
+    if (!user) return;
+    const clean = (text || '').trim().slice(0, 200);
+    if (!clean) return;
+
+    lobbyChat.push({
+      id: Date.now() + Math.random(),
+      name: user.name,
+      avatar: user.avatar,
+      text: clean,
+      time: Date.now()
+    });
+    if (lobbyChat.length > 60) lobbyChat.shift();
+    io.emit('lobby_chat_update', lobbyChat);
+  });
+
+  // 4. TẠO PHÒNG (PvP hoặc 1 vs AI)
   socket.on('create_room', async ({ mode, topicPref, roomName }, cb) => {
     const user = onlineUsers[socket.id];
     if (!user) return cb({ ok: false, msg: 'Bạn chưa đăng nhập!' });
@@ -1118,7 +1131,7 @@ io.on('connection', (socket) => {
     }
   });
 
-  // 4. THAM GIA PHÒNG (LÀM ĐỐI THỦ HOẶC KHÁN GIẢ XEM CUỘC CHIẾN)
+  // 5. THAM GIA PHÒNG (LÀM ĐỐI THỦ HOẶC KHÁN GIẢ XEM CUỘC CHIẾN)
   socket.on('join_room', ({ roomId, asSpectator }, cb) => {
     const user = onlineUsers[socket.id];
     if (!user) return cb({ ok: false, msg: 'Bạn chưa đăng nhập!' });
@@ -1153,7 +1166,7 @@ io.on('connection', (socket) => {
     broadcastLobby();
   });
 
-  // 5. ĐỔI CHỦ ĐỀ & BẮT ĐẦU TRẬN / TÁI ĐẤU
+  // 6. ĐỔI CHỦ ĐỀ & BẮT ĐẦU TRẬN / TÁI ĐẤU
   socket.on('update_topic_pref', ({ topicPref }) => {
     const user = onlineUsers[socket.id];
     if (!user || !user.roomId) return;
@@ -1186,7 +1199,7 @@ io.on('connection', (socket) => {
     await startMatchInRoom(room);
   });
 
-  // 6. ĐẶT CÂU HỎI YES/NO
+  // 7. ĐẶT CÂU HỎI YES/NO
   socket.on('ask_question', async ({ text }, cb) => {
     const user = onlineUsers[socket.id];
     if (!user || !user.roomId) return cb && cb({ ok: false, msg: 'Không ở trong phòng!' });
@@ -1213,7 +1226,6 @@ io.on('connection', (socket) => {
     if (cb) cb({ ok: true });
     broadcastRoom(room);
 
-    // Nếu đối thủ là AI Thám Tử -> gọi API mới trả lời tự động
     if (room.mode === 'pvai' && side === 'p1') {
       room.aiThinking = true;
       broadcastRoom(room);
@@ -1242,7 +1254,7 @@ io.on('connection', (socket) => {
     }
   });
 
-  // 7. TRẢ LỜI 5 MỨC: YES / NO / MAYBE / PROBABLY_NO / DONT_KNOW
+  // 8. TRẢ LỜI 5 MỨC
   socket.on('answer_question', ({ answer, note }, cb) => {
     const user = onlineUsers[socket.id];
     if (!user || !user.roomId) return cb && cb({ ok: false, msg: 'Không ở trong phòng!' });
@@ -1279,7 +1291,7 @@ io.on('connection', (socket) => {
     broadcastLobby();
   });
 
-  // 8. CHỐT ĐOÁN ĐÁP ÁN (VÔ SỐ LẦN — QUẢN TRÒ AI CHẤM & CÔNG BỐ)
+  // 9. CHỐT ĐOÁN ĐÁP ÁN (VÔ SỐ LẦN — QUẢN TRÒ AI CHẤM & CÔNG BỐ)
   socket.on('submit_guess', async ({ guessText }, cb) => {
     const user = onlineUsers[socket.id];
     if (!user || !user.roomId) return cb && cb({ ok: false, msg: 'Không ở trong phòng!' });
@@ -1329,7 +1341,6 @@ io.on('connection', (socket) => {
       return;
     }
 
-    // Đoán sai -> được đoán tiếp không giới hạn ở các lượt sau, tạm nhường lượt cho đối thủ
     room.turnSide = targetSide;
     room.turnPhase = 'asking';
     broadcastRoom(room);
@@ -1340,7 +1351,7 @@ io.on('connection', (socket) => {
     }
   });
 
-  // 9. CHAT KHÁN ĐÀI
+  // 10. CHAT KHÁN ĐÀI TRONG PHÒNG
   socket.on('spectator_chat', ({ text }) => {
     const user = onlineUsers[socket.id];
     if (!user || !user.roomId) return;
@@ -1364,7 +1375,7 @@ io.on('connection', (socket) => {
     broadcastRoom(room);
   });
 
-  // 10. RỜI PHÒNG / NGẮT KẾT NỐI
+  // 11. RỜI PHÒNG / NGẮT KẾT NỐI
   socket.on('leave_room', () => {
     removeUserFromRoom(socket.id, 'Chủ động rời phòng');
   });
@@ -1378,5 +1389,5 @@ io.on('connection', (socket) => {
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-  console.log(`🕵️‍♂️ Game "LÀ ẢI LÀ AI" (v2) đang chạy tại: http://localhost:${PORT}`);
+  console.log(`🕵️‍♂️ Game "LÀ ẢI LÀ AI" (v3) đang chạy tại: http://localhost:${PORT}`);
 });
