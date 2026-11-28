@@ -96,11 +96,6 @@
       grid-template-columns: repeat(5, 1fr);
       gap: 6px;
     }
-    @media (max-width: 680px) {
-      .ans-btn-row {
-        grid-template-columns: repeat(3, 1fr);
-      }
-    }
     .btn-ans-YES { background: linear-gradient(135deg, #16a34a, #10b981); }
     .btn-ans-NO { background: linear-gradient(135deg, #dc2626, #e11d48); }
     .btn-ans-MAYBE { background: linear-gradient(135deg, #d97706, #eab308); color: #0b141a; }
@@ -205,7 +200,7 @@
       margin-bottom: 12px;
     }
 
-    /* ================= LOBBY SCREEN (KHÔNG CÒN BẢNG XẾP HẠNG) ================= */
+    /* ================= LOBBY SCREEN ================= */
     #lobbyScreen {
       max-width: 980px;
       margin: 0 auto;
@@ -259,7 +254,7 @@
       gap: 10px;
     }
 
-    /* ================= ROOM SCREEN (FIXED VIEWPORT — FB MESSENGER STYLE) ================= */
+    /* ================= ROOM SCREEN (GIỮ NGUYÊN PC) ================= */
     #roomScreen {
       height: 100dvh;
       max-width: 960px;
@@ -281,15 +276,11 @@
       border-radius: 14px;
     }
 
-    /* Khu vực thông tin Chủ đề + Thẻ bí mật gọn gàng */
     .room-info-strip {
       flex-shrink: 0;
       display: grid;
       grid-template-columns: 1.15fr 1fr;
       gap: 8px;
-    }
-    @media (max-width: 700px) {
-      .room-info-strip { grid-template-columns: 1fr; }
     }
 
     .info-card {
@@ -333,11 +324,12 @@
       line-height: 1.4;
     }
     .secret-blurred { filter: blur(7px); user-select: none; }
+    .mobile-only-hint { display: none; }
 
     /* KHUNG CHAT CỐ ĐỊNH GIỐNG FACEBOOK MESSENGER */
     .chat-shell {
       flex: 1;
-      min-height: 0; /* Cực kỳ quan trọng để cuộn bên trong mà không giãn trang */
+      min-height: 0;
       display: flex;
       flex-direction: column;
       overflow: hidden;
@@ -373,7 +365,6 @@
       border-radius: 999px;
     }
 
-    /* Tin nhắn kiểu FB: trái = đối thủ, phải = mình */
     .msg-row {
       display: flex;
       align-items: flex-end;
@@ -444,7 +435,6 @@
       font-style: italic;
     }
 
-    /* Hộp câu trả lời gắn ngay dưới câu hỏi */
     .reply-chip {
       display: inline-flex;
       align-items: center;
@@ -463,7 +453,6 @@
     .reply-DONT_KNOW { background: rgba(148, 163, 184, 0.2); border-color: rgba(148, 163, 184, 0.35); color: #cbd5e1; }
     .reply-note { font-weight: 500; color: #e2e8f0; }
 
-    /* Thông báo từ Quản trò ở giữa khung chat */
     .judge-banner {
       align-self: center;
       max-width: 92%;
@@ -490,7 +479,6 @@
       color: #a5f3fc;
     }
 
-    /* KHUNG NHẬP CÂU HỎI / TRẢ LỜI GHIM CỐ ĐỊNH DƯỚI CÙNG */
     .chat-composer {
       flex-shrink: 0;
       padding: 10px 12px;
@@ -553,17 +541,166 @@
       align-items: center;
     }
 
-    /* ================= BONG BÓNG KHÁN ĐÀI KÉO THẢ (MẶC ĐỊNH ẨN) ================= */
-    #spectatorBubble {
+    /* ================= TỐI ƯU RIÊNG CHO ĐIỆN THOẠI (MAXIMIZE KHUNG CHAT) ================= */
+    @media (max-width: 700px) {
+      #roomScreen {
+        padding: 4px 5px;
+        gap: 4px;
+      }
+
+      .room-header {
+        padding: 5px 8px;
+        border-radius: 10px;
+      }
+      #roomTitle { font-size: 13px !important; }
+      #roomBadges .pill { padding: 1px 6px; font-size: 10px; }
+
+      /* Gộp Chủ đề + Thẻ bí mật nằm song song cực gọn trên 1 hàng */
+      .room-info-strip {
+        grid-template-columns: 1fr 1fr;
+        gap: 5px;
+      }
+      .info-card {
+        padding: 6px 8px;
+        border-radius: 10px;
+        cursor: pointer;
+      }
+      .info-mini-label {
+        font-size: 9.5px;
+        letter-spacing: 0.3px;
+      }
+      .info-main-text {
+        font-size: 12.5px;
+        line-height: 1.25;
+        margin-top: 2px;
+      }
+      .info-sub-text {
+        font-size: 11px;
+        line-height: 1.3;
+      }
+      .mobile-only-hint {
+        display: inline;
+        font-size: 10px;
+        opacity: 0.8;
+      }
+      /* Mặc định thu gọn mô tả chủ đề trên mobile, bấm vào ô Chủ đề để xổ ra */
+      .topic-desc-mobile-hide {
+        display: none;
+      }
+
+      .chat-shell {
+        border-radius: 12px;
+      }
+      .chat-subheader {
+        padding: 5px 10px;
+        font-size: 11.5px;
+      }
+      .chat-messages {
+        padding: 10px 8px;
+        gap: 9px;
+      }
+      .msg-row {
+        max-width: 92%;
+        gap: 6px;
+      }
+      .msg-av {
+        width: 26px;
+        height: 26px;
+        font-size: 14px;
+      }
+      .msg-bubble {
+        padding: 8px 12px;
+        font-size: 13.5px;
+      }
+      .reply-chip {
+        padding: 4px 8px;
+        font-size: 11.5px;
+      }
+      .judge-banner {
+        padding: 6px 10px;
+        font-size: 12px;
+      }
+
+      /* Thu gọn thanh nhập & 5 nút trả lời ở đáy cho khung chat chiếm nhiều diện tích nhất */
+      .chat-composer {
+        padding: 6px 8px;
+      }
+      .composer-tabs {
+        gap: 4px;
+        margin-bottom: 5px;
+      }
+      .composer-tab {
+        padding: 5px 6px;
+        font-size: 11.5px;
+        border-radius: 8px;
+      }
+      .quick-strip {
+        padding-bottom: 4px;
+        margin-bottom: 4px;
+        gap: 5px;
+      }
+      .chip {
+        padding: 3px 8px;
+        font-size: 11px;
+      }
+      .input-row {
+        gap: 6px;
+      }
+      .input-row input {
+        padding: 8px 10px;
+        font-size: 13.5px;
+        border-radius: 10px;
+      }
+      .input-row .btn {
+        padding: 8px 12px;
+        font-size: 13px;
+        border-radius: 10px;
+      }
+
+      .ans-prompt-label {
+        font-size: 11px !important;
+        margin-bottom: 4px !important;
+      }
+      .ans-note-wrap {
+        margin-bottom: 5px !important;
+      }
+      .ans-note-wrap input {
+        padding: 6px 9px !important;
+        font-size: 12px !important;
+      }
+      .ans-btn-row {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 4px;
+      }
+      .ans-btn-row .btn {
+        padding: 7px 4px;
+        font-size: 11.5px;
+        border-radius: 9px;
+      }
+      .guess-hint-line {
+        font-size: 10.5px !important;
+        margin-bottom: 4px !important;
+      }
+
+      #chatBubble {
+        width: 50px;
+        height: 50px;
+        right: 10px;
+        bottom: 66px;
+      }
+    }
+
+    /* ================= BONG BÓNG "CHAT" KÉO THẢ (SẢNH + PHÒNG) ================= */
+    #chatBubble {
       position: fixed;
       right: 18px;
-      bottom: 92px;
+      bottom: 84px;
       width: 58px;
       height: 58px;
       border-radius: 50%;
       background: linear-gradient(135deg, #0d9488, #0284c7);
-      border: 2px solid rgba(94, 234, 212, 0.85);
-      box-shadow: 0 8px 26px rgba(0, 0, 0, 0.52);
+      border: 2px solid rgba(94, 234, 212, 0.9);
+      box-shadow: 0 8px 26px rgba(0, 0, 0, 0.55);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -574,11 +711,12 @@
       touch-action: none;
       color: #fff;
     }
-    #spectatorBubble:active { cursor: grabbing; transform: scale(0.95); }
-    .bubble-count {
-      font-size: 10px;
+    #chatBubble:active { cursor: grabbing; transform: scale(0.95); }
+    .bubble-label {
+      font-size: 11px;
       font-weight: 800;
-      margin-top: -2px;
+      letter-spacing: 0.3px;
+      margin-top: -1px;
     }
     .bubble-unread {
       position: absolute;
@@ -598,12 +736,12 @@
       border: 2px solid #041016;
     }
 
-    #spectatorDrawer {
+    #chatDrawer {
       position: fixed;
-      right: 16px;
-      bottom: 84px;
-      width: min(350px, calc(100vw - 24px));
-      height: min(460px, calc(100dvh - 120px));
+      right: 14px;
+      bottom: 78px;
+      width: min(360px, calc(100vw - 24px));
+      height: min(470px, calc(100dvh - 110px));
       z-index: 1000;
       display: flex;
       flex-direction: column;
@@ -616,14 +754,37 @@
       box-shadow: 0 18px 48px rgba(0, 0, 0, 0.65);
     }
     .drawer-head {
-      padding: 11px 14px;
+      padding: 10px 12px;
       background: rgba(13, 148, 136, 0.22);
       border-bottom: 1px solid rgba(94, 234, 212, 0.22);
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 8px;
       font-size: 13.5px;
       font-weight: 800;
+    }
+    .drawer-tabs {
+      display: flex;
+      gap: 6px;
+      padding: 8px 12px 0;
+    }
+    .drawer-tab {
+      flex: 1;
+      padding: 7px 8px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.05);
+      color: #cbd5e1;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .drawer-tab.active {
+      background: rgba(45, 212, 191, 0.24);
+      border-color: var(--accent);
+      color: #5eead4;
     }
     .drawer-body {
       flex: 1;
@@ -634,7 +795,7 @@
       gap: 8px;
       overflow: hidden;
     }
-    .spec-chat-list {
+    .drawer-chat-list {
       flex: 1;
       min-height: 0;
       overflow-y: auto;
@@ -645,6 +806,7 @@
       flex-direction: column;
       gap: 7px;
       font-size: 12.5px;
+      line-height: 1.4;
     }
 
     .pulse { display: inline-block; animation: pulseAnim 1.2s infinite; }
@@ -701,7 +863,7 @@
     </div>
   </div>
 
-  <!-- ================= MÀN HÌNH SẢNH CHỜ (ĐÃ BỎ BẢNG XẾP HẠNG) ================= -->
+  <!-- ================= MÀN HÌNH SẢNH CHỜ ================= -->
   <div id="lobbyScreen" class="hidden">
     <div class="glass topbar">
       <div class="user-badge">
@@ -756,12 +918,11 @@
     </div>
   </div>
 
-  <!-- ================= MÀN HÌNH PHÒNG ĐẤU (CHAT FB CỐ ĐỊNH KHUNG) ================= -->
+  <!-- ================= MÀN HÌNH PHÒNG ĐẤU ================= -->
   <div id="roomScreen" class="hidden">
-    <!-- 1. HEADER GỌN -->
     <div class="glass room-header">
       <div style="display:flex; align-items:center; gap:8px; min-width:0;">
-        <button class="btn btn-ghost" style="padding:7px 11px; font-size:12.5px;" onclick="leaveRoom()">← Sảnh</button>
+        <button class="btn btn-ghost" style="padding:6px 10px; font-size:12px;" onclick="leaveRoom()">← Sảnh</button>
         <div style="min-width:0;">
           <div style="font-weight:800; font-size:14.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" id="roomTitle">Phòng Đấu</div>
           <div style="display:flex; gap:5px; margin-top:2px; flex-wrap:wrap;" id="roomBadges"></div>
@@ -770,46 +931,47 @@
       <div style="display:flex; align-items:center; gap:6px;" id="roomHeaderActions"></div>
     </div>
 
-    <!-- 2. DẢI THÔNG TIN CHỦ ĐỀ & THẺ BÍ MẬT -->
     <div class="room-info-strip" id="roomInfoStrip"></div>
 
-    <!-- 3. KHUNG HỘI THOẠI CỐ ĐỊNH GIỐNG MESSENGER -->
     <div class="glass chat-shell">
       <div class="chat-subheader" id="chatSubheader"></div>
-
-      <!-- DANH SÁCH TIN NHẮN (CUỘN TỪ TRÊN XUỐNG DƯỚI) -->
       <div class="chat-messages" id="chatMessages"></div>
-
-      <!-- THANH NHẬP CÂU HỎI / 5 NÚT TRẢ LỜI GHIM DƯỚI ĐÁY -->
       <div class="chat-composer" id="chatComposer"></div>
     </div>
   </div>
 
-  <!-- ================= BONG BÓNG KHÁN ĐÀI KÉO THẢ (MẶC ĐỊNH ẨN) ================= -->
-  <div id="spectatorBubble" class="hidden" title="Kéo để di chuyển • Bấm để mở Khán đài">
-    <span style="font-size:20px; line-height:1;">👀</span>
-    <span class="bubble-count" id="bubbleSpecCount">0</span>
+  <!-- ================= BONG BÓNG "CHAT" KÉO THẢ (CÓ Ở CẢ SẢNH & PHÒNG) ================= -->
+  <div id="chatBubble" class="hidden" title="Kéo để di chuyển • Bấm để mở Chat">
+    <span style="font-size:19px; line-height:1;">💬</span>
+    <span class="bubble-label">Chat</span>
     <span class="bubble-unread hidden" id="bubbleUnreadBadge">0</span>
   </div>
 
-  <div id="spectatorDrawer" class="hidden">
+  <div id="chatDrawer" class="hidden">
     <div class="drawer-head">
-      <span>👀 Khán Đài (<span id="drawerSpecCount">0</span>)</span>
-      <button class="btn btn-ghost" style="padding:4px 9px; font-size:12px;" onclick="toggleSpectatorDrawer(false)">✕</button>
+      <span id="drawerTitle">💬 Chat Sảnh Online</span>
+      <button class="btn btn-ghost" style="padding:4px 9px; font-size:12px;" onclick="toggleChatDrawer(false)">✕</button>
     </div>
+
+    <!-- Thanh tab chỉ hiện khi đang ở trong phòng đấu -->
+    <div id="drawerTabs" class="drawer-tabs hidden">
+      <button class="drawer-tab active" id="dTabLobby" onclick="switchDrawerTab('lobby')">💬 Chat Sảnh</button>
+      <button class="drawer-tab" id="dTabSpec" onclick="switchDrawerTab('spectator')">👀 Khán Đài (<span id="drawerSpecCount">0</span>)</button>
+    </div>
+
     <div class="drawer-body">
       <div id="drawerSpoilerWrap" class="hidden">
         <button class="btn btn-gold" style="width:100%; padding:8px; font-size:12.5px;" id="toggleSpoilerBtn" onclick="toggleSpectatorSpoiler()">
           👁️ Bật Soi Đáp Án Cả 2 Bên
         </button>
       </div>
-      <div id="drawerSpecList" style="display:flex; flex-wrap:wrap; gap:5px; max-height:60px; overflow-y:auto;"></div>
-      <div class="spec-chat-list" id="drawerChatList"></div>
+      <div id="drawerSpecList" class="hidden" style="display:flex; flex-wrap:wrap; gap:5px; max-height:54px; overflow-y:auto;"></div>
+      <div class="drawer-chat-list" id="drawerChatList"></div>
       <div id="drawerChatInputRow" style="display:flex; gap:6px;">
-        <input id="spectatorChatInput" type="text" placeholder="Chat cổ vũ trên khán đài..." maxlength="160"
+        <input id="drawerChatInput" type="text" placeholder="Nhập tin nhắn..." maxlength="200"
                style="padding:9px 11px; font-size:13px;"
-               onkeydown="if(event.key==='Enter') sendSpectatorChat()" />
-        <button class="btn btn-primary" style="padding:9px 13px;" onclick="sendSpectatorChat()">Gửi</button>
+               onkeydown="if(event.key==='Enter') sendDrawerChat()" />
+        <button class="btn btn-primary" style="padding:9px 13px;" onclick="sendDrawerChat()">Gửi</button>
       </div>
     </div>
   </div>
@@ -830,19 +992,24 @@
     let selectedAvatar = '🕵️';
     let me = null;
     let currentRoom = null;
+    let lobbyChatMessages = [];
 
     let spectatorRevealSecrets = false;
     let showFactsExpanded = false;
-    let activeComposerTab = 'ask'; // 'ask' | 'guess'
-    let drawerOpen = false;
-    let lastSpecChatCount = 0;
-    let unreadSpecCount = 0;
+    let showTopicDescMobile = false;
+    let activeComposerTab = 'ask';
 
-    // Khóa để tránh re-render làm mất chữ người chơi đang gõ
+    // Trạng thái bong bóng Chat
+    let drawerOpen = false;
+    let drawerTab = 'lobby'; // 'lobby' | 'spectator'
+    let unreadChatCount = 0;
+    let lastLobbyChatLen = 0;
+    let lastSpecChatLen = 0;
+
     let lastComposerRenderKey = '';
     let lastFeedRenderKey = '';
 
-    // Khởi tạo bảng chọn Avatar
+    // Avatar picker
     const pickerEl = document.getElementById('avatarPicker');
     AVATARS.forEach(em => {
       const btn = document.createElement('div');
@@ -879,11 +1046,18 @@
       socket.emit(eventName, { name, password, avatar: selectedAvatar }, (res) => {
         if (!res.ok) return showAuthError(res.msg);
         me = res.user;
+        lobbyChatMessages = res.lobbyChat || lobbyChatMessages || [];
+        lastLobbyChatLen = lobbyChatMessages.length;
+
         document.getElementById('authScreen').classList.add('hidden');
         document.getElementById('lobbyScreen').classList.remove('hidden');
+        // Hiện bong bóng Chat ngay khi vào Sảnh
+        document.getElementById('chatBubble').classList.remove('hidden');
+
         document.getElementById('meAvatar').textContent = me.avatar || '🕵️';
         document.getElementById('meName').textContent = me.name;
         renderLobby(res.lobby);
+        renderChatDrawer();
       });
     }
 
@@ -893,10 +1067,22 @@
 
     function logout() { location.reload(); }
 
-    // ================= LOBBY =================
+    // ================= LOBBY & GLOBAL CHAT =================
     socket.on('lobby_update', (lobby) => {
       if (!me) return;
       renderLobby(lobby);
+    });
+
+    socket.on('lobby_chat_update', (msgs) => {
+      const arr = Array.isArray(msgs) ? msgs : [];
+      if (me && arr.length > lastLobbyChatLen) {
+        if (!drawerOpen || drawerTab !== 'lobby') {
+          unreadChatCount += (arr.length - lastLobbyChatLen);
+        }
+      }
+      lobbyChatMessages = arr;
+      lastLobbyChatLen = arr.length;
+      if (me) renderChatDrawer();
     });
 
     function renderLobby(lobby) {
@@ -967,36 +1153,39 @@
       currentRoom = room;
       spectatorRevealSecrets = false;
       showFactsExpanded = false;
+      showTopicDescMobile = false;
       activeComposerTab = 'ask';
       drawerOpen = false;
-      unreadSpecCount = 0;
-      lastSpecChatCount = (room.spectatorChat || []).length;
+      drawerTab = room.role === 'spectator' ? 'spectator' : 'lobby';
+      lastSpecChatLen = (room.spectatorChat || []).length;
       lastComposerRenderKey = '';
       lastFeedRenderKey = '';
 
       document.getElementById('lobbyScreen').classList.add('hidden');
       document.getElementById('roomScreen').classList.remove('hidden');
-      document.getElementById('spectatorBubble').classList.remove('hidden');
-      document.getElementById('spectatorDrawer').classList.add('hidden');
+      document.getElementById('chatDrawer').classList.add('hidden');
       renderRoom(room);
     }
 
     function leaveRoom() {
       socket.emit('leave_room');
       currentRoom = null;
+      drawerTab = 'lobby';
       drawerOpen = false;
       document.getElementById('roomScreen').classList.add('hidden');
-      document.getElementById('spectatorBubble').classList.add('hidden');
-      document.getElementById('spectatorDrawer').classList.add('hidden');
+      document.getElementById('chatDrawer').classList.add('hidden');
       document.getElementById('lobbyScreen').classList.remove('hidden');
+      renderChatDrawer();
     }
 
     socket.on('room_update', (room) => {
       const newSpecLen = (room.spectatorChat || []).length;
-      if (!drawerOpen && newSpecLen > lastSpecChatCount) {
-        unreadSpecCount += (newSpecLen - lastSpecChatCount);
+      if (newSpecLen > lastSpecChatLen) {
+        if (!drawerOpen || drawerTab !== 'spectator') {
+          unreadChatCount += (newSpecLen - lastSpecChatLen);
+        }
       }
-      lastSpecChatCount = newSpecLen;
+      lastSpecChatLen = newSpecLen;
       currentRoom = room;
       renderRoom(room);
     });
@@ -1026,7 +1215,7 @@
       const isHost = room.hostId === socket.id;
       if (isHost && (room.status === 'waiting' || room.status === 'finished')) {
         headerActions.innerHTML = `
-          <select style="width:auto; padding:6px 9px; font-size:12px;" onchange="changeRoomTopicPref(this.value)">
+          <select style="width:auto; padding:5px 8px; font-size:11.5px;" onchange="changeRoomTopicPref(this.value)">
             <option value="hot_drama" ${room.topicPref==='hot_drama'?'selected':''}>🔥 Drama/Hot</option>
             <option value="vn_showbiz" ${room.topicPref==='vn_showbiz'?'selected':''}>🇻🇳 Showbiz VN</option>
             <option value="global_star" ${room.topicPref==='global_star'?'selected':''}>🌍 Sao Quốc Tế</option>
@@ -1044,35 +1233,38 @@
       renderChatSubheader(room);
       renderChatMessages(room);
       renderChatComposer(room);
-      renderSpectatorFloating(room);
+      renderChatDrawer();
     }
 
     function renderInfoStrip(room) {
       const strip = document.getElementById('roomInfoStrip');
 
-      // Ô trái: Chủ đề
+      // Ô trái: Chủ đề (trên mobile mặc định thu gọn mô tả, bấm để xem thêm)
       let topicHtml = '';
       if (room.status === 'generating') {
         topicHtml = `
           <div class="info-card">
-            <div class="info-mini-label">🎯 CHỦ ĐỀ VÒNG NÀY</div>
-            <div class="info-main-text pulse">🎲 Quản trò AI đang bốc chủ đề &amp; nhân vật mới...</div>
+            <div class="info-mini-label">🎯 CHỦ ĐỀ</div>
+            <div class="info-main-text pulse">🎲 Đang bốc...</div>
           </div>
         `;
       } else if (room.topic && room.topic.name) {
         topicHtml = `
-          <div class="info-card">
-            <div class="info-mini-label">🎯 CHỦ ĐỀ CHUNG</div>
+          <div class="info-card" onclick="toggleTopicDescMobile()">
+            <div class="info-mini-label">
+              <span>🎯 CHỦ ĐỀ</span>
+              <span class="mobile-only-hint">${showTopicDescMobile ? '▲' : '▼'}</span>
+            </div>
             <div class="info-main-text">${escapeHtml(room.topic.name)}</div>
-            <div class="info-sub-text">${escapeHtml(room.topic.description)}</div>
+            <div class="info-sub-text ${showTopicDescMobile ? '' : 'topic-desc-mobile-hide'}">${escapeHtml(room.topic.description)}</div>
           </div>
         `;
       } else {
         topicHtml = `
           <div class="info-card">
-            <div class="info-mini-label">🎯 TRẠNG THÁI PHÒNG</div>
-            <div class="info-main-text">Đang chờ bắt đầu trận đấu</div>
-            <div class="info-sub-text">Quản trò AI sẽ bốc chủ đề và 2 đối tượng bí mật ngay khi trận đấu mở màn.</div>
+            <div class="info-mini-label">🎯 CHỦ ĐỀ</div>
+            <div class="info-main-text">Chờ bắt đầu</div>
+            <div class="info-sub-text topic-desc-mobile-hide">Quản trò AI sẽ bốc chủ đề và 2 đối tượng bí mật ngay khi mở màn.</div>
           </div>
         `;
       }
@@ -1087,20 +1279,20 @@
         if (room.status === 'finished' && myPl?.secret && oppPl?.secret) {
           secretHtml = `
             <div class="info-card secret-card">
-              <div class="info-mini-label">🔓 LẬT MỞ ĐÁP ÁN CẢ 2 BÊN</div>
-              <div class="info-sub-text" style="margin-top:4px;">
-                • Của bạn: <b style="color:#fff;">${escapeHtml(myPl.secret.name)}</b><br/>
-                • Của ${escapeHtml(oppPl.name)}: <b style="color:#fde047;">${escapeHtml(oppPl.secret.name)}</b>
+              <div class="info-mini-label">🔓 ĐÁP ÁN</div>
+              <div class="info-sub-text" style="margin-top:2px;">
+                Bạn: <b style="color:#fff;">${escapeHtml(myPl.secret.name)}</b><br/>
+                Địch: <b style="color:#fde047;">${escapeHtml(oppPl.secret.name)}</b>
               </div>
             </div>
           `;
         } else if (myPl && myPl.secret) {
           const facts = (myPl.secret.facts || []).map(f => `<li>${escapeHtml(f)}</li>`).join('');
           secretHtml = `
-            <div class="info-card secret-card">
+            <div class="info-card secret-card" onclick="toggleFacts()">
               <div class="info-mini-label">
-                <span>🔐 THẺ CỦA BẠN (ĐỂ TRẢ LỜI ĐỐI THỦ)</span>
-                ${facts ? `<button class="btn btn-ghost" style="padding:2px 7px; font-size:10.5px;" onclick="toggleFacts()">${showFactsExpanded ? 'Ẩn gợi ý' : 'Xem gợi ý'}</button>` : ''}
+                <span>🔐 THẺ CỦA BẠN</span>
+                ${facts ? `<span style="font-size:10px; color:#5eead4;">${showFactsExpanded ? 'Ẩn ▲' : 'Gợi ý ▼'}</span>` : ''}
               </div>
               <div class="info-main-text" style="color:#5eead4;">${escapeHtml(myPl.secret.name)}</div>
               ${showFactsExpanded && facts ? `<ul class="fact-list">${facts}</ul>` : ''}
@@ -1110,24 +1302,23 @@
           secretHtml = `
             <div class="info-card secret-card">
               <div class="info-mini-label">🔐 THẺ BÍ MẬT</div>
-              <div class="info-sub-text">Chưa phát thẻ. Đoán không giới hạn số lượt đến khi tìm ra đáp án!</div>
+              <div class="info-sub-text">Chưa phát thẻ</div>
             </div>
           `;
         }
       } else {
-        // Khán giả
         const p1 = room.players.p1;
         const p2 = room.players.p2;
         const isBlur = room.status === 'playing' && !spectatorRevealSecrets;
         secretHtml = `
-          <div class="info-card secret-card">
+          <div class="info-card secret-card" onclick="toggleSpectatorSpoiler()">
             <div class="info-mini-label">
-              <span>👁️ ĐÁP ÁN 2 ĐẤU THỦ</span>
-              ${room.status === 'playing' ? `<button class="btn btn-ghost" style="padding:2px 7px; font-size:10.5px;" onclick="toggleSpectatorSpoiler()">${spectatorRevealSecrets ? '🙈 Ẩn' : '👁️ Soi'}</button>` : ''}
+              <span>👁️ ĐÁP ÁN 2 BÊN</span>
+              ${room.status === 'playing' ? `<span style="font-size:10px; color:#fde047;">${spectatorRevealSecrets ? 'Ẩn' : 'Soi'}</span>` : ''}
             </div>
-            <div class="info-sub-text ${isBlur ? 'secret-blurred' : ''}" style="margin-top:4px;">
-              ${p1 ? `${p1.avatar} ${escapeHtml(p1.name)}: <b style="color:#5eead4;">${escapeHtml(p1.secret?.name || '---')}</b>` : '---'}<br/>
-              ${p2 ? `${p2.avatar} ${escapeHtml(p2.name)}: <b style="color:#fde047;">${escapeHtml(p2.secret?.name || '---')}</b>` : '---'}
+            <div class="info-sub-text ${isBlur ? 'secret-blurred' : ''}" style="margin-top:2px;">
+              ${p1 ? `${p1.avatar} <b style="color:#5eead4;">${escapeHtml(p1.secret?.name || '---')}</b>` : '---'}<br/>
+              ${p2 ? `${p2.avatar} <b style="color:#fde047;">${escapeHtml(p2.secret?.name || '---')}</b>` : '---'}
             </div>
           </div>
         `;
@@ -1148,13 +1339,13 @@
         const turnPl = room.players[room.turnSide];
         const respPl = room.players[room.turnSide === 'p1' ? 'p2' : 'p1'];
         if (room.judgingGuess) {
-          turnBadge = `<span class="pill pill-wait pulse">⚖️ Quản trò đang chấm...</span>`;
+          turnBadge = `<span class="pill pill-wait pulse">⚖️ Đang chấm...</span>`;
         } else if (room.aiThinking) {
-          turnBadge = `<span class="pill pill-ai pulse">🤖 AI đang suy luận...</span>`;
+          turnBadge = `<span class="pill pill-ai pulse">🤖 AI suy luận...</span>`;
         } else if (room.turnPhase === 'asking') {
-          turnBadge = `<span class="pill pill-play">❓ Lượt ${escapeHtml(turnPl?.name || '')} hỏi</span>`;
+          turnBadge = `<span class="pill pill-play">❓ Lượt ${escapeHtml(turnPl?.name || '')}</span>`;
         } else {
-          turnBadge = `<span class="pill pill-wait">💬 Chờ ${escapeHtml(respPl?.name || '')} trả lời</span>`;
+          turnBadge = `<span class="pill pill-wait">💬 Chờ ${escapeHtml(respPl?.name || '')}</span>`;
         }
       } else if (room.status === 'finished') {
         turnBadge = `<span class="pill pill-wait">🏆 Kết thúc</span>`;
@@ -1166,7 +1357,6 @@
       `;
     }
 
-    // Tin nhắn kiểu Facebook Messenger: Cũ ở trên, mới ở dưới cùng
     function renderChatMessages(room) {
       const feedKey = JSON.stringify({
         st: room.status,
@@ -1191,10 +1381,9 @@
       } else if (room.status === 'generating') {
         parts.push(`<div class="judge-banner judge-sys pulse">🎲 Quản trò AI đang chọn chủ đề và bốc 2 nhân vật bí mật hoàn toàn mới...</div>`);
       } else if (room.topic?.name) {
-        parts.push(`<div class="judge-banner judge-sys">🎬 Trận đấu bắt đầu! Chủ đề: <b>${escapeHtml(room.topic.name)}</b> — Hãy hỏi Yes/No từ trên xuống dưới để tìm ra nhân vật của đối phương!</div>`);
+        parts.push(`<div class="judge-banner judge-sys">🎬 Trận đấu bắt đầu! Chủ đề: <b>${escapeHtml(room.topic.name)}</b></div>`);
       }
 
-      // Render lịch sử theo đúng thứ tự thời gian (từ trên xuống dưới)
       room.qaHistory.forEach((item, idx) => {
         const isMine = (room.role === 'p1' || room.role === 'p2')
           ? (item.bySide === room.role)
@@ -1209,7 +1398,7 @@
               <div class="msg-col">
                 <div class="msg-sender">🎯 ${escapeHtml(item.byName)} chốt đáp án</div>
                 <div class="msg-bubble guess-bubble">
-                  <b>Đáp án tôi chốt là: "${escapeHtml(item.question)}"</b>
+                  <b>Chốt đáp án: "${escapeHtml(item.question)}"</b>
                   ${item.taunt ? `<div class="msg-taunt" style="color:#fef3c7;">💭 ${escapeHtml(item.taunt)}</div>` : ''}
                 </div>
               </div>
@@ -1239,7 +1428,6 @@
         }
       });
 
-      // Câu hỏi đang chờ trả lời
       if (room.pendingQuestion) {
         const pq = room.pendingQuestion;
         const isMine = (room.role === 'p1' || room.role === 'p2')
@@ -1263,7 +1451,6 @@
         `);
       }
 
-      // Hiệu ứng đang gõ (Typing indicator kiểu Messenger)
       if (room.aiThinking) {
         parts.push(`
           <div class="msg-row other">
@@ -1283,16 +1470,15 @@
       if (room.status === 'finished') {
         const winner = room.players[room.winnerSide];
         parts.push(`
-          <div class="judge-banner judge-win" style="padding:12px 16px; font-size:13.5px;">
+          <div class="judge-banner judge-win" style="padding:10px 14px; font-size:13px;">
             🏆 ${winner ? `${winner.avatar} ${escapeHtml(winner.name)} GIÀNH CHIẾN THẮNG!` : 'TRẬN ĐẤU KẾT THÚC!'}<br/>
-            <span style="font-weight:500; font-size:12.5px;">${escapeHtml(room.winReason || '')}</span>
+            <span style="font-weight:500; font-size:12px;">${escapeHtml(room.winReason || '')}</span>
           </div>
         `);
       }
 
       box.innerHTML = parts.join('');
 
-      // Chỉ tự động cuộn xuống đáy khi có tin nhắn mới hoặc người dùng đang ở gần cuối
       if (wasNearBottom || room.qaHistory.length > prevLen || room.pendingQuestion || room.aiThinking || room.judgingGuess) {
         requestAnimationFrame(() => {
           box.scrollTop = box.scrollHeight;
@@ -1300,7 +1486,6 @@
       }
     }
 
-    // Thanh nhập câu hỏi / trả lời cố định ở đáy
     function renderChatComposer(room) {
       const composerKey = JSON.stringify({
         st: room.status,
@@ -1324,53 +1509,52 @@
       if (room.status === 'waiting') {
         const ready = Boolean(room.players.p1 && room.players.p2);
         el.innerHTML = `
-          <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
-            <span style="font-size:13px; color:var(--muted);">
-              ${ready ? '🔥 Đã đủ 2 đấu thủ! Sẵn sàng phát thẻ!' : '⏳ Đang chờ người chơi thứ 2 vào phòng...'}
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap;">
+            <span style="font-size:12.5px; color:var(--muted);">
+              ${ready ? '🔥 Đã đủ 2 đấu thủ!' : '⏳ Đang chờ người chơi thứ 2...'}
             </span>
             ${isHost
-              ? `<button class="btn btn-primary" ${ready ? '' : 'disabled'} onclick="startMatch()">🚀 Bắt Đầu Trận Đấu</button>`
-              : `<span class="pill pill-wait">Chờ chủ phòng bấm Bắt Đầu</span>`}
+              ? `<button class="btn btn-primary" ${ready ? '' : 'disabled'} onclick="startMatch()">🚀 Bắt Đầu</button>`
+              : `<span class="pill pill-wait">Chờ chủ phòng bắt đầu</span>`}
           </div>
         `;
         return;
       }
 
       if (room.status === 'generating') {
-        el.innerHTML = `<div style="text-align:center; font-size:13px; color:var(--accent);" class="pulse">🎲 Quản trò AI đang chuẩn bị chủ đề &amp; thẻ bí mật...</div>`;
+        el.innerHTML = `<div style="text-align:center; font-size:12.5px; color:var(--accent);" class="pulse">🎲 Quản trò AI đang phát thẻ...</div>`;
         return;
       }
 
       if (room.status === 'finished') {
         el.innerHTML = `
-          <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
-            <span style="font-size:13px; color:#fde68a;">🏁 Ván đấu đã xong! Đổi chủ đề ở góc trên nếu muốn.</span>
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap;">
+            <span style="font-size:12.5px; color:#fde68a;">🏁 Ván đấu đã kết thúc!</span>
             ${isHost && room.players.p1 && room.players.p2
               ? `<button class="btn btn-gold" onclick="startMatch()">🔄 Chơi Ván Mới</button>`
-              : `<span style="font-size:12.5px; color:var(--muted);">Chờ chủ phòng mở ván mới...</span>`}
+              : `<span style="font-size:12px; color:var(--muted);">Chờ chủ phòng mở ván mới...</span>`}
           </div>
         `;
         return;
       }
 
-      // ĐANG CHƠI
       if (room.role === 'spectator') {
         el.innerHTML = `
-          <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap;">
-            <span style="font-size:13px; color:var(--muted);">👁️ Bạn đang xem trận đấu trực tiếp.</span>
-            <button class="btn btn-ghost" style="padding:7px 12px; font-size:12.5px;" onclick="toggleSpectatorDrawer(true)">💬 Mở Bong Bóng Khán Đài</button>
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
+            <span style="font-size:12.5px; color:var(--muted);">👁️ Bạn đang xem trận đấu trực tiếp.</span>
+            <button class="btn btn-ghost" style="padding:6px 11px; font-size:12px;" onclick="openSpectatorTab()">💬 Mở Chat</button>
           </div>
         `;
         return;
       }
 
       if (room.judgingGuess) {
-        el.innerHTML = `<div style="text-align:center; font-size:13px; color:var(--gold);" class="pulse">⚖️ Quản trò AI đang chấm đáp án...</div>`;
+        el.innerHTML = `<div style="text-align:center; font-size:12.5px; color:var(--gold);" class="pulse">⚖️ Quản trò AI đang chấm đáp án...</div>`;
         return;
       }
 
       if (room.aiThinking) {
-        el.innerHTML = `<div style="text-align:center; font-size:13px; color:#c4b5fd;" class="pulse">🤖 AI Thám Tử đang xử lý...</div>`;
+        el.innerHTML = `<div style="text-align:center; font-size:12.5px; color:#c4b5fd;" class="pulse">🤖 AI Thám Tử đang xử lý...</div>`;
         return;
       }
 
@@ -1379,18 +1563,18 @@
 
       if (isMyAnswerTurn) {
         el.innerHTML = `
-          <div style="font-size:12px; color:var(--gold); font-weight:700; margin-bottom:6px;">
-            ⚡ Chọn câu trả lời cho câu hỏi của ${escapeHtml(room.pendingQuestion.byName)}:
+          <div class="ans-prompt-label" style="font-size:12px; color:var(--gold); font-weight:700; margin-bottom:6px;">
+            ⚡ Trả lời câu hỏi của ${escapeHtml(room.pendingQuestion.byName)}:
           </div>
-          <div style="margin-bottom:8px;">
-            <input id="answerNoteInput" type="text" placeholder="Ghi chú ngắn thêm (không bắt buộc)..." maxlength="100" style="padding:8px 12px; font-size:13px;" />
+          <div class="ans-note-wrap" style="margin-bottom:7px;">
+            <input id="answerNoteInput" type="text" placeholder="Ghi chú ngắn (không bắt buộc)..." maxlength="100" style="padding:8px 11px; font-size:13px;" />
           </div>
           <div class="ans-btn-row">
             <button class="btn btn-ans-YES" onclick="sendAnswer('YES')">✅ Có</button>
             <button class="btn btn-ans-NO" onclick="sendAnswer('NO')">❌ Không</button>
             <button class="btn btn-ans-MAYBE" onclick="sendAnswer('MAYBE')">🤔 Có thể</button>
-            <button class="btn btn-ans-PROBABLY_NO" onclick="sendAnswer('PROBABLY_NO')">🤨 Hình như không</button>
-            <button class="btn btn-ans-DONT_KNOW" onclick="sendAnswer('DONT_KNOW')">🤷 Không biết</button>
+            <button class="btn btn-ans-PROBABLY_NO" onclick="sendAnswer('PROBABLY_NO')">🤨 Hình như ko</button>
+            <button class="btn btn-ans-DONT_KNOW" onclick="sendAnswer('DONT_KNOW')">🤷 Ko biết</button>
           </div>
         `;
         return;
@@ -1400,10 +1584,10 @@
         el.innerHTML = `
           <div class="composer-tabs">
             <button class="composer-tab ${activeComposerTab === 'ask' ? 'active-ask' : ''}" onclick="setComposerTab('ask')">
-              ❓ Hỏi thông tin Yes / No
+              ❓ Hỏi Yes / No
             </button>
             <button class="composer-tab ${activeComposerTab === 'guess' ? 'active-guess' : ''}" onclick="setComposerTab('guess')">
-              🎯 Chốt đáp án (Đoán vô số lần ∞)
+              🎯 Chốt đáp án (∞)
             </button>
           </div>
           ${activeComposerTab === 'ask' ? `
@@ -1411,21 +1595,21 @@
               <span class="chip" onclick="fillQuestion('Đối tượng này có phải đến từ Việt Nam không?')">🇻🇳 Việt Nam?</span>
               <span class="chip" onclick="fillQuestion('Nhân vật này có phải là nam giới không?')">👨 Là nam?</span>
               <span class="chip" onclick="fillQuestion('Người này có nổi tiếng trong lĩnh vực âm nhạc không?')">🎵 Âm nhạc?</span>
-              <span class="chip" onclick="fillQuestion('Nhân vật này có từng có drama lớn gần đây không?')">🔥 Có drama?</span>
+              <span class="chip" onclick="fillQuestion('Nhân vật này có từng có drama lớn gần đây không?')">🔥 Drama?</span>
               <span class="chip" onclick="fillQuestion('Đối tượng này có phải là con người thật đang còn sống không?')">🧑 Người thật?</span>
               <span class="chip" onclick="fillQuestion('Đối tượng này có xuất xứ từ Châu Á không?')">🌏 Châu Á?</span>
             </div>
             <div class="input-row">
-              <input id="questionInput" type="text" placeholder="Nhập câu hỏi Yes/No rồi nhấn Enter..." maxlength="200"
+              <input id="questionInput" type="text" placeholder="Nhập câu hỏi Yes/No..." maxlength="200"
                      onkeydown="if(event.key==='Enter') sendQuestion()" />
               <button class="btn btn-primary" onclick="sendQuestion()">Gửi</button>
             </div>
           ` : `
-            <div style="font-size:11.5px; color:#fde68a; margin-bottom:6px;">
-              ⚖️ Quản trò AI sẽ chấm tự động (chấp nhận cả tên thật, biệt danh, không dấu). Đoán sai chỉ chuyển lượt, được đoán lại thoải mái!
+            <div class="guess-hint-line" style="font-size:11.5px; color:#fde68a; margin-bottom:6px;">
+              ⚖️ Quản trò AI chấm linh hoạt (cả tên thật, biệt danh, không dấu). Đoán vô số lần!
             </div>
             <div class="input-row">
-              <input id="guessInput" type="text" placeholder="Nhập tên nhân vật/đối tượng bạn đoán..." maxlength="100"
+              <input id="guessInput" type="text" placeholder="Nhập tên nhân vật/đối tượng..." maxlength="100"
                      onkeydown="if(event.key==='Enter') sendGuess()" />
               <button class="btn btn-gold" onclick="sendGuess()">🎯 Chốt!</button>
             </div>
@@ -1437,69 +1621,123 @@
       const waitMsg = room.turnPhase === 'answering'
         ? '⏳ Đang chờ đối thủ chọn câu trả lời...'
         : '⏳ Đang tới lượt đối thủ đặt câu hỏi...';
-      el.innerHTML = `<div style="text-align:center; font-size:13px; color:var(--muted);" class="pulse">${waitMsg}</div>`;
+      el.innerHTML = `<div style="text-align:center; font-size:12.5px; color:var(--muted);" class="pulse">${waitMsg}</div>`;
     }
 
-    // ================= BONG BÓNG KHÁN ĐÀI KÉO THẢ =================
-    function renderSpectatorFloating(room) {
-      const count = (room.spectators || []).length;
-      document.getElementById('bubbleSpecCount').textContent = count;
-      document.getElementById('drawerSpecCount').textContent = count;
-
+    // ================= BONG BÓNG "CHAT" (SẢNH + KHÁN ĐÀI) =================
+    function renderChatDrawer() {
       const unreadBadge = document.getElementById('bubbleUnreadBadge');
-      if (!drawerOpen && unreadSpecCount > 0) {
-        unreadBadge.textContent = unreadSpecCount > 9 ? '9+' : unreadSpecCount;
+      if (!drawerOpen && unreadChatCount > 0) {
+        unreadBadge.textContent = unreadChatCount > 9 ? '9+' : unreadChatCount;
         unreadBadge.classList.remove('hidden');
       } else {
         unreadBadge.classList.add('hidden');
       }
 
+      const inRoom = Boolean(currentRoom);
+      if (!inRoom) drawerTab = 'lobby';
+
+      document.getElementById('drawerTabs').classList.toggle('hidden', !inRoom);
+      document.getElementById('dTabLobby').classList.toggle('active', drawerTab === 'lobby');
+      document.getElementById('dTabSpec').classList.toggle('active', drawerTab === 'spectator');
+
+      const specCount = currentRoom ? (currentRoom.spectators || []).length : 0;
+      document.getElementById('drawerSpecCount').textContent = specCount;
+
       const spoilerWrap = document.getElementById('drawerSpoilerWrap');
-      if (room.role === 'spectator' && room.status === 'playing') {
-        spoilerWrap.classList.remove('hidden');
-        document.getElementById('toggleSpoilerBtn').textContent = spectatorRevealSecrets
-          ? '🙈 Ẩn Đáp Án Để Tự Đoán Cùng'
-          : '👁️ Bật Soi Đáp Án Cả 2 Bên';
-      } else {
-        spoilerWrap.classList.add('hidden');
-      }
-
-      document.getElementById('drawerSpecList').innerHTML = count
-        ? room.spectators.map(s => `<span class="pill pill-done">${s.avatar} ${escapeHtml(s.name)}</span>`).join('')
-        : `<span style="font-size:11.5px; color:var(--muted);">Chưa có khán giả nào vào xem.</span>`;
-
+      const specListEl = document.getElementById('drawerSpecList');
       const chatList = document.getElementById('drawerChatList');
       const inputRow = document.getElementById('drawerChatInputRow');
-      const isFightingPlayer = room.role !== 'spectator' && room.status === 'playing';
+      const chatInput = document.getElementById('drawerChatInput');
 
-      if (isFightingPlayer) {
-        chatList.innerHTML = `<div style="color:var(--muted); text-align:center; margin-top:45px; line-height:1.5;">🔒 Chat khán đài tạm khóa với 2 đấu thủ trong lúc thi đấu để tránh bị lộ đáp án!</div>`;
-        inputRow.classList.add('hidden');
-      } else {
+      if (drawerTab === 'lobby') {
+        document.getElementById('drawerTitle').textContent = '💬 Chat Sảnh Online';
+        spoilerWrap.classList.add('hidden');
+        specListEl.classList.add('hidden');
         inputRow.classList.remove('hidden');
-        if (!room.spectatorChat.length) {
-          chatList.innerHTML = `<div style="color:var(--muted); text-align:center; margin-top:24px;">Khán đài đang yên ắng... Cổ vũ đi nào!</div>`;
+        chatInput.placeholder = 'Nhắn tin với mọi người đang online...';
+
+        if (!lobbyChatMessages.length) {
+          chatList.innerHTML = `<div style="color:var(--muted); text-align:center; margin-top:26px;">Chưa có tin nhắn nào. Chào mọi người đang online đi nào! 👋</div>`;
         } else {
-          chatList.innerHTML = room.spectatorChat.map(c => `
+          chatList.innerHTML = lobbyChatMessages.map(c => `
             <div><b style="color:var(--accent);">${c.avatar} ${escapeHtml(c.name)}:</b> ${escapeHtml(c.text)}</div>
           `).join('');
           chatList.scrollTop = chatList.scrollHeight;
         }
+      } else {
+        // Tab Khán Đài trong phòng
+        document.getElementById('drawerTitle').textContent = `👀 Khán Đài Phòng (${specCount})`;
+        specListEl.classList.remove('hidden');
+
+        if (currentRoom && currentRoom.role === 'spectator' && currentRoom.status === 'playing') {
+          spoilerWrap.classList.remove('hidden');
+          document.getElementById('toggleSpoilerBtn').textContent = spectatorRevealSecrets
+            ? '🙈 Ẩn Đáp Án Để Tự Đoán Cùng'
+            : '👁️ Bật Soi Đáp Án Cả 2 Bên';
+        } else {
+          spoilerWrap.classList.add('hidden');
+        }
+
+        specListEl.innerHTML = specCount
+          ? currentRoom.spectators.map(s => `<span class="pill pill-done">${s.avatar} ${escapeHtml(s.name)}</span>`).join('')
+          : `<span style="font-size:11.5px; color:var(--muted);">Chưa có khán giả nào vào xem.</span>`;
+
+        const isFightingPlayer = currentRoom && currentRoom.role !== 'spectator' && currentRoom.status === 'playing';
+        if (isFightingPlayer) {
+          chatList.innerHTML = `<div style="color:var(--muted); text-align:center; margin-top:36px; line-height:1.5;">🔒 Chat khán đài tạm khóa với 2 đấu thủ trong lúc thi đấu để tránh lộ đáp án!<br/><span style="color:var(--accent);">Bạn vẫn có thể bấm sang tab "💬 Chat Sảnh" ở trên.</span></div>`;
+          inputRow.classList.add('hidden');
+        } else {
+          inputRow.classList.remove('hidden');
+          chatInput.placeholder = 'Cổ vũ trên khán đài phòng này...';
+          const sChat = (currentRoom && currentRoom.spectatorChat) || [];
+          if (!sChat.length) {
+            chatList.innerHTML = `<div style="color:var(--muted); text-align:center; margin-top:24px;">Khán đài đang yên ắng... Cổ vũ đi nào!</div>`;
+          } else {
+            chatList.innerHTML = sChat.map(c => `
+              <div><b style="color:var(--gold);">${c.avatar} ${escapeHtml(c.name)}:</b> ${escapeHtml(c.text)}</div>
+            `).join('');
+            chatList.scrollTop = chatList.scrollHeight;
+          }
+        }
       }
     }
 
-    function toggleSpectatorDrawer(forceState) {
+    function toggleChatDrawer(forceState) {
       drawerOpen = typeof forceState === 'boolean' ? forceState : !drawerOpen;
-      document.getElementById('spectatorDrawer').classList.toggle('hidden', !drawerOpen);
+      document.getElementById('chatDrawer').classList.toggle('hidden', !drawerOpen);
       if (drawerOpen) {
-        unreadSpecCount = 0;
-        if (currentRoom) renderSpectatorFloating(currentRoom);
+        unreadChatCount = 0;
+        renderChatDrawer();
       }
     }
 
-    // Logic kéo thả bong bóng (hỗ trợ cả chuột & cảm ứng mobile)
+    function openSpectatorTab() {
+      drawerTab = 'spectator';
+      toggleChatDrawer(true);
+    }
+
+    function switchDrawerTab(tab) {
+      drawerTab = tab;
+      unreadChatCount = 0;
+      renderChatDrawer();
+    }
+
+    function sendDrawerChat() {
+      const inp = document.getElementById('drawerChatInput');
+      const text = inp.value.trim();
+      if (!text) return;
+      if (drawerTab === 'lobby') {
+        socket.emit('lobby_chat', { text });
+      } else {
+        socket.emit('spectator_chat', { text });
+      }
+      inp.value = '';
+    }
+
+    // Kéo thả bong bóng "Chat" trên cả chuột & màn hình cảm ứng
     (function setupDraggableBubble() {
-      const bubble = document.getElementById('spectatorBubble');
+      const bubble = document.getElementById('chatBubble');
       let dragging = false;
       let moved = false;
       let startX = 0, startY = 0;
@@ -1526,16 +1764,14 @@
         if (Math.abs(dx) > 5 || Math.abs(dy) > 5) moved = true;
         const maxLeft = window.innerWidth - bubble.offsetWidth - 8;
         const maxTop = window.innerHeight - bubble.offsetHeight - 8;
-        const nextLeft = Math.max(8, Math.min(maxLeft, initLeft + dx));
-        const nextTop = Math.max(8, Math.min(maxTop, initTop + dy));
-        bubble.style.left = nextLeft + 'px';
-        bubble.style.top = nextTop + 'px';
+        bubble.style.left = Math.max(8, Math.min(maxLeft, initLeft + dx)) + 'px';
+        bubble.style.top = Math.max(8, Math.min(maxTop, initTop + dy)) + 'px';
       };
 
       const onUp = () => {
         if (!dragging) return;
         dragging = false;
-        if (!moved) toggleSpectatorDrawer();
+        if (!moved) toggleChatDrawer();
       };
 
       bubble.addEventListener('mousedown', (e) => { e.preventDefault(); onDown(e.clientX, e.clientY); });
@@ -1558,6 +1794,11 @@
     function changeRoomTopicPref(val) { socket.emit('update_topic_pref', { topicPref: val }); }
     function startMatch() { socket.emit('start_match', {}, (res) => { if (res && !res.ok) alert(res.msg); }); }
 
+    function toggleTopicDescMobile() {
+      showTopicDescMobile = !showTopicDescMobile;
+      if (currentRoom) renderInfoStrip(currentRoom);
+    }
+
     function toggleFacts() {
       showFactsExpanded = !showFactsExpanded;
       if (currentRoom) renderInfoStrip(currentRoom);
@@ -1567,7 +1808,7 @@
       spectatorRevealSecrets = !spectatorRevealSecrets;
       if (currentRoom) {
         renderInfoStrip(currentRoom);
-        renderSpectatorFloating(currentRoom);
+        renderChatDrawer();
       }
     }
 
@@ -1609,14 +1850,6 @@
       socket.emit('submit_guess', { guessText }, (res) => {
         if (res && !res.ok) alert(res.msg);
       });
-    }
-
-    function sendSpectatorChat() {
-      const inp = document.getElementById('spectatorChatInput');
-      const text = inp.value.trim();
-      if (!text) return;
-      socket.emit('spectator_chat', { text });
-      inp.value = '';
     }
 
     function escapeHtml(str) {
