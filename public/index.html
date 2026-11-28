@@ -84,6 +84,16 @@
       box-shadow: 0 4px 16px rgba(245, 158, 11, 0.3);
     }
 
+    .btn-hint {
+      background: rgba(251, 191, 36, 0.2);
+      border: 1px solid rgba(251, 191, 36, 0.55);
+      color: #fde68a;
+      padding: 3px 9px;
+      font-size: 11.5px;
+      border-radius: 999px;
+    }
+    .btn-hint:hover:not(:disabled) { background: rgba(251, 191, 36, 0.32); }
+
     .btn-ghost {
       background: rgba(255, 255, 255, 0.07);
       border-color: rgba(255, 255, 255, 0.15);
@@ -132,8 +142,10 @@
     .pill-ai { background: rgba(167, 139, 250, 0.22); color: #ddd6fe; }
     .pill-pvp { background: rgba(56, 189, 248, 0.2); color: #bae6fd; }
     .pill-done { background: rgba(148, 163, 184, 0.2); color: #cbd5e1; }
+    .pill-hard { background: rgba(239, 68, 68, 0.22); color: #fca5a5; }
+    .pill-easy { background: rgba(34, 197, 94, 0.2); color: #86efac; }
 
-    /* ================= AUTH SCREEN ================= */
+    /* ================= MÀN HÌNH NHẬP TÊN (KHÔNG CẦN TẠO ACC) ================= */
     #authScreen {
       min-height: 100dvh;
       display: flex;
@@ -141,9 +153,9 @@
       justify-content: center;
       padding: 20px;
     }
-    .auth-card { width: 100%; max-width: 430px; padding: 26px; }
+    .auth-card { width: 100%; max-width: 420px; padding: 28px; }
     .brand-title {
-      font-size: 30px;
+      font-size: 32px;
       font-weight: 800;
       text-align: center;
       background: linear-gradient(90deg, #5eead4, #38bdf8, #fbbf24);
@@ -154,36 +166,17 @@
       text-align: center;
       color: var(--muted);
       font-size: 13px;
-      margin: 6px 0 20px;
+      margin: 6px 0 22px;
     }
-    .tabs {
-      display: flex;
-      background: rgba(0, 0, 0, 0.3);
-      border-radius: 12px;
-      padding: 4px;
-      margin-bottom: 16px;
-    }
-    .tab-btn {
-      flex: 1;
-      padding: 9px;
-      border: none;
-      background: transparent;
-      color: var(--muted);
-      font-family: inherit;
-      font-weight: 700;
-      border-radius: 9px;
-      cursor: pointer;
-    }
-    .tab-btn.active { background: rgba(45, 212, 191, 0.22); color: var(--accent); }
-    .form-group { margin-bottom: 13px; }
-    .form-group label { display: block; font-size: 12px; font-weight: 600; color: #cbd5e1; margin-bottom: 5px; }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 12.5px; font-weight: 600; color: #cbd5e1; margin-bottom: 6px; }
     .avatar-picker { display: flex; flex-wrap: wrap; gap: 7px; }
     .avatar-opt {
-      width: 38px; height: 38px; border-radius: 10px;
+      width: 40px; height: 40px; border-radius: 10px;
       border: 1px solid rgba(255,255,255,0.12);
       background: rgba(255,255,255,0.05);
       display: flex; align-items: center; justify-content: center;
-      font-size: 19px; cursor: pointer;
+      font-size: 20px; cursor: pointer;
     }
     .avatar-opt.selected {
       border-color: var(--accent);
@@ -197,7 +190,7 @@
       padding: 9px 12px;
       border-radius: 10px;
       font-size: 13px;
-      margin-bottom: 12px;
+      margin-bottom: 14px;
     }
 
     /* ================= LOBBY SCREEN ================= */
@@ -236,11 +229,11 @@
     }
     .create-box {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1.2fr 1fr 0.9fr;
       gap: 10px;
       margin-bottom: 12px;
     }
-    @media (max-width: 640px) { .create-box { grid-template-columns: 1fr; } }
+    @media (max-width: 720px) { .create-box { grid-template-columns: 1fr; } }
     .room-list { display: flex; flex-direction: column; gap: 10px; }
     .room-item {
       padding: 13px 15px;
@@ -478,6 +471,11 @@
       border: 1px solid rgba(94, 234, 212, 0.25);
       color: #a5f3fc;
     }
+    .judge-hint {
+      background: rgba(251, 191, 36, 0.14);
+      border: 1px dashed rgba(251, 191, 36, 0.55);
+      color: #fef08a;
+    }
 
     .chat-composer {
       flex-shrink: 0;
@@ -555,7 +553,6 @@
       #roomTitle { font-size: 13px !important; }
       #roomBadges .pill { padding: 1px 6px; font-size: 10px; }
 
-      /* Gộp Chủ đề + Thẻ bí mật nằm song song cực gọn trên 1 hàng */
       .room-info-strip {
         grid-template-columns: 1fr 1fr;
         gap: 5px;
@@ -583,7 +580,6 @@
         font-size: 10px;
         opacity: 0.8;
       }
-      /* Mặc định thu gọn mô tả chủ đề trên mobile, bấm vào ô Chủ đề để xổ ra */
       .topic-desc-mobile-hide {
         display: none;
       }
@@ -592,8 +588,8 @@
         border-radius: 12px;
       }
       .chat-subheader {
-        padding: 5px 10px;
-        font-size: 11.5px;
+        padding: 5px 8px;
+        font-size: 11px;
       }
       .chat-messages {
         padding: 10px 8px;
@@ -621,7 +617,6 @@
         font-size: 12px;
       }
 
-      /* Thu gọn thanh nhập & 5 nút trả lời ở đáy cho khung chat chiếm nhiều diện tích nhất */
       .chat-composer {
         padding: 6px 8px;
       }
@@ -690,7 +685,7 @@
       }
     }
 
-    /* ================= BONG BÓNG "CHAT" KÉO THẢ (SẢNH + PHÒNG) ================= */
+    /* ================= BONG BÓNG "CHAT" KÉO THẢ ================= */
     #chatBubble {
       position: fixed;
       right: 18px;
@@ -830,35 +825,26 @@
 </head>
 <body>
 
-  <!-- ================= MÀN HÌNH ĐĂNG NHẬP / TẠO ACC ================= -->
+  <!-- ================= MÀN HÌNH NHẬP TÊN VÀO LUÔN ================= -->
   <div id="authScreen">
     <div class="glass auth-card">
       <div class="brand-title">🕵️‍♂️ LÀ ẢI LÀ AI?</div>
-      <div class="brand-sub">Đoán nhân vật Yes/No • 2 Người Online &amp; Đấu Trí AI Thám Tử</div>
-
-      <div class="tabs">
-        <button class="tab-btn active" id="tabLogin" onclick="switchAuthTab('login')">Đăng Nhập</button>
-        <button class="tab-btn" id="tabRegister" onclick="switchAuthTab('register')">Tạo Acc Vào Ngay</button>
-      </div>
+      <div class="brand-sub">Nhập tên là vào chơi ngay • Không cần tạo tài khoản</div>
 
       <div id="authError" class="err-msg hidden"></div>
 
       <div class="form-group">
-        <label>Tên tài khoản / Biệt danh</label>
-        <input id="authName" type="text" placeholder="Ví dụ: Thám Tử Lừng Danh..." maxlength="24" />
-      </div>
-      <div class="form-group">
-        <label>Mật khẩu</label>
-        <input id="authPass" type="password" placeholder="Nhập mật khẩu (tối thiểu 3 ký tự)" />
+        <label>Tên hiển thị của bạn</label>
+        <input id="authName" type="text" placeholder="Ví dụ: Thám Tử Conan, Bé Na..." maxlength="24" autofocus />
       </div>
 
-      <div class="form-group hidden" id="avatarGroup">
+      <div class="form-group">
         <label>Chọn biểu tượng đại diện</label>
         <div class="avatar-picker" id="avatarPicker"></div>
       </div>
 
-      <button class="btn btn-primary" style="width:100%; padding:13px;" id="authSubmitBtn" onclick="submitAuth()">
-        🚀 Đăng Nhập Vào Sảnh
+      <button class="btn btn-primary" style="width:100%; padding:13px; font-size:15px;" onclick="enterLobby()">
+        🚀 Vào Sảnh Ngay
       </button>
     </div>
   </div>
@@ -873,7 +859,7 @@
           <div style="font-size:12px; color:var(--accent);" id="onlineCountBadge">🟢 1 đang online</div>
         </div>
       </div>
-      <button class="btn btn-ghost" onclick="logout()">Đăng xuất</button>
+      <button class="btn btn-ghost" onclick="logout()">Đổi tên</button>
     </div>
 
     <div class="glass panel">
@@ -881,7 +867,7 @@
 
       <div class="create-box">
         <div>
-          <label style="font-size:12px; color:var(--muted); display:block; margin-bottom:5px;">Chủ đề (Quản trò AI tự chọn không trùng)</label>
+          <label style="font-size:12px; color:var(--muted); display:block; margin-bottom:5px;">Chủ đề (Quản trò AI chọn không trùng)</label>
           <select id="lobbyTopicPref">
             <option value="hot_drama">🔥 Ưu tiên Nghệ sĩ / Drama Hot VN &amp; Thế giới</option>
             <option value="vn_showbiz">🇻🇳 Showbiz &amp; Drama Việt Nam</option>
@@ -893,8 +879,15 @@
           </select>
         </div>
         <div>
-          <label style="font-size:12px; color:var(--muted); display:block; margin-bottom:5px;">Tên phòng (không bắt buộc)</label>
-          <input id="lobbyRoomName" type="text" placeholder="Ví dụ: Kèo showbiz căng đét..." maxlength="32" />
+          <label style="font-size:12px; color:var(--muted); display:block; margin-bottom:5px;">Độ khó khi đấu AI</label>
+          <select id="lobbyAiDifficulty">
+            <option value="easy">🟢 Dễ (Có gợi ý + câu hỏi nhanh)</option>
+            <option value="hard">🔴 Khó (Tắt toàn bộ gợi ý)</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:12px; color:var(--muted); display:block; margin-bottom:5px;">Tên phòng (tùy chọn)</label>
+          <input id="lobbyRoomName" type="text" placeholder="Ví dụ: Kèo showbiz..." maxlength="32" />
         </div>
       </div>
 
@@ -928,7 +921,7 @@
           <div style="display:flex; gap:5px; margin-top:2px; flex-wrap:wrap;" id="roomBadges"></div>
         </div>
       </div>
-      <div style="display:flex; align-items:center; gap:6px;" id="roomHeaderActions"></div>
+      <div style="display:flex; align-items:center; gap:5px; flex-wrap:wrap;" id="roomHeaderActions"></div>
     </div>
 
     <div class="room-info-strip" id="roomInfoStrip"></div>
@@ -953,7 +946,6 @@
       <button class="btn btn-ghost" style="padding:4px 9px; font-size:12px;" onclick="toggleChatDrawer(false)">✕</button>
     </div>
 
-    <!-- Thanh tab chỉ hiện khi đang ở trong phòng đấu -->
     <div id="drawerTabs" class="drawer-tabs hidden">
       <button class="drawer-tab active" id="dTabLobby" onclick="switchDrawerTab('lobby')">💬 Chat Sảnh</button>
       <button class="drawer-tab" id="dTabSpec" onclick="switchDrawerTab('spectator')">👀 Khán Đài (<span id="drawerSpecCount">0</span>)</button>
@@ -988,7 +980,6 @@
       DONT_KNOW: { label: '🤷 Không biết', cls: 'reply-DONT_KNOW' }
     };
 
-    let authMode = 'login';
     let selectedAvatar = '🕵️';
     let me = null;
     let currentRoom = null;
@@ -999,9 +990,8 @@
     let showTopicDescMobile = false;
     let activeComposerTab = 'ask';
 
-    // Trạng thái bong bóng Chat
     let drawerOpen = false;
-    let drawerTab = 'lobby'; // 'lobby' | 'spectator'
+    let drawerTab = 'lobby';
     let unreadChatCount = 0;
     let lastLobbyChatLen = 0;
     let lastSpecChatLen = 0;
@@ -1023,27 +1013,15 @@
       pickerEl.appendChild(btn);
     });
 
-    function switchAuthTab(mode) {
-      authMode = mode;
-      document.getElementById('tabLogin').classList.toggle('active', mode === 'login');
-      document.getElementById('tabRegister').classList.toggle('active', mode === 'register');
-      document.getElementById('avatarGroup').classList.toggle('hidden', mode === 'login');
-      document.getElementById('authSubmitBtn').textContent = mode === 'login' ? '🚀 Đăng Nhập Vào Sảnh' : '✨ Tạo Acc & Vào Chơi Luôn';
-      document.getElementById('authError').classList.add('hidden');
-    }
-
     function showAuthError(msg) {
       const el = document.getElementById('authError');
       el.textContent = msg;
       el.classList.remove('hidden');
     }
 
-    function submitAuth() {
+    function enterLobby() {
       const name = document.getElementById('authName').value.trim();
-      const password = document.getElementById('authPass').value.trim();
-      const eventName = authMode === 'login' ? 'login' : 'register';
-
-      socket.emit(eventName, { name, password, avatar: selectedAvatar }, (res) => {
+      socket.emit('enter_lobby', { name, avatar: selectedAvatar }, (res) => {
         if (!res.ok) return showAuthError(res.msg);
         me = res.user;
         lobbyChatMessages = res.lobbyChat || lobbyChatMessages || [];
@@ -1051,7 +1029,6 @@
 
         document.getElementById('authScreen').classList.add('hidden');
         document.getElementById('lobbyScreen').classList.remove('hidden');
-        // Hiện bong bóng Chat ngay khi vào Sảnh
         document.getElementById('chatBubble').classList.remove('hidden');
 
         document.getElementById('meAvatar').textContent = me.avatar || '🕵️';
@@ -1061,8 +1038,8 @@
       });
     }
 
-    document.getElementById('authPass').addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') submitAuth();
+    document.getElementById('authName').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') enterLobby();
     });
 
     function logout() { location.reload(); }
@@ -1096,7 +1073,7 @@
       } else {
         roomListEl.innerHTML = lobby.rooms.map(r => {
           const modePill = r.mode === 'pvai'
-            ? `<span class="pill pill-ai">🤖 1 vs AI</span>`
+            ? `<span class="pill pill-ai">🤖 1vAI</span> <span class="pill ${r.difficulty === 'hard' ? 'pill-hard' : 'pill-easy'}">${r.difficulty === 'hard' ? '🔴 Khó' : '🟢 Dễ'}</span>`
             : `<span class="pill pill-pvp">⚔️ 2 Người</span>`;
           let statusPill = `<span class="pill pill-wait">⏳ Đang chờ</span>`;
           if (r.status === 'playing' || r.status === 'generating') statusPill = `<span class="pill pill-play">🔥 Đang chiến</span>`;
@@ -1135,8 +1112,9 @@
 
     function createRoom(mode) {
       const topicPref = document.getElementById('lobbyTopicPref').value;
+      const difficulty = document.getElementById('lobbyAiDifficulty').value;
       const roomName = document.getElementById('lobbyRoomName').value.trim();
-      socket.emit('create_room', { mode, topicPref, roomName }, (res) => {
+      socket.emit('create_room', { mode, difficulty, topicPref, roomName }, (res) => {
         if (!res.ok) return alert(res.msg);
         enterRoomView(res.room);
       });
@@ -1195,17 +1173,19 @@
       leaveRoom();
     });
 
-    socket.on('force_logout', (msg) => {
-      alert(msg);
-      location.reload();
-    });
-
     // ================= RENDER PHÒNG ĐẤU =================
     function renderRoom(room) {
       document.getElementById('roomTitle').textContent = room.name;
 
       const badges = [];
-      badges.push(room.mode === 'pvai' ? `<span class="pill pill-ai">🤖 1vAI</span>` : `<span class="pill pill-pvp">⚔️ 2 Người</span>`);
+      if (room.mode === 'pvai') {
+        badges.push(`<span class="pill pill-ai">🤖 1vAI</span>`);
+        badges.push(room.difficulty === 'hard'
+          ? `<span class="pill pill-hard">🔴 Khó</span>`
+          : `<span class="pill pill-easy">🟢 Dễ</span>`);
+      } else {
+        badges.push(`<span class="pill pill-pvp">⚔️ 2 Người</span>`);
+      }
       badges.push(room.role === 'spectator'
         ? `<span class="pill pill-wait">👁️ Khán giả</span>`
         : `<span class="pill pill-play">🎮 Đấu thủ</span>`);
@@ -1214,7 +1194,14 @@
       const headerActions = document.getElementById('roomHeaderActions');
       const isHost = room.hostId === socket.id;
       if (isHost && (room.status === 'waiting' || room.status === 'finished')) {
+        const diffSelect = room.mode === 'pvai' ? `
+          <select style="width:auto; padding:5px 7px; font-size:11.5px;" onchange="changeRoomDifficulty(this.value)">
+            <option value="easy" ${room.difficulty==='easy'?'selected':''}>🟢 Dễ</option>
+            <option value="hard" ${room.difficulty==='hard'?'selected':''}>🔴 Khó</option>
+          </select>
+        ` : '';
         headerActions.innerHTML = `
+          ${diffSelect}
           <select style="width:auto; padding:5px 8px; font-size:11.5px;" onchange="changeRoomTopicPref(this.value)">
             <option value="hot_drama" ${room.topicPref==='hot_drama'?'selected':''}>🔥 Drama/Hot</option>
             <option value="vn_showbiz" ${room.topicPref==='vn_showbiz'?'selected':''}>🇻🇳 Showbiz VN</option>
@@ -1239,7 +1226,6 @@
     function renderInfoStrip(room) {
       const strip = document.getElementById('roomInfoStrip');
 
-      // Ô trái: Chủ đề (trên mobile mặc định thu gọn mô tả, bấm để xem thêm)
       let topicHtml = '';
       if (room.status === 'generating') {
         topicHtml = `
@@ -1269,7 +1255,6 @@
         `;
       }
 
-      // Ô phải: Thẻ bí mật
       let secretHtml = '';
       if (room.role === 'p1' || room.role === 'p2') {
         const myPl = room.players[room.role];
@@ -1292,7 +1277,7 @@
             <div class="info-card secret-card" onclick="toggleFacts()">
               <div class="info-mini-label">
                 <span>🔐 THẺ CỦA BẠN</span>
-                ${facts ? `<span style="font-size:10px; color:#5eead4;">${showFactsExpanded ? 'Ẩn ▲' : 'Gợi ý ▼'}</span>` : ''}
+                ${facts ? `<span style="font-size:10px; color:#5eead4;">${showFactsExpanded ? 'Ẩn ▲' : 'Thông tin ▼'}</span>` : ''}
               </div>
               <div class="info-main-text" style="color:#5eead4;">${escapeHtml(myPl.secret.name)}</div>
               ${showFactsExpanded && facts ? `<ul class="fact-list">${facts}</ul>` : ''}
@@ -1351,9 +1336,23 @@
         turnBadge = `<span class="pill pill-wait">🏆 Kết thúc</span>`;
       }
 
+      // Nút Gợi ý chỉ hiện ở chế độ 1vAI - Dễ khi đang chơi
+      let hintBtnHtml = '';
+      if (room.mode === 'pvai' && room.difficulty === 'easy' && room.role === 'p1' && room.status === 'playing' && room.maxHints > 0) {
+        const left = room.maxHints - (room.hintsRevealed || 0);
+        hintBtnHtml = `
+          <button class="btn btn-hint" ${left <= 0 ? 'disabled' : ''} onclick="requestHint()" title="Mở thêm gợi ý về nhân vật của AI">
+            💡 Gợi ý (${room.hintsRevealed}/${room.maxHints})
+          </button>
+        `;
+      }
+
       el.innerHTML = `
         <div style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${p1Txt} <span style="color:var(--muted);">vs</span> ${p2Txt}</div>
-        <div>${turnBadge}</div>
+        <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
+          ${hintBtnHtml}
+          ${turnBadge}
+        </div>
       `;
     }
 
@@ -1365,7 +1364,8 @@
         ai: room.aiThinking,
         jg: room.judgingGuess,
         win: room.winnerSide,
-        role: room.role
+        role: room.role,
+        diff: room.difficulty
       });
       if (feedKey === lastFeedRenderKey) return;
 
@@ -1381,10 +1381,23 @@
       } else if (room.status === 'generating') {
         parts.push(`<div class="judge-banner judge-sys pulse">🎲 Quản trò AI đang chọn chủ đề và bốc 2 nhân vật bí mật hoàn toàn mới...</div>`);
       } else if (room.topic?.name) {
-        parts.push(`<div class="judge-banner judge-sys">🎬 Trận đấu bắt đầu! Chủ đề: <b>${escapeHtml(room.topic.name)}</b></div>`);
+        const diffNote = room.mode === 'pvai'
+          ? (room.difficulty === 'hard' ? ' • Chế độ 🔴 Khó (Tắt gợi ý)' : ' • Chế độ 🟢 Dễ (Có nút 💡 Gợi ý ở góc trên)')
+          : '';
+        parts.push(`<div class="judge-banner judge-sys">🎬 Trận đấu bắt đầu! Chủ đề: <b>${escapeHtml(room.topic.name)}</b>${diffNote}</div>`);
       }
 
-      room.qaHistory.forEach((item, idx) => {
+      let qCounter = 0;
+      room.qaHistory.forEach((item) => {
+        if (item.isHint) {
+          parts.push(`
+            <div class="judge-banner judge-hint">
+              💡 <b>Gợi ý #${item.hintIndex} về nhân vật của AI:</b> ${escapeHtml(item.text)}
+            </div>
+          `);
+          return;
+        }
+
         const isMine = (room.role === 'p1' || room.role === 'p2')
           ? (item.bySide === room.role)
           : (item.bySide === 'p1');
@@ -1408,12 +1421,13 @@
             </div>
           `);
         } else {
+          qCounter += 1;
           const ansMeta = ANSWER_UI[item.answer] || ANSWER_UI.MAYBE;
           parts.push(`
             <div class="msg-row ${isMine ? 'mine' : 'other'}">
               <div class="msg-av">${av}</div>
               <div class="msg-col">
-                <div class="msg-sender">#${idx + 1} • ${escapeHtml(item.byName)}</div>
+                <div class="msg-sender">#${qCounter} • ${escapeHtml(item.byName)}</div>
                 <div class="msg-bubble">
                   ${escapeHtml(item.question)}
                   ${item.taunt ? `<div class="msg-taunt">💭 ${escapeHtml(item.taunt)}</div>` : ''}
@@ -1498,7 +1512,9 @@
         pq: room.pendingQuestion?.id || null,
         ai: room.aiThinking,
         jg: room.judgingGuess,
-        tab: activeComposerTab
+        tab: activeComposerTab,
+        mode: room.mode,
+        diff: room.difficulty
       });
       if (composerKey === lastComposerRenderKey) return;
       lastComposerRenderKey = composerKey;
@@ -1581,6 +1597,7 @@
       }
 
       if (isMyAskTurn) {
+        const showQuickChips = !(room.mode === 'pvai' && room.difficulty === 'hard');
         el.innerHTML = `
           <div class="composer-tabs">
             <button class="composer-tab ${activeComposerTab === 'ask' ? 'active-ask' : ''}" onclick="setComposerTab('ask')">
@@ -1591,14 +1608,16 @@
             </button>
           </div>
           ${activeComposerTab === 'ask' ? `
-            <div class="quick-strip">
-              <span class="chip" onclick="fillQuestion('Đối tượng này có phải đến từ Việt Nam không?')">🇻🇳 Việt Nam?</span>
-              <span class="chip" onclick="fillQuestion('Nhân vật này có phải là nam giới không?')">👨 Là nam?</span>
-              <span class="chip" onclick="fillQuestion('Người này có nổi tiếng trong lĩnh vực âm nhạc không?')">🎵 Âm nhạc?</span>
-              <span class="chip" onclick="fillQuestion('Nhân vật này có từng có drama lớn gần đây không?')">🔥 Drama?</span>
-              <span class="chip" onclick="fillQuestion('Đối tượng này có phải là con người thật đang còn sống không?')">🧑 Người thật?</span>
-              <span class="chip" onclick="fillQuestion('Đối tượng này có xuất xứ từ Châu Á không?')">🌏 Châu Á?</span>
-            </div>
+            ${showQuickChips ? `
+              <div class="quick-strip">
+                <span class="chip" onclick="fillQuestion('Đối tượng này có phải đến từ Việt Nam không?')">🇻🇳 Việt Nam?</span>
+                <span class="chip" onclick="fillQuestion('Nhân vật này có phải là nam giới không?')">👨 Là nam?</span>
+                <span class="chip" onclick="fillQuestion('Người này có nổi tiếng trong lĩnh vực âm nhạc không?')">🎵 Âm nhạc?</span>
+                <span class="chip" onclick="fillQuestion('Nhân vật này có từng có drama lớn gần đây không?')">🔥 Drama?</span>
+                <span class="chip" onclick="fillQuestion('Đối tượng này có phải là con người thật đang còn sống không?')">🧑 Người thật?</span>
+                <span class="chip" onclick="fillQuestion('Đối tượng này có xuất xứ từ Châu Á không?')">🌏 Châu Á?</span>
+              </div>
+            ` : ''}
             <div class="input-row">
               <input id="questionInput" type="text" placeholder="Nhập câu hỏi Yes/No..." maxlength="200"
                      onkeydown="if(event.key==='Enter') sendQuestion()" />
@@ -1666,7 +1685,6 @@
           chatList.scrollTop = chatList.scrollHeight;
         }
       } else {
-        // Tab Khán Đài trong phòng
         document.getElementById('drawerTitle').textContent = `👀 Khán Đài Phòng (${specCount})`;
         specListEl.classList.remove('hidden');
 
@@ -1735,7 +1753,7 @@
       inp.value = '';
     }
 
-    // Kéo thả bong bóng "Chat" trên cả chuột & màn hình cảm ứng
+    // Kéo thả bong bóng "Chat" trên cả chuột & cảm ứng
     (function setupDraggableBubble() {
       const bubble = document.getElementById('chatBubble');
       let dragging = false;
@@ -1792,7 +1810,14 @@
 
     // ================= ROOM ACTIONS =================
     function changeRoomTopicPref(val) { socket.emit('update_topic_pref', { topicPref: val }); }
+    function changeRoomDifficulty(val) { socket.emit('update_difficulty', { difficulty: val }); }
     function startMatch() { socket.emit('start_match', {}, (res) => { if (res && !res.ok) alert(res.msg); }); }
+
+    function requestHint() {
+      socket.emit('request_hint', {}, (res) => {
+        if (res && !res.ok) alert(res.msg);
+      });
+    }
 
     function toggleTopicDescMobile() {
       showTopicDescMobile = !showTopicDescMobile;
