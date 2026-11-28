@@ -10,7 +10,6 @@ const io = new Server(server, { cors: { origin: "*" } });
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-const ACCOUNTS_FILE = path.join(__dirname, 'accounts.json');
 const USED_TARGETS_FILE = path.join(__dirname, 'used_targets.json');
 
 // ================= CẤU HÌNH 2 GEMINI API KEY =================
@@ -37,6 +36,17 @@ const ANSWER_LABELS_VI = {
   PROBABLY_NO: 'HÌNH NHƯ KHÔNG',
   DONT_KNOW: 'KHÔNG BIẾT'
 };
+
+// Danh sách từ phân loại chung (không phải tên riêng nhân vật/hãng)
+const GENERIC_ATTRIBUTE_WORDS = [
+  'nam', 'nu', 'nam gioi', 'nu gioi', 'dan ong', 'phu nu', 'con trai', 'con gai',
+  'nguoi viet', 'viet nam', 'chau a', 'chau au', 'chau my', 'chau phi', 'han quoc', 'nhat ban', 'trung quoc', 'my', 'duc', 'phap', 'anh', 'y', 'thai lan', 'dong nam a',
+  'ca si', 'rapper', 'dien vien', 'streamer', 'youtuber', 'tiktoker', 'mc', 'danh hai', 'dao dien', 'nhac si', 'hoa hau', 'nguoi mau', 'cau thu', 'van dong vien', 'ty phu', 'doanh nhan', 'chinh tri gia', 'nha khoa hoc', 'danh tuong', 'hoang de', 'vua', 'anh hung', 'quan su', 'idol', 'kol', 'nghe si', 'nhom nhac', 'than tuong', 'nha phat minh', 'hoa si', 'nha van',
+  'con nguoi', 'nguoi that', 'nguoi noi tieng', 'nhan vat hu cau', 'nhan vat chinh', 'phan dien', 'sieu anh hung', 'anime', 'manga', 'game', 'truyen tranh',
+  'hang xe', 'xe dien', 'xe sang', 'sieu xe', 'xe pho thong', 'xe the thao', 'xe gia dinh', 'o to', 'thuong hieu', 'cong ty', 'tap doan', 'mon an', 'dong vat', 'quoc gia', 'dia danh',
+  'dang con song', 'con song', 'da mat', 'tre', 'gen z', '9x', '8x', '7x', 'doc than', 'da ket hon', 'co vo', 'co chong', 'co con',
+  'am nhac', 'dien anh', 'the thao', 'bong da', 'cong nghe', 'lich su', 'thoi trang', 'hai huoc', 'drama', 'scandal', 'noi tieng', 'mien bac', 'mien nam', 'mien trung', 'ha noi', 'sai gon', 'tp hcm'
+];
 
 async function getAvailableGeminiModels(apiKey) {
   try {
@@ -155,6 +165,47 @@ function normalizeVN(str) {
     .replace(/[^a-z0-9\s]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
+}
+
+function escapeRegex(str) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+// Phát hiện nếu AI hỏi đích danh tên nhân vật ("Có phải là [Tên] không?") thay vì chốt đáp án
+function detectDirectNameQuestion(qText, targetSecret) {
+  const cleanQ = (qText || '').trim();
+  const qNorm = normalizeVN(cleanQ);
+
+  // 1. Khớp trực tiếp tên hoặc biệt danh của đáp án thật
+  const targetNames = [targetSecret?.name, ...(targetSecret?.aliases || [])].filter(Boolean);
+  for (const tn of targetNames) {
+    const tnNorm = normalizeVN(tn);
+    if (tnNorm.length >= 3 && new RegExp(`(^|\\s)${escapeRegex(tnNorm)}(\\s|$)`).test(qNorm)) {
+      return { isDirectName: true, extractedName: tn };
+    }
+  }
+
+  // 2. Bắt mẫu câu hỏi đích danh tên riêng: "Có phải (là) [Tên Riêng] không / phải không / đúng không?"
+  const pattern = /(?:có phải(?:\s+là)?|phải là|đáp án(?:\s+của bạn)?(?:\s+có phải)?\s+là|nhân vật(?:\s+này|\s+của bạn)?(?:\s+có phải)?\s+là|đối tượng(?:\s+này|\s+của bạn)?(?:\s+có phải)?\s+là|hãng(?:\s+xe)?(?:\s+này)?(?:\s+có phải)?\s+là|người này(?:\s+có phải)?\s+là|tên(?:\s+của)?(?:\s+nhân vật này|\s+người này)?\s+là)\s+["'“”]?([^?,"'“”]{2,44}?)["'“”]?\s*(?:không|ko|k|phải không|đúng không|nhỉ|chứ|\?)+$/i;
+  const m = cleanQ.match(pattern);
+  if (m && m[1]) {
+    const candidate = m[1]
+      .trim()
+      .replace(/^(là|một|người|ca sĩ|rapper|diễn viên|streamer|hãng|xe|vua|đại tướng|nghệ sĩ|tỷ phú|cầu thủ)\s+/i, '')
+      .trim();
+    const candNorm = normalizeVN(candidate);
+    if (candNorm.length >= 2 && candNorm.split(' ').length <= 5) {
+      const isGeneric = GENERIC_ATTRIBUTE_WORDS.some(w =>
+        candNorm === w || candNorm.startsWith(w + ' ') || candNorm.endsWith(' ' + w)
+      );
+      const startsWithUpper = /^[A-ZĐÀÁẢÃẠÂẤẦẨẪẬĂẮẰẲẴẶÈÉẺẼẸÊẾỀỂỄỆÌÍỈĨỊÒÓỎÕỌÔỐỒỔỖỘƠỚỜỞỠỢÙÚỦŨỤƯỨỪỬỮỰỲÝỶỸỴ]/.test(candidate);
+      if (!isGeneric && startsWithUpper) {
+        return { isDirectName: true, extractedName: candidate };
+      }
+    }
+  }
+
+  return { isDirectName: false, extractedName: '' };
 }
 
 // ================= BỘ NHỚ CHỐNG TRÙNG NHÂN VẬT TOÀN CỤC =================
@@ -284,18 +335,18 @@ const FALLBACK_DECKS = {
     topicName: 'Nghệ Sĩ & Nhân Vật Hot Showbiz Việt',
     topicDescription: 'Ca sĩ, rapper, diễn viên, streamer và KOL Việt Nam nổi tiếng hoặc từng tạo bão mạng xã hội.',
     items: [
-      { name: 'Sơn Tùng M-TP', aliases: ['Son Tung', 'MTP', 'Nguyen Thanh Tung'], facts: ['Ca sĩ quê Thái Bình, chủ tịch M-TP Entertainment', 'Nổi tiếng với Lạc Trôi, Hãy Trao Cho Anh, Chúng Ta Của Hiện Tại', 'Phong cách âm nhạc hiện đại, kín tiếng đời tư'] },
-      { name: 'Jack - J97', aliases: ['Jack', 'J97', 'Trinh Tran Phuong Tuan'], facts: ['Ca sĩ quê Bến Tre, nổi lên từ Hồng Nhan, Bạc Phận, Sóng Gió', 'Cộng đồng fan mang tên Đóm', 'Từng dính nhiều ồn ào đời tư và tranh cãi trên mạng'] },
-      { name: 'Trấn Thành', aliases: ['Tran Thanh', 'Huynh Tran Thanh'], facts: ['MC, diễn viên, đạo diễn loạt phim trăm tỷ (Bố Già, Nhà Bà Nữ, Mai)', 'Kết hôn với nữ ca sĩ Hari Won', 'Nổi tiếng hoạt ngôn và hay xúc động trên sóng truyền hình'] },
-      { name: 'Độ Mixi', aliases: ['Do Mixi', 'Phung Thanh Do', 'Toc Truong'], facts: ['Streamer hàng đầu Việt Nam quê Cao Bằng', 'Trưởng nhóm Refund Gaming, hay livestream tâm sự và chơi game', 'Sở hữu cộng đồng fan Bộ Tộc MixiGaming cực lớn'] },
-      { name: 'HIEUTHUHAI', aliases: ['Hieu Thu Hai', 'Tran Minh Hieu'], facts: ['Rapper sinh năm 1999 thuộc nhóm GERDNANG', 'Quán quân Anh Trai Say Hi, thành viên 2 Ngày 1 Đêm', 'Sở hữu nhiều bản hit như Ngủ Một Mình, Không Thể Say'] },
-      { name: 'Đen Vâu', aliases: ['Den Vau', 'Nguyen Duc Cuong'], facts: ['Rapper xuất thân từ công nhân vệ sinh bãi biển ở Hạ Long', 'Nổi tiếng với Lối Nhỏ, Mang Tiền Về Cho Mẹ, Nấu Ăn Cho Em', 'Gắn liền với phong cách mộc mạc, gần gũi và hoạt động thiện nguyện'] },
-      { name: 'Mỹ Tâm', aliases: ['My Tam', 'Hoa Mi Toc Nau'], facts: ['Nữ ca sĩ hạng A quê Đà Nẵng, biệt danh Họa mi tóc nâu', 'Sở hữu loạt liveshow Tri Âm hàng chục nghìn khán giả', 'Nổi tiếng với Họa Mi Tóc Nâu, Ước Gì, Đừng Hỏi Em'] },
+      { name: 'Sơn Tùng M-TP', aliases: ['Son Tung', 'MTP', 'Nguyen Thanh Tung'], facts: ['Ca sĩ quê Thái Bình, chủ tịch công ty giải trí riêng', 'Nổi tiếng với Lạc Trôi, Hãy Trao Cho Anh, Chúng Ta Của Hiện Tại', 'Phong cách âm nhạc hiện đại, cực kỳ kín tiếng đời tư'] },
+      { name: 'Jack - J97', aliases: ['Jack', 'J97', 'Trinh Tran Phuong Tuan'], facts: ['Ca sĩ quê Bến Tre, nổi lên từ Hồng Nhan, Bạc Phận, Sóng Gió', 'Cộng đồng fan mang tên Đóm', 'Từng dính nhiều ồn ào đời tư và tranh cãi trên mạng xã hội'] },
+      { name: 'Trấn Thành', aliases: ['Tran Thanh', 'Huynh Tran Thanh'], facts: ['MC, diễn viên, đạo diễn loạt phim trăm tỷ (Bố Già, Nhà Bà Nữ, Mai)', 'Kết hôn với nữ ca sĩ gốc Hàn Quốc Hari Won', 'Nổi tiếng hoạt ngôn và hay xúc động trên sóng truyền hình'] },
+      { name: 'Độ Mixi', aliases: ['Do Mixi', 'Phung Thanh Do', 'Toc Truong'], facts: ['Streamer hàng đầu Việt Nam quê Cao Bằng', 'Trưởng nhóm Refund Gaming, hay livestream tâm sự và chơi game', 'Sở hữu cộng đồng fan Bộ Tộc đông đảo nhất nhì Việt Nam'] },
+      { name: 'HIEUTHUHAI', aliases: ['Hieu Thu Hai', 'Tran Minh Hieu'], facts: ['Rapper sinh năm 1999 thuộc tổ đội GERDNANG', 'Quán quân Anh Trai Say Hi, thành viên 2 Ngày 1 Đêm', 'Sở hữu các bản hit Ngủ Một Mình, Không Thể Say'] },
+      { name: 'Đen Vâu', aliases: ['Den Vau', 'Nguyen Duc Cuong'], facts: ['Rapper từng làm công nhân vệ sinh bãi biển ở Hạ Long', 'Nổi tiếng với Lối Nhỏ, Mang Tiền Về Cho Mẹ, Nấu Ăn Cho Em', 'Gắn liền với phong cách mộc mạc và các dự án thiện nguyện'] },
+      { name: 'Mỹ Tâm', aliases: ['My Tam', 'Hoa Mi Toc Nau'], facts: ['Nữ ca sĩ hạng A quê Đà Nẵng, biệt danh Họa mi tóc nâu', 'Sở hữu loạt liveshow Tri Âm hàng chục nghìn khán giả', 'Nổi tiếng với Ước Gì, Đừng Hỏi Em, Người Hãy Quên Em Đi'] },
       { name: 'SOOBIN', aliases: ['Soobin Hoang Son', 'Nguyen Huynh Son'], facts: ['Nam ca sĩ, nhạc sĩ thuộc SpaceSpeakers xuất thân từ Hà Nội', 'Gây bão trở lại nhờ chương trình Anh Trai Vượt Ngàn Chông Gai', 'Nổi tiếng với Phía Sau Một Cô Gái, Giá Như'] },
       { name: 'Hòa Minzy', aliases: ['Hoa Minzy', 'Nguyen Thi Hoa'], facts: ['Nữ ca sĩ quê Bắc Ninh, quán quân Học Viện Ngôi Sao', 'Nổi tiếng với Rời Bỏ, Không Thể Cùng Nhau Suốt Kiếp, Thị Mầu', 'Tính cách hài hước, thân thiết với gia đình Hoa Dâm Bụt'] },
       { name: 'Binz', aliases: ['Le Nguyen Trung Dan', 'Xuan Dan'], facts: ['Rapper thuộc SpaceSpeakers từng làm HLV Rap Việt', 'Nổi tiếng với Bigcityboi, OK, Hit Me Up', 'Gắn liền với màu hồng và phong cách lãng tử'] },
       { name: 'ViruSs', aliases: ['Viruss', 'Dang Tien Hoang'], facts: ['Streamer, nhạc sĩ, reaction YouTuber nổi tiếng', 'Tác giả bản hit Thằng Điên, Trời Giấu Trời Mang Đi', 'Thường xuyên gây tranh luận sôi nổi trên mạng xã hội'] },
-      { name: 'Bích Phương', aliases: ['Bich Phuong', 'Bui Thi Bich Phuong'], facts: ['Nữ ca sĩ quê Quảng Ninh nổi tiếng với tính cách lầy lội', 'Sở hữu các bản hit Bùa Yêu, Đi Đu Đưa Đi, Bao Giờ Lấy Chồng', 'Gắn liền với biệt danh thánh lầy V-Pop'] }
+      { name: 'Bích Phương', aliases: ['Bich Phuong', 'Bui Thi Bich Phuong'], facts: ['Nữ ca sĩ quê Quảng Ninh nổi tiếng với tính cách lầy lội', 'Sở hữu các bản hit Bùa Yêu, Đi Đu Đưa Đi, Bao Giờ Lấy Chồng', 'Được fan gọi là thánh lầy V-Pop'] }
     ]
   },
   global_star: {
@@ -307,7 +358,7 @@ const FALLBACK_DECKS = {
       { name: 'Cristiano Ronaldo', aliases: ['CR7', 'Ronaldo'], facts: ['Siêu sao bóng đá người Bồ Đào Nha giành 5 Quả Bóng Vàng', 'Từng khoác áo Man Utd, Real Madrid, Juventus và Al Nassr', 'Nổi tiếng với pha ăn mừng Siuuu kinh điển'] },
       { name: 'Lionel Messi', aliases: ['Messi', 'M10'], facts: ['Siêu sao bóng đá người Argentina vô địch World Cup 2022', 'Giữ kỷ lục 8 Quả Bóng Vàng trong lịch sử bóng đá', 'Huyền thoại CLB Barcelona, hiện thi đấu tại Mỹ cho Inter Miami'] },
       { name: 'G-Dragon', aliases: ['GD', 'Kwon Ji Yong'], facts: ['Trưởng nhóm huyền thoại BIGBANG của K-Pop', 'Biểu tượng thời trang toàn cầu, sáng lập PEACEMINUSONE', 'Được mệnh danh là Ông hoàng K-Pop'] },
-      { name: 'Lisa (BLACKPINK)', aliases: ['Lisa', 'Lalisa Manobal'], facts: ['Nữ idol người Thái Lan thuộc nhóm nhạc BLACKPINK', 'Sở hữu các bản hit solo Lalisa, Money, Rockstar', 'Lượng người theo dõi Instagram cao bậc nhất giới K-Pop'] },
+      { name: 'Lisa (BLACKPINK)', aliases: ['Lisa', 'Lalisa Manobal'], facts: ['Nữ idol người Thái Lan thuộc nhóm nhạc nữ hàng đầu K-Pop', 'Sở hữu các bản hit solo Lalisa, Money, Rockstar', 'Lượng người theo dõi Instagram cao bậc nhất giới K-Pop'] },
       { name: 'MrBeast', aliases: ['Jimmy Donaldson'], facts: ['YouTuber cá nhân có lượng người đăng ký lớn nhất thế giới', 'Nổi tiếng với các thử thách tốn hàng triệu đô và làm từ thiện', 'Sở hữu thương hiệu sô-cô-la Feastables'] },
       { name: 'Jackie Chan', aliases: ['Thanh Long'], facts: ['Ngôi sao võ thuật hài huyền thoại gốc Hồng Kông', 'Nổi tiếng tự đóng các cảnh hành động mạo hiểm không cần thế thân', 'Từng nhận giải Oscar Thành tựu trọn đời'] }
     ]
@@ -325,7 +376,7 @@ const FALLBACK_DECKS = {
       { name: 'Tesla', aliases: ['Tesla Motors'], facts: ['Hãng xe điện hàng đầu của Mỹ do Elon Musk dẫn dắt', 'Nổi tiếng với công nghệ tự lái và mẫu bán tải Cybertruck', 'Dẫn đầu làn sóng ô tô điện toàn cầu'] },
       { name: 'Hyundai', aliases: ['Huyndai'], facts: ['Hãng xe hàng đầu Hàn Quốc với logo chữ H nghiêng', 'Rất phổ biến tại Việt Nam với Accent, Tucson, SantaFe', 'Cùng tập đoàn mẹ với thương hiệu KIA'] },
       { name: 'Porsche', aliases: ['Porche'], facts: ['Hãng xe thể thao hạng sang của Đức nổi tiếng với dòng 911', 'Còn rất thành công với các mẫu SUV như Macan, Cayenne', 'Thiết kế đèn pha tròn đặc trưng dễ nhận diện'] },
-      { name: 'Ford', aliases: ['Ford Motor'], facts: ['Hãng xe lâu đời của Mỹ do Henry Ford sáng lập', 'Nổi tiếng tại Việt Nam với vua bán tải Ford Ranger và Everest', 'Sở hữu dòng xe cơ bắp huyền thoại Mustang'] }
+      { name: 'Ford', aliases: ['Ford Motor'], facts: ['Hãng xe lâu đời của Mỹ do Henry Ford sáng lập', 'Nổi tiếng tại Việt Nam với vua bán tải Ranger và Everest', 'Sở hữu dòng xe cơ bắp huyền thoại Mustang'] }
     ]
   },
   history: {
@@ -347,11 +398,11 @@ const FALLBACK_DECKS = {
     topicDescription: 'Những nhân vật hư cấu cực kỳ nổi tiếng trong Anime, Truyện tranh, Marvel/DC và Game.',
     items: [
       { name: 'Monkey D. Luffy', aliases: ['Luffy', 'Mu Rom'], facts: ['Thuyền trưởng băng Hải tặc Mũ Rơm trong One Piece', 'Ăn trái ác quỷ biến cơ thể thành cao su, ước mơ làm Vua Hải Tặc', 'Nổi tiếng với chiếc mũ rơm và vết sẹo dưới mắt trái'] },
-      { name: 'Son Goku', aliases: ['Goku', 'Kakarot'], facts: ['Nhân vật chính người Saiyan trong Dragon Ball (7 Viên Ngọc Rồng)', 'Nổi tiếng với chiêu Kamehameha và biến hình Super Saiyan tóc vàng', 'Rất mê ăn uống và thích đấu với đối thủ mạnh'] },
+      { name: 'Son Goku', aliases: ['Goku', 'Kakarot'], facts: ['Nhân vật chính người Saiyan trong 7 Viên Ngọc Rồng', 'Nổi tiếng với chiêu Kamehameha và biến hình tóc vàng Super Saiyan', 'Rất mê ăn uống và thích đấu với đối thủ mạnh'] },
       { name: 'Doraemon', aliases: ['Do re mon', 'Meo May'], facts: ['Chú mèo máy đến từ thế kỷ 22 trong truyện tranh Nhật Bản', 'Sở hữu chiếc túi thần kỳ trước bụng chứa vô số bảo bối', 'Cực kỳ thích bánh rán Dorayaki và sợ chuột'] },
       { name: 'Gojo Satoru', aliases: ['Gojo', 'Thay Gojo'], facts: ['Chú thuật sư mạnh nhất trong bộ anime Jujutsu Kaisen', 'Đặc trưng với mái tóc trắng, Lục Nhãn xanh và thường đeo băng bịt mắt', 'Tính cách tự tin, nhây nhưng rất bảo vệ học trò'] },
       { name: 'Iron Man', aliases: ['Tony Stark', 'Nguoi Sat'], facts: ['Tỷ phú thiên tài mặc bộ giáp công nghệ cao của vũ trụ Marvel', 'Thành viên nòng cốt của biệt đội siêu anh hùng Avengers', 'Nổi tiếng với câu nói I am Iron Man'] },
-      { name: 'Naruto Uzumaki', aliases: ['Naruto'], facts: ['Ninja làng Lá mang trong mình Cửu Vĩ Hồ trong bộ Naruto', 'Ước mơ trở thành Hokage, nổi tiếng với Rasengan và Ảnh Phân Thân', 'Mặc bộ đồ màu cam đen đặc trưng và rất thích ăn mì Ramen'] },
+      { name: 'Naruto Uzumaki', aliases: ['Naruto'], facts: ['Ninja làng Lá mang trong mình Cửu Vĩ Hồ', 'Ước mơ trở thành Hokage, nổi tiếng với Rasengan và Ảnh Phân Thân', 'Mặc bộ đồ màu cam đen đặc trưng và rất thích ăn mì Ramen'] },
       { name: 'Pikachu', aliases: ['Pika'], facts: ['Linh vật chuột điện màu vàng biểu tượng của thương hiệu Pokemon', 'Bạn đồng hành thân thiết nhất của Ash (Satoshi)', 'Chiêu thức nổi tiếng nhất là Điện 100.000 Vôn'] },
       { name: 'Batman', aliases: ['Bruce Wayne', 'Nguoi Doi'], facts: ['Siêu anh hùng không có siêu năng lực của vũ trụ DC tại thành phố Gotham', 'Ban ngày là tỷ phú, ban đêm mặc giáp dơi dùng trí tuệ và công nghệ diệt tội phạm', 'Kẻ thù truyền kiếp nổi tiếng nhất là Joker'] }
     ]
@@ -375,7 +426,8 @@ async function generateRoundWithGameMaster(topicPref = 'hot_drama', roomUsed = [
 Nhiệm vụ:
 1. Chọn 1 chủ đề hấp dẫn phù hợp với yêu cầu và góc khai thác bên dưới, viết mô tả rõ ràng (1-2 câu).
 2. Chọn ĐÚNG 2 nhân vật/đối tượng KHÁC NHAU nhưng CÙNG THUỘC CHỦ ĐỀ ĐÓ, đủ nổi tiếng để người Việt Nam biết và đặt câu hỏi Yes/No đoán ra được.
-3. ĐA DẠNG HÓA TỐI ĐA: Tránh lặp lại các cái tên quá cũ kỹ/mòn sáo nếu chúng đã nằm trong danh sách cấm. Hãy chọn 2 cái tên MỚI MẺ, bất ngờ nhưng vẫn cực kỳ quen thuộc!
+3. ĐA DẠNG HÓA TỐI ĐA: Tránh lặp lại các cái tên đã nằm trong danh sách cấm. Hãy chọn 2 cái tên MỚI MẺ, bất ngờ nhưng vẫn cực kỳ quen thuộc!
+4. Mỗi đối tượng phải có đúng 3 gợi ý ("facts") đi từ mức độ chung chung đến cụ thể hơn, KHÔNG nhắc trực tiếp tên đối tượng trong "facts".
 
 CHỈ TRẢ VỀ DUY NHẤT 1 JSON HỢP LỆ (không thêm chữ nào ngoài JSON):
 {
@@ -384,12 +436,12 @@ CHỈ TRẢ VỀ DUY NHẤT 1 JSON HỢP LỆ (không thêm chữ nào ngoài JS
   "p1Target": {
     "name": "Tên chuẩn phổ biến nhất của đối tượng 1",
     "aliases": ["Tên thật / Nghệ danh khác / Biệt danh 1", "Tên viết tắt nếu có"],
-    "facts": ["Gợi ý sự thật ngắn 1", "Gợi ý sự thật ngắn 2", "Gợi ý sự thật / drama nổi bật 3"]
+    "facts": ["Gợi ý 1 (rộng, không lộ tên)", "Gợi ý 2 (trung bình, không lộ tên)", "Gợi ý 3 (dấu ấn / drama đặc trưng, không lộ tên)"]
   },
   "p2Target": {
     "name": "Tên chuẩn phổ biến nhất của đối tượng 2 (PHẢI KHÁC đối tượng 1)",
     "aliases": ["Tên thật / Nghệ danh khác / Biệt danh 2", "Tên viết tắt nếu có"],
-    "facts": ["Gợi ý sự thật ngắn 1", "Gợi ý sự thật ngắn 2", "Gợi ý sự thật / drama nổi bật 3"]
+    "facts": ["Gợi ý 1 (rộng, không lộ tên)", "Gợi ý 2 (trung bình, không lộ tên)", "Gợi ý 3 (dấu ấn / drama đặc trưng, không lộ tên)"]
   }
 }`;
 
@@ -418,12 +470,12 @@ Hãy tạo vòng chơi mới thật cuốn hút!`;
           const p1Secret = {
             name: String(parsed.p1Target.name).trim(),
             aliases: Array.isArray(parsed.p1Target.aliases) ? parsed.p1Target.aliases.map(String) : [],
-            facts: Array.isArray(parsed.p1Target.facts) ? parsed.p1Target.facts.slice(0, 4).map(String) : []
+            facts: Array.isArray(parsed.p1Target.facts) ? parsed.p1Target.facts.slice(0, 3).map(String) : []
           };
           const p2Secret = {
             name: String(parsed.p2Target.name).trim(),
             aliases: Array.isArray(parsed.p2Target.aliases) ? parsed.p2Target.aliases.map(String) : [],
-            facts: Array.isArray(parsed.p2Target.facts) ? parsed.p2Target.facts.slice(0, 4).map(String) : []
+            facts: Array.isArray(parsed.p2Target.facts) ? parsed.p2Target.facts.slice(0, 3).map(String) : []
           };
           rememberUsedTargets(topicPref, [p1Secret.name, p2Secret.name]);
           return {
@@ -521,7 +573,11 @@ Người chơi "${guesserName}" chốt đáp án: "${guessText}"`;
 }
 
 // ================= HÀM ĐỐI THỦ AI THÁM TỬ (DÙNG API MỚI) =================
-async function aiOpponentAnswer(aiSecret, topic, questionText) {
+async function aiOpponentAnswer(aiSecret, topic, questionText, difficulty = 'easy') {
+  const noteRule = difficulty === 'hard'
+    ? `Viết 1 câu phản hồi cực ngắn (tối đa 8 từ), kín tiếng, TUYỆT ĐỐI KHÔNG cho thêm bất kỳ manh mối hay gợi ý phụ nào về "${aiSecret.name}".`
+    : `Viết kèm 1 câu bình luận ngắn (tối đa 12 từ), thân thiện, KHÔNG tiết lộ tên "${aiSecret.name}".`;
+
   const sys = `Bạn là đối thủ AI giữ thẻ bí mật trong game hỏi đáp Yes/No "Là ải là ai".
 Đáp án bí mật BẠN ĐANG GIỮ: "${aiSecret.name}" (Tên gọi khác: ${(aiSecret.aliases || []).join(', ')})
 Chủ đề: ${topic.name} (${topic.description})
@@ -535,7 +591,7 @@ Chỉ được chọn ĐÚNG 1 trong 5 nhãn sau:
 - "PROBABLY_NO": Hình như không / Thiên về sai nhưng không dám khẳng định 100%.
 - "DONT_KNOW": Không biết / Thông tin quá riêng tư hoặc không rõ.
 
-Viết kèm 1 câu bình luận cực ngắn (tối đa 12 từ), tự nhiên, KHÔNG tiết lộ tên "${aiSecret.name}".
+${noteRule}
 CHỈ TRẢ VỀ JSON HỢP LỆ: {"answer": "YES"|"NO"|"MAYBE"|"PROBABLY_NO"|"DONT_KNOW", "note": "..."}`;
 
   const usr = `Đối thủ hỏi bạn: "${questionText}"`;
@@ -553,10 +609,10 @@ CHỈ TRẢ VỀ JSON HỢP LỆ: {"answer": "YES"|"NO"|"MAYBE"|"PROBABLY_NO"|"D
     console.error('Loi AI Opponent tra loi:', err.message);
   }
 
-  return { answer: 'MAYBE', note: 'Câu này hơi khó nói chắc, để mình tính là Có thể nhé!' };
+  return { answer: 'MAYBE', note: 'Câu này hơi khó nói chắc nhé!' };
 }
 
-async function aiOpponentThinkAndAct(topic, aiHistory, aiSecretName) {
+async function aiOpponentThinkAndAct(topic, aiHistory, aiSecretName, targetSecretForGuard) {
   const askedLines = aiHistory.map((item, idx) => {
     if (item.isGuess) {
       return `${idx + 1}. [ĐOÁN THỬ TÊN] "${item.question}" => KẾT QUẢ TỪ QUẢN TRÒ: SAI (Tuyệt đối KHÔNG đoán lại tên này!)`;
@@ -580,8 +636,13 @@ async function aiOpponentThinkAndAct(topic, aiHistory, aiSecretName) {
     : (totalQuestions >= 4);
 
   const actionRule = allowGuess
-    ? `Bạn ĐƯỢC PHÉP chọn "action": "guess" CHỈ KHI sau khi tổng hợp toàn bộ lịch sử bạn tự tin >= 90% về 1 cái tên duy nhất (KHÁC các tên đã đoán sai: ${wrongGuesses.join(', ') || 'chưa có'}). Nếu vẫn còn hơn 1 ứng viên hoặc chưa chắc chắn, HÃY TIẾP TỤC CHỌN "action": "ask" để hỏi thêm thông tin phân loại sắc bén!`
-    : `LỆNH CẤM ĐOÁN Ở LƯỢT NÀY: Bạn BẮT BUỘC phải chọn "action": "ask" để đặt 1 câu hỏi Yes/No thu thập thêm thông tin mới! TUYỆT ĐỐI KHÔNG ĐƯỢC chọn "guess" ở lượt này (${hasGuessedBefore ? `bạn mới hỏi thêm ${questionsSinceLastGuess}/3 câu sau lần đoán sai` : `bạn mới hỏi ${totalQuestions}/4 câu khởi đầu`}).`;
+    ? `QUY TẮC CHỐT ĐÁP ÁN:
+- Nếu bạn đã nghĩ ra đích danh 1 cái tên cụ thể và tự tin >= 85% (KHÁC các tên đã đoán sai: ${wrongGuesses.join(', ') || 'chưa có'}), BẮT BUỘC dùng "action": "guess" và CHỈ điền đúng tên đối tượng đó vào "text" để Quản trò chấm thắng LUÔN trong lượt này!
+- TUYỆT ĐỐI CẤM dùng "action": "ask" để hỏi kiểu "Có phải là [Tên nhân vật/hãng] không?" vì làm thế cực kỳ vô lý và mất thêm 1 lượt!
+- Nếu vẫn còn nhiều ứng viên chưa chắc chắn, chọn "action": "ask" để hỏi về ĐẶC ĐIỂM / THUỘC TÍNH phân loại thêm.`
+    : `LỆNH CẤM ĐOÁN Ở LƯỢT NÀY:
+- Bạn BẮT BUỘC phải chọn "action": "ask" để hỏi về ĐẶC ĐIỂM / THUỘC TÍNH chung (${hasGuessedBefore ? `mới hỏi thêm ${questionsSinceLastGuess}/3 câu sau lần đoán sai` : `mới hỏi ${totalQuestions}/4 câu khởi đầu`}).
+- TUYỆT ĐỐI CẤM chọn "guess" VÀ TUYỆT ĐỐI CẤM hỏi đích danh tên bất kỳ nhân vật/hãng cụ thể nào (cấm hỏi "Có phải là [Tên] không?").`;
 
   const sys = `Bạn là "AI Thám Tử" — cao thủ suy luận logic trong game hỏi đáp Yes/No "Là ải là ai".
 Chủ đề trận đấu: "${topic.name}"
@@ -591,16 +652,14 @@ Mô tả chủ đề: "${topic.description}"
 ${actionRule}
 
 CHIẾN THUẬT HỎI THÔNG TIN THÔNG MINH:
-1. Hỏi theo kiểu chia đôi không gian tìm kiếm:
-   - Nếu là người: Quốc tịch/quê quán -> Giới tính -> Lĩnh vực chính (ca hát/rap/diễn xuất/streamer/thể thao...) -> Thế hệ/độ tuổi -> Đặc điểm nhận diện nổi bật (nhóm nhạc, chương trình tham gia, bản hit, drama đặc trưng, ngoại hình...).
-   - Nếu là hãng xe/vật thể/thương hiệu: Khu vực xuất xứ (Châu Á/Châu Âu/Mỹ) -> Phân khúc (phổ thông/xe sang/siêu xe/xe điện) -> Đặc điểm logo/màu sắc/sản phẩm biểu tượng...
-2. Đọc thật kỹ lịch sử câu trả lời (CÓ / KHÔNG / CÓ THỂ / HÌNH NHƯ KHÔNG / KHÔNG BIẾT) để câu hỏi tiếp theo khai thác thông tin MỚI HOÀN TOÀN, tuyệt đối không hỏi trùng ý đã hỏi.
-3. Câu hỏi phải ngắn gọn, rõ ràng, dễ trả lời kiểu Yes/No bằng tiếng Việt (không hỏi câu lựa chọn "A hay B?").
+1. Khi chọn "action": "ask", CHỈ hỏi đặc điểm phân loại (Quốc tịch, giới tính, lĩnh vực, thế hệ, tác phẩm/bản hit/nhóm, đặc điểm nhận diện, phân khúc, logo, màu sắc...). KHÔNG BAO GIỜ nhắc tên đích danh ứng viên trong câu hỏi Yes/No!
+2. Đọc kỹ lịch sử câu trả lời để hỏi thông tin MỚI HOÀN TOÀN, không lặp ý cũ.
+3. Khi chọn "action": "guess", "text" CHỈ chứa ĐÚNG TÊN nhân vật/đối tượng (Ví dụ: "Sơn Tùng M-TP", "Toyota", "Trần Hưng Đạo"), không viết thành câu hỏi.
 
 CHỈ TRẢ VỀ JSON HỢP LỆ:
 {
   "action": "${allowGuess ? 'ask" hoặc "guess' : 'ask'}",
-  "text": "1 câu hỏi Yes/No sắc bén HOẶC Tên đối tượng chốt đoán",
+  "text": "1 câu hỏi thuộc tính Yes/No sắc bén HOẶC đúng Tên đối tượng chốt đoán",
   "taunt": "1 câu bình luận suy luận cực ngắn (dưới 12 từ)"
 }`;
 
@@ -611,25 +670,42 @@ CHỈ TRẢ VỀ JSON HỢP LỆ:
   for (let attempt = 0; attempt < 2; attempt++) {
     try {
       const extraNote = attempt === 1
-        ? '\nNHẮC LẠI: BẮT BUỘC trả về "action": "ask" với một câu hỏi Yes/No hoàn toàn mới, KHÔNG đoán tên!'
+        ? '\nNHẮC LẠI NGHIÊM NGẶT: BẮT BUỘC trả về "action": "ask" với một câu hỏi về ĐẶC ĐIỂM / THUỘC TÍNH chung, TUYỆT ĐỐI KHÔNG nhắc tên nhân vật/hãng cụ thể nào!'
         : '';
-      const raw = await callGeminiText(API_OPPONENT_KEY, sys, usr + extraNote, 0.55);
+      const raw = await callGeminiText(API_OPPONENT_KEY, sys, usr + extraNote, 0.5);
       const parsed = extractJSON(raw);
 
       if (parsed && parsed.text) {
         let act = parsed.action === 'guess' ? 'guess' : 'ask';
-        const txt = String(parsed.text).trim().slice(0, 180);
+        let txt = String(parsed.text).trim().slice(0, 180);
+        const taunt = String(parsed.taunt || 'Đang khoanh vùng dần rồi...').slice(0, 100);
 
+        // BỘ BẢO VỆ: Nếu AI lại lỡ dùng action="ask" để hỏi "Có phải là [Tên] không?"
+        if (act === 'ask') {
+          const check = detectDirectNameQuestion(txt, targetSecretForGuard);
+          if (check.isDirectName && check.extractedName) {
+            const alreadyGuessedWrong = wrongGuesses.some(w => normalizeVN(w) === normalizeVN(check.extractedName));
+            if (allowGuess && !alreadyGuessedWrong) {
+              // Tự động chuyển thẳng thành CHỐT ĐÁP ÁN luôn, không lãng phí thêm 1 lượt!
+              return {
+                action: 'guess',
+                text: check.extractedName,
+                taunt: taunt || 'Chốt thẳng đáp án luôn!'
+              };
+            } else {
+              // Chưa đủ số câu hỏi hoặc tên đó đã đoán sai -> bắt AI hỏi lại thuộc tính khác
+              continue;
+            }
+          }
+        }
+
+        // Chặn đoán quá sớm hoặc đoán lại tên đã sai
         const repeatedWrongGuess = act === 'guess' && wrongGuesses.some(w => normalizeVN(w) === normalizeVN(txt));
         if ((!allowGuess && act === 'guess') || repeatedWrongGuess) {
           continue;
         }
 
-        return {
-          action: act,
-          text: txt,
-          taunt: String(parsed.taunt || 'Đang khoanh vùng dần rồi...').slice(0, 100)
-        };
+        return { action: act, text: txt, taunt };
       }
     } catch (err) {
       console.error('Loi AI Opponent dat cau hoi:', err.message);
@@ -656,30 +732,10 @@ CHỈ TRẢ VỀ JSON HỢP LỆ:
   };
 }
 
-// ================= QUẢN LÝ TÀI KHOẢN & CHAT SẢNH =================
-let accounts = {};
-
-function loadAccounts() {
-  try {
-    if (fs.existsSync(ACCOUNTS_FILE)) {
-      accounts = JSON.parse(fs.readFileSync(ACCOUNTS_FILE, 'utf8'));
-    }
-  } catch (e) {
-    accounts = {};
-  }
-}
-
-function saveAccounts() {
-  try {
-    fs.writeFileSync(ACCOUNTS_FILE, JSON.stringify(accounts, null, 2), 'utf8');
-  } catch (e) {}
-}
-
-loadAccounts();
-
-const onlineUsers = {}; // socketId -> { id, usernameKey, name, avatar, roomId }
+// ================= QUẢN LÝ NGƯỜI ONLINE (KHÔNG CẦN ACC, KHÔNG LƯU FILE) =================
+const onlineUsers = {}; // socketId -> { id, name, nameKey, avatar, roomId }
 const rooms = {};       // roomId -> Room
-const lobbyChat = [];   // Chat chung cho tất cả người online (ngoài sảnh & trong phòng đều mở tab Sảnh xem được)
+const lobbyChat = [];   // Chat chung online
 let roomCounter = 100;
 
 function getLobbyState() {
@@ -687,6 +743,7 @@ function getLobbyState() {
     id: r.id,
     name: r.name,
     mode: r.mode,
+    difficulty: r.difficulty,
     topicPref: r.topicPref,
     status: r.status,
     topicName: r.topic?.name || '',
@@ -725,7 +782,6 @@ function serializeRoomForSocket(room, socketId) {
     const canSeeSecret = revealAll || role === side;
     return {
       id: pl.id,
-      usernameKey: pl.usernameKey,
       name: pl.name,
       avatar: pl.avatar,
       isAI: Boolean(pl.isAI),
@@ -734,10 +790,15 @@ function serializeRoomForSocket(room, socketId) {
     };
   };
 
+  const maxHints = room.mode === 'pvai' && room.difficulty === 'easy'
+    ? Math.min(3, (room.players.p2?.secret?.facts || []).length)
+    : 0;
+
   return {
     id: room.id,
     name: room.name,
     mode: room.mode,
+    difficulty: room.difficulty,
     topicPref: room.topicPref,
     status: room.status,
     hostId: room.hostId,
@@ -756,7 +817,9 @@ function serializeRoomForSocket(room, socketId) {
     winnerSide: room.winnerSide,
     winReason: room.winReason,
     aiThinking: Boolean(room.aiThinking),
-    judgingGuess: Boolean(room.judgingGuess)
+    judgingGuess: Boolean(room.judgingGuess),
+    hintsRevealed: room.hintsRevealed || 0,
+    maxHints
   };
 }
 
@@ -794,6 +857,7 @@ async function startMatchInRoom(room) {
   room.pendingQuestion = null;
   room.aiThinking = false;
   room.judgingGuess = false;
+  room.hintsRevealed = 0;
   room.players.p1.guessAttempts = 0;
   room.players.p2.guessAttempts = 0;
   room.players.p1.secret = null;
@@ -826,14 +890,15 @@ async function triggerAITurn(room) {
   room.aiThinking = true;
   broadcastRoom(room);
 
-  await new Promise(r => setTimeout(r, 950));
+  await new Promise(r => setTimeout(r, 900));
   if (!rooms[room.id] || room.status !== 'playing' || room.turnSide !== 'p2') return;
 
-  const aiHistory = room.qaHistory.filter(item => item.bySide === 'p2');
+  const aiHistory = room.qaHistory.filter(item => !item.isHint && item.bySide === 'p2');
   const decision = await aiOpponentThinkAndAct(
     room.topic,
     aiHistory,
-    room.players.p2.secret?.name || ''
+    room.players.p2.secret?.name || '',
+    room.players.p1.secret
   );
 
   if (!rooms[room.id] || room.status !== 'playing' || room.turnSide !== 'p2') return;
@@ -953,36 +1018,24 @@ io.on('connection', (socket) => {
   socket.emit('lobby_update', getLobbyState());
   socket.emit('lobby_chat_update', lobbyChat);
 
-  // 1. ĐĂNG KÝ TẠO ACC -> VÀO ĐƯỢC LUÔN
-  socket.on('register', ({ name, password, avatar }, cb) => {
+  // 1. NHẬP TÊN LÀ VÀO SẢNH LUÔN (KHÔNG CẦN TẠO ACC / MẬT KHẨU)
+  socket.on('enter_lobby', ({ name, avatar }, cb) => {
     const cleanName = (name || '').trim().replace(/\s+/g, ' ').slice(0, 24);
-    const cleanPass = (password || '').trim();
     if (!cleanName || cleanName.length < 2) {
       return cb({ ok: false, msg: 'Tên hiển thị phải có ít nhất 2 ký tự!' });
     }
-    if (!cleanPass || cleanPass.length < 3) {
-      return cb({ ok: false, msg: 'Mật khẩu phải có ít nhất 3 ký tự!' });
+
+    const nameKey = cleanName.toLowerCase();
+    const isTakenOnline = Object.values(onlineUsers).some(u => u.id !== socket.id && u.nameKey === nameKey);
+    if (isTakenOnline) {
+      return cb({ ok: false, msg: 'Tên này đang có người dùng online rồi! Hãy thêm số hoặc chọn tên khác nhé.' });
     }
 
-    const key = cleanName.toLowerCase();
-    if (accounts[key]) {
-      return cb({ ok: false, msg: 'Tên tài khoản này đã tồn tại! Hãy chọn tên khác hoặc chuyển sang Đăng nhập.' });
-    }
-
-    accounts[key] = {
-      usernameKey: key,
+    onlineUsers[socket.id] = {
+      id: socket.id,
       name: cleanName,
-      password: cleanPass,
+      nameKey,
       avatar: avatar || '🕵️',
-      createdAt: Date.now()
-    };
-    saveAccounts();
-
-    onlineUsers[socket.id] = {
-      id: socket.id,
-      usernameKey: key,
-      name: cleanName,
-      avatar: accounts[key].avatar,
       roomId: null
     };
 
@@ -991,60 +1044,15 @@ io.on('connection', (socket) => {
       ok: true,
       user: {
         id: socket.id,
-        usernameKey: key,
         name: cleanName,
-        avatar: accounts[key].avatar
+        avatar: onlineUsers[socket.id].avatar
       },
       lobby: getLobbyState(),
       lobbyChat
     });
   });
 
-  // 2. ĐĂNG NHẬP VÀO LUÔN
-  socket.on('login', ({ name, password }, cb) => {
-    const cleanName = (name || '').trim().replace(/\s+/g, ' ');
-    const cleanPass = (password || '').trim();
-    const key = cleanName.toLowerCase();
-    const acc = accounts[key];
-
-    if (!acc) {
-      return cb({ ok: false, msg: 'Không tìm thấy tài khoản này! Hãy bấm sang tab "Tạo Acc Vào Ngay".' });
-    }
-    if (acc.password !== cleanPass) {
-      return cb({ ok: false, msg: 'Sai mật khẩu rồi!' });
-    }
-
-    for (const [sid, u] of Object.entries(onlineUsers)) {
-      if (u.usernameKey === key && sid !== socket.id) {
-        removeUserFromRoom(sid, 'Đăng nhập ở thiết bị khác');
-        delete onlineUsers[sid];
-        io.to(sid).emit('force_logout', 'Tài khoản của bạn vừa được đăng nhập ở nơi khác!');
-      }
-    }
-
-    onlineUsers[socket.id] = {
-      id: socket.id,
-      usernameKey: key,
-      name: acc.name,
-      avatar: acc.avatar || '🕵️',
-      roomId: null
-    };
-
-    broadcastLobby();
-    return cb({
-      ok: true,
-      user: {
-        id: socket.id,
-        usernameKey: key,
-        name: acc.name,
-        avatar: acc.avatar || '🕵️'
-      },
-      lobby: getLobbyState(),
-      lobbyChat
-    });
-  });
-
-  // 3. CHAT SẢNH CHUNG (MỌI NGƯỜI ONLINE NHẮN VỚI NHAU)
+  // 2. CHAT SẢNH CHUNG
   socket.on('lobby_chat', ({ text }) => {
     const user = onlineUsers[socket.id];
     if (!user) return;
@@ -1062,20 +1070,21 @@ io.on('connection', (socket) => {
     io.emit('lobby_chat_update', lobbyChat);
   });
 
-  // 4. TẠO PHÒNG (PvP hoặc 1 vs AI)
-  socket.on('create_room', async ({ mode, topicPref, roomName }, cb) => {
+  // 3. TẠO PHÒNG (PvP hoặc 1 vs AI có Dễ / Khó)
+  socket.on('create_room', async ({ mode, difficulty, topicPref, roomName }, cb) => {
     const user = onlineUsers[socket.id];
-    if (!user) return cb({ ok: false, msg: 'Bạn chưa đăng nhập!' });
+    if (!user) return cb({ ok: false, msg: 'Bạn chưa nhập tên vào sảnh!' });
 
     if (user.roomId) removeUserFromRoom(socket.id);
 
     roomCounter += 1;
     const roomId = `ROOM_${roomCounter}`;
     const validMode = mode === 'pvai' ? 'pvai' : 'pvp';
+    const validDiff = difficulty === 'hard' ? 'hard' : 'easy';
     const validPref = TOPIC_CONFIGS[topicPref] ? topicPref : 'hot_drama';
     const title = (roomName || '').trim().slice(0, 32) || (
       validMode === 'pvai'
-        ? `🤖 ${user.name} đấu trí AI Thám Tử`
+        ? `🤖 ${user.name} vs AI (${validDiff === 'hard' ? 'Khó' : 'Dễ'})`
         : `⚔️ Sàn đấu của ${user.name}`
     );
 
@@ -1083,13 +1092,13 @@ io.on('connection', (socket) => {
       id: roomId,
       name: title,
       mode: validMode,
+      difficulty: validDiff,
       topicPref: validPref,
       status: 'waiting',
       hostId: socket.id,
       players: {
         p1: {
           id: socket.id,
-          usernameKey: user.usernameKey,
           name: user.name,
           avatar: user.avatar,
           isAI: false,
@@ -1098,7 +1107,6 @@ io.on('connection', (socket) => {
         },
         p2: validMode === 'pvai' ? {
           id: 'AI_OPPONENT',
-          usernameKey: 'ai_tham_tu',
           name: 'AI Thám Tử',
           avatar: '🤖',
           isAI: true,
@@ -1117,7 +1125,8 @@ io.on('connection', (socket) => {
       winReason: '',
       usedTargets: [],
       aiThinking: false,
-      judgingGuess: false
+      judgingGuess: false,
+      hintsRevealed: 0
     };
 
     rooms[roomId] = newRoom;
@@ -1131,10 +1140,10 @@ io.on('connection', (socket) => {
     }
   });
 
-  // 5. THAM GIA PHÒNG (LÀM ĐỐI THỦ HOẶC KHÁN GIẢ XEM CUỘC CHIẾN)
+  // 4. THAM GIA PHÒNG
   socket.on('join_room', ({ roomId, asSpectator }, cb) => {
     const user = onlineUsers[socket.id];
-    if (!user) return cb({ ok: false, msg: 'Bạn chưa đăng nhập!' });
+    if (!user) return cb({ ok: false, msg: 'Bạn chưa nhập tên vào sảnh!' });
 
     const room = rooms[roomId];
     if (!room) return cb({ ok: false, msg: 'Phòng không còn tồn tại!' });
@@ -1145,7 +1154,6 @@ io.on('connection', (socket) => {
     if (canJoinAsPlayer) {
       room.players.p2 = {
         id: socket.id,
-        usernameKey: user.usernameKey,
         name: user.name,
         avatar: user.avatar,
         isAI: false,
@@ -1166,7 +1174,7 @@ io.on('connection', (socket) => {
     broadcastLobby();
   });
 
-  // 6. ĐỔI CHỦ ĐỀ & BẮT ĐẦU TRẬN / TÁI ĐẤU
+  // 5. ĐỔI CHỦ ĐỀ / ĐỘ KHÓ & BẮT ĐẦU TRẬN
   socket.on('update_topic_pref', ({ topicPref }) => {
     const user = onlineUsers[socket.id];
     if (!user || !user.roomId) return;
@@ -1174,6 +1182,18 @@ io.on('connection', (socket) => {
     if (!room || room.hostId !== socket.id) return;
     if (TOPIC_CONFIGS[topicPref]) {
       room.topicPref = topicPref;
+      broadcastRoom(room);
+      broadcastLobby();
+    }
+  });
+
+  socket.on('update_difficulty', ({ difficulty }) => {
+    const user = onlineUsers[socket.id];
+    if (!user || !user.roomId) return;
+    const room = rooms[user.roomId];
+    if (!room || room.hostId !== socket.id || room.mode !== 'pvai') return;
+    if (room.status === 'waiting' || room.status === 'finished') {
+      room.difficulty = difficulty === 'hard' ? 'hard' : 'easy';
       broadcastRoom(room);
       broadcastLobby();
     }
@@ -1197,6 +1217,39 @@ io.on('connection', (socket) => {
 
     if (cb) cb({ ok: true });
     await startMatchInRoom(room);
+  });
+
+  // 6. XIN GỢI Ý (CHỈ DÙNG ĐƯỢC Ở CHẾ ĐỘ 1vAI - DỄ)
+  socket.on('request_hint', (_, cb) => {
+    const user = onlineUsers[socket.id];
+    if (!user || !user.roomId) return cb && cb({ ok: false, msg: 'Không ở trong phòng!' });
+    const room = rooms[user.roomId];
+    if (!room || room.status !== 'playing') return cb && cb({ ok: false, msg: 'Trận đấu chưa bắt đầu!' });
+    if (room.mode !== 'pvai' || room.difficulty !== 'easy') {
+      return cb && cb({ ok: false, msg: 'Chế độ Khó đã tắt gợi ý!' });
+    }
+    if (room.players.p1?.id !== socket.id) {
+      return cb && cb({ ok: false, msg: 'Chỉ đấu thủ mới được mở gợi ý!' });
+    }
+
+    const facts = room.players.p2?.secret?.facts || [];
+    const maxH = Math.min(3, facts.length);
+    if (room.hintsRevealed >= maxH) {
+      return cb && cb({ ok: false, msg: 'Bạn đã mở hết toàn bộ gợi ý cho ván này rồi!' });
+    }
+
+    const hintText = facts[room.hintsRevealed];
+    room.hintsRevealed += 1;
+    room.qaHistory.push({
+      id: Date.now(),
+      isHint: true,
+      hintIndex: room.hintsRevealed,
+      text: hintText,
+      time: Date.now()
+    });
+
+    if (cb) cb({ ok: true });
+    broadcastRoom(room);
   });
 
   // 7. ĐẶT CÂU HỎI YES/NO
@@ -1230,7 +1283,7 @@ io.on('connection', (socket) => {
       room.aiThinking = true;
       broadcastRoom(room);
 
-      const aiRes = await aiOpponentAnswer(room.players.p2.secret, room.topic, qText);
+      const aiRes = await aiOpponentAnswer(room.players.p2.secret, room.topic, qText, room.difficulty);
       if (!rooms[room.id] || room.status !== 'playing') return;
 
       room.aiThinking = false;
@@ -1389,5 +1442,5 @@ io.on('connection', (socket) => {
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-  console.log(`🕵️‍♂️ Game "LÀ ẢI LÀ AI" (v3) đang chạy tại: http://localhost:${PORT}`);
+  console.log(`🕵️‍♂️ Game "LÀ ẢI LÀ AI" (v4) đang chạy tại: http://localhost:${PORT}`);
 });
